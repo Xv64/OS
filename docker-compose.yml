@@ -1,0 +1,9 @@
+version: '3.6'
+services:
+  xv6:
+    build:
+      context: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/src
