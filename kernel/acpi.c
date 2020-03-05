@@ -1,7 +1,7 @@
-/* vm64.c 
+/* vm64.c
  *
  * Copyright (c) 2013 Brian Swetland
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -12,7 +12,7 @@
  *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -49,7 +49,11 @@ static struct acpi_rdsp *scan_rdsp(uint base, uint len) {
         return (struct acpi_rdsp *) p;
     }
   }
-  return (struct acpi_rdsp *) 0;  
+  return (struct acpi_rdsp *) 0;
+}
+
+void acpi_halt() {
+    outw(0x604, 0x2000); //shutdown (only in QEMU)
 }
 
 static struct acpi_rdsp *find_rdsp(void) {
@@ -59,7 +63,7 @@ static struct acpi_rdsp *find_rdsp(void) {
   if (pa && (rdsp = scan_rdsp(pa, 1024)))
     return rdsp;
   return scan_rdsp(0xE0000, 0x20000);
-} 
+}
 
 static int acpi_config_smp(struct acpi_madt *madt) {
   uint32 lapic_addr;

@@ -68,5 +68,5 @@ struct madt_ioapic {
   uint32 addr;
   uint32 interrupt_base;
 } __attribute__((__packed__));
-  
 
+void acpi_halt();
