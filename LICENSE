@@ -1,6 +1,8 @@
 The xv6 software is:
 
-Copyright (c) 2006-2009 Frans Kaashoek, Robert Morris, Russ Cox,
+Copyright (c) 2020 Jason Whitehorn
+Copyright (c) 2013 Brian Swetland
+Copyright (c) 2006-2014 Frans Kaashoek, Robert Morris, Russ Cox,
                         Massachusetts Institute of Technology
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -21,4 +23,3 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-

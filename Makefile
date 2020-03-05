@@ -179,12 +179,12 @@ UPROGS=\
 	fs/wc\
 	fs/zombie\
 
-fs/README: README
+fs/README.md: README.md
 	@mkdir -p fs
-	cp README fs/README
+	cp README.md fs/README.md
 
-fs.img: out/mkfs README $(UPROGS)
-	out/mkfs fs.img README $(UPROGS)
+fs.img: out/mkfs README.md $(UPROGS)
+	out/mkfs fs.img README.md $(UPROGS)
 
 -include */*.d
 
