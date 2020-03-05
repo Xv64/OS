@@ -22,7 +22,7 @@ int main(void){
         mpinit();  // otherwise use bios MP tables
     lapicinit();
     seginit();     // set up segments
-    cprintf("\ncpu%d: starting xv6\n\n", cpu->id);
+    cprintf("\ncpu%d: starting Xv64\n\n", cpu->id);
     picinit();     // interrupt controller
     ioapicinit();  // another interrupt controller
     consoleinit(); // I/O devices & their interrupts
