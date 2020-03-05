@@ -56,7 +56,7 @@ FSIMAGE := fs.img
 endif
 
 # Cross-compiling (e.g., on Mac OS X)
-#TOOLPREFIX = i386-jos-elf-
+# TOOLPREFIX = i386-jos-elf
 
 # Using native tools (e.g., on X86 Linux)
 #TOOLPREFIX =
@@ -188,7 +188,7 @@ fs.img: out/mkfs README $(UPROGS)
 
 -include */*.d
 
-clean: 
+clean:
 	rm -rf out fs uobj kobj
 	rm -f kernel/vectors.S xv6.img xv6memfs.img fs.img .gdbinit
 
@@ -228,4 +228,3 @@ qemu-gdb: fs.img xv6.img .gdbinit
 qemu-nox-gdb: fs.img xv6.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
-

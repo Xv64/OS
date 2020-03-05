@@ -13,6 +13,106 @@ char name[3];
 char *echoargv[] = { "echo", "ALL", "TESTS", "PASSED", 0 };
 int stdout = 1;
 
+// does chdir() call iput(p->cwd) in a transaction?
+void
+iputtest(void)
+{
+  printf(stdout, "iput test\n");
+
+  if(mkdir("iputdir") < 0){
+    printf(stdout, "mkdir failed\n");
+    exit();
+  }
+  if(chdir("iputdir") < 0){
+    printf(stdout, "chdir iputdir failed\n");
+    exit();
+  }
+  if(unlink("../iputdir") < 0){
+    printf(stdout, "unlink ../iputdir failed\n");
+    exit();
+  }
+  if(chdir("/") < 0){
+    printf(stdout, "chdir / failed\n");
+    exit();
+  }
+  printf(stdout, "iput test ok\n");
+}
+
+// does exit() call iput(p->cwd) in a transaction?
+void
+exitiputtest(void)
+{
+  int pid;
+
+  printf(stdout, "exitiput test\n");
+
+  pid = fork();
+  if(pid < 0){
+    printf(stdout, "fork failed\n");
+    exit();
+  }
+  if(pid == 0){
+    if(mkdir("iputdir") < 0){
+      printf(stdout, "mkdir failed\n");
+      exit();
+    }
+    if(chdir("iputdir") < 0){
+      printf(stdout, "child chdir failed\n");
+      exit();
+    }
+    if(unlink("../iputdir") < 0){
+      printf(stdout, "unlink ../iputdir failed\n");
+      exit();
+    }
+    exit();
+  }
+  wait();
+  printf(stdout, "exitiput test ok\n");
+}
+
+// does the error path in open() for attempt to write a
+// directory call iput() in a transaction?
+// needs a hacked kernel that pauses just after the namei()
+// call in sys_open():
+//    if((ip = namei(path)) == 0)
+//      return -1;
+//    {
+//      int i;
+//      for(i = 0; i < 10000; i++)
+//        yield();
+//    }
+void
+openiputtest(void)
+{
+  int pid;
+
+  printf(stdout, "openiput test\n");
+  if(mkdir("oidir") < 0){
+    printf(stdout, "mkdir oidir failed\n");
+    exit();
+  }
+  pid = fork();
+  if(pid < 0){
+    printf(stdout, "fork failed\n");
+    exit();
+  }
+  if(pid == 0){
+    int fd = open("oidir", O_RDWR);
+    if(fd >= 0){
+      printf(stdout, "open directory for write succeeded\n");
+      exit();
+    }
+    exit();
+  }
+  sleep(1);
+  if(unlink("oidir") != 0){
+    printf(stdout, "unlink failed\n");
+    exit();
+  }
+  wait();
+  printf(stdout, "openiput test ok\n");
+}
+
 // simple file system tests
 
 void
@@ -187,7 +287,7 @@ void dirtest(void)
     printf(stdout, "unlink dir0 failed\n");
     exit();
   }
-  printf(stdout, "mkdir test\n");
+  printf(stdout, "mkdir test ok\n");
 }
 
 void
@@ -412,51 +512,56 @@ sharedfd(void)
   }
 }
 
-// two processes write two different files at the same
+// four processes write different files at the same
 // time, to test block allocation.
 void
-twofiles(void)
+fourfiles(void)
 {
-  int fd, pid, i, j, n, total;
+  int fd, pid, i, j, n, total, pi;
+  char *names[] = { "f0", "f1", "f2", "f3" };
   char *fname;
 
-  printf(1, "twofiles test\n");
+  printf(1, "fourfiles test\n");
 
-  unlink("f1");
-  unlink("f2");
+  for(pi = 0; pi < 4; pi++){
+    fname = names[pi];
+    unlink(fname);
 
-  pid = fork();
-  if(pid < 0){
-    printf(1, "fork failed\n");
-    exit();
-  }
+    pid = fork();
+    if(pid < 0){
+      printf(1, "fork failed\n");
+      exit();
+    }
 
-  fname = pid ? "f1" : "f2";
-  fd = open(fname, O_CREATE | O_RDWR);
-  if(fd < 0){
-    printf(1, "create failed\n");
-    exit();
-  }
-
-  memset(buf, pid?'p':'c', 512);
-  for(i = 0; i < 12; i++){
-    if((n = write(fd, buf, 500)) != 500){
-      printf(1, "write failed %d\n", n);
+    if(pid == 0){
+      fd = open(fname, O_CREATE | O_RDWR);
+      if(fd < 0){
+        printf(1, "create failed\n");
+        exit();
+      }
+      
+      memset(buf, '0'+pi, 512);
+      for(i = 0; i < 12; i++){
+        if((n = write(fd, buf, 500)) != 500){
+          printf(1, "write failed %d\n", n);
+          exit();
+        }
+      }
       exit();
     }
   }
-  close(fd);
-  if(pid)
+
+  for(pi = 0; pi < 4; pi++){
     wait();
-  else
-    exit();
+  }
 
   for(i = 0; i < 2; i++){
-    fd = open(i?"f1":"f2", 0);
+    fname = names[i];
+    fd = open(fname, 0);
     total = 0;
     while((n = read(fd, buf, sizeof(buf))) > 0){
       for(j = 0; j < n; j++){
-        if(buf[j] != (i?'p':'c')){
+        if(buf[j] != '0'+i){
           printf(1, "wrong char\n");
           exit();
         }
@@ -468,87 +573,80 @@ twofiles(void)
       printf(1, "wrong length %d\n", total);
       exit();
     }
+    unlink(fname);
   }
 
-  unlink("f1");
-  unlink("f2");
-
-  printf(1, "twofiles ok\n");
+  printf(1, "fourfiles ok\n");
 }
 
-// two processes create and delete different files in same directory
+// four processes create and delete different files in same directory
 void
 createdelete(void)
 {
   enum { N = 20 };
-  int pid, i, fd;
+  int pid, i, fd, pi;
   char name[32];
 
   printf(1, "createdelete test\n");
-  pid = fork();
-  if(pid < 0){
-    printf(1, "fork failed\n");
-    exit();
-  }
 
-  name[0] = pid ? 'p' : 'c';
-  name[2] = '\0';
-  for(i = 0; i < N; i++){
-    name[1] = '0' + i;
-    fd = open(name, O_CREATE | O_RDWR);
-    if(fd < 0){
-      printf(1, "create failed\n");
+  for(pi = 0; pi < 4; pi++){
+    pid = fork();
+    if(pid < 0){
+      printf(1, "fork failed\n");
       exit();
     }
-    close(fd);
-    if(i > 0 && (i % 2 ) == 0){
-      name[1] = '0' + (i / 2);
-      if(unlink(name) < 0){
-        printf(1, "unlink failed\n");
+
+    if(pid == 0){
+      name[0] = 'p' + pi;
+      name[2] = '\0';
+      for(i = 0; i < N; i++){
+        name[1] = '0' + i;
+        fd = open(name, O_CREATE | O_RDWR);
+        if(fd < 0){
+          printf(1, "create failed\n");
+          exit();
+        }
+        close(fd);
+        if(i > 0 && (i % 2 ) == 0){
+          name[1] = '0' + (i / 2);
+          if(unlink(name) < 0){
+            printf(1, "unlink failed\n");
+            exit();
+          }
+        }
+      }
+      exit();
+    }
+  }
+
+  for(pi = 0; pi < 4; pi++){
+    wait();
+  }
+
+  name[0] = name[1] = name[2] = 0;
+  for(i = 0; i < N; i++){
+    for(pi = 0; pi < 4; pi++){
+      name[0] = 'p' + pi;
+      name[1] = '0' + i;
+      fd = open(name, 0);
+      if((i == 0 || i >= N/2) && fd < 0){
+        printf(1, "oops createdelete %s didn't exist\n", name);
+        exit();
+      } else if((i >= 1 && i < N/2) && fd >= 0){
+        printf(1, "oops createdelete %s did exist\n", name);
         exit();
       }
+      if(fd >= 0)
+        close(fd);
     }
   }
 
-  if(pid==0)
-    exit();
-  else
-    wait();
-
   for(i = 0; i < N; i++){
-    name[0] = 'p';
-    name[1] = '0' + i;
-    fd = open(name, 0);
-    if((i == 0 || i >= N/2) && fd < 0){
-      printf(1, "oops createdelete %s didn't exist\n", name);
-      exit();
-    } else if((i >= 1 && i < N/2) && fd >= 0){
-      printf(1, "oops createdelete %s did exist\n", name);
-      exit();
+    for(pi = 0; pi < 4; pi++){
+      name[0] = 'p' + i;
+      name[1] = '0' + i;
+      unlink(name);
     }
-    if(fd >= 0)
-      close(fd);
-
-    name[0] = 'c';
-    name[1] = '0' + i;
-    fd = open(name, 0);
-    if((i == 0 || i >= N/2) && fd < 0){
-      printf(1, "oops createdelete %s didn't exist\n", name);
-      exit();
-    } else if((i >= 1 && i < N/2) && fd >= 0){
-      printf(1, "oops createdelete %s did exist\n", name);
-      exit();
-    }
-    if(fd >= 0)
-      close(fd);
-  }
-
-  for(i = 0; i < N; i++){
-    name[0] = 'p';
-    name[1] = '0' + i;
-    unlink(name);
-    name[0] = 'c';
-    unlink(name);
   }
 
   printf(1, "createdelete ok\n");
@@ -1618,6 +1716,12 @@ main(int argc, char *argv[])
   }
   close(open("usertests.ran", O_CREATE));
 
+  createdelete();
+  linkunlink();
+  concreate();
+  fourfiles();
+  sharedfd();
+
   bigargtest();
   bigwrite();
   bigargtest();
@@ -1630,6 +1734,10 @@ main(int argc, char *argv[])
   writetest1();
   createtest();
 
+  openiputtest();
+  exitiputtest();
+  iputtest();
+
   mem();
   pipe1();
   preempt();
@@ -1639,18 +1747,12 @@ main(int argc, char *argv[])
   fourteen();
   bigfile();
   subdir();
-  concreate();
-  linkunlink();
   linktest();
   unlinkread();
-  createdelete();
-  twofiles();
-  sharedfd();
   dirfile();
   iref();
   forktest();
   bigdir(); // slow
-
   exectest();
 
   exit();

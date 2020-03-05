@@ -18,8 +18,11 @@ exec(char *path, char **argv)
   struct proghdr ph;
   pde_t *pgdir, *oldpgdir;
 
-  if((ip = namei(path)) == 0)
+  begin_op();
+  if((ip = namei(path)) == 0){
+    end_op();
     return -1;
+  }
   ilock(ip);
   pgdir = 0;
 
@@ -47,6 +50,7 @@ exec(char *path, char **argv)
       goto bad;
   }
   iunlockput(ip);
+  end_op();
   ip = 0;
 
   // Allocate two pages at the next page boundary.
@@ -100,7 +104,9 @@ exec(char *path, char **argv)
  bad:
   if(pgdir)
     freevm(pgdir);
-  if(ip)
+  if(ip){
     iunlockput(ip);
+    end_op();
+  }
   return -1;
 }

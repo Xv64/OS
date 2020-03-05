@@ -15,7 +15,7 @@
 # define static_assert(a, b) do { switch (0) case 0: case (a): ; } while (0)
 #endif // static_assert
 
-int nblocks = 985;
+int nblocks = (995-LOGSIZE);
 int nlog = LOGSIZE;
 int ninodes = 200;
 int size = 1024;

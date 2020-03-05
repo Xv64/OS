@@ -314,12 +314,14 @@ iunlock(struct inode *ip)
 // be recycled.
 // If that was the last reference and the inode has no links
 // to it, free the inode (and its content) on disk.
+// All calls to iput() must be inside a transaction in
+// case it has to free the inode.
 void
 iput(struct inode *ip)
 {
   acquire(&icache.lock);
   if(ip->ref == 1 && (ip->flags & I_VALID) && ip->nlink == 0){
-    // inode has no links: truncate and free inode.
+    // inode has no links and no other references: truncate and free.
     if(ip->flags & I_BUSY)
       panic("iput busy");
     ip->flags |= I_BUSY;
@@ -601,6 +603,7 @@ skipelem(char *path, char *name)
 // Look up and return the inode for a path name.
 // If parent != 0, return the inode for the parent and copy the final
 // path element into name, which must have room for DIRSIZ bytes.
+// Must be called inside a transaction since it calls iput().
 static struct inode*
 namex(char *path, int nameiparent, char *name)
 {

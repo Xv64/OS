@@ -56,7 +56,7 @@ binit(void)
 }
 
 // Look through buffer cache for sector on device dev.
-// If not found, allocate fresh block.
+// If not found, allocate a buffer.
 // In either case, return B_BUSY buffer.
 static struct buf*
 bget(uint dev, uint sector)
@@ -80,6 +80,8 @@ bget(uint dev, uint sector)
   }
 
   // Not cached; recycle some non-busy and clean buffer.
+  // "clean" because B_DIRTY and !B_BUSY means log.c
+  // hasn't yet committed the changes to the buffer.
   for(b = bcache.head.prev; b != &bcache.head; b = b->prev){
     if((b->flags & B_BUSY) == 0 && (b->flags & B_DIRTY) == 0){
       b->dev = dev;
@@ -136,4 +138,6 @@ brelse(struct buf *b)
 
   release(&bcache.lock);
 }
+//PAGEBREAK!
+// Blank page.
 
