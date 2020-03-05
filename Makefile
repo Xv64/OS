@@ -162,6 +162,13 @@ out/mkfs: tools/mkfs.c include/fs.h
 # http://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 .PRECIOUS: uobj/%.o
 
+SUBPROGS := $(wildcard user/*/.)
+
+FORCE:
+
+$(SUBPROGS): FORCE
+	$(MAKE) -C $@
+
 UPROGS=\
 	fs/cat\
 	fs/echo\
@@ -183,7 +190,7 @@ fs/README.md: README.md
 	@mkdir -p fs
 	cp README.md fs/README.md
 
-fs.img: out/mkfs README.md $(UPROGS)
+fs.img: out/mkfs README.md $(UPROGS) $(SUBPROGS)
 	out/mkfs fs.img README.md $(UPROGS)
 
 -include */*.d
