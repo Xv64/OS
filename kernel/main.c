@@ -62,9 +62,9 @@ static void mpmain(void){
     vendor[4] = (int)'\0';
     char *cpu_vendor = (char *)vendor;
 
-    cprintf("cpu%d (%s - %d): starting\n", cpu->id, cpu_vendor, regs[0]);
     idtinit();     // load idt register
     xchg(&cpu->started, 1); // tell startothers() we're up
+    cprintf("cpu#%d (%s - %d): ready\n", cpu->id, cpu_vendor, regs[0]);
     scheduler();   // start running processes
 }
 
