@@ -18,6 +18,7 @@ OPT ?= -O0
 
 OBJS := \
 	kobj/bio.o\
+	kobj/ahci.o\
 	kobj/console.o\
 	kobj/exec.o\
 	kobj/file.o\
@@ -214,7 +215,9 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 ifndef CPUS
 CPUS := 3
 endif
-QEMUOPTS = -net none -hda xv6.img -hdb fs.img -smp $(CPUS) -m 512 $(QEMUEXTRA)
+QEMUIDEFS = -hdb fs.img
+QEMUSATAFS =  -drive id=disk,file=fs.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0
+QEMUOPTS = -net none -hda xv6.img $(QEMUIDEFS) -smp $(CPUS) -m 512 $(QEMUEXTRA)
 
 qemu: fs.img xv6.img
 	$(QEMU) -serial mon:stdio $(QEMUOPTS)

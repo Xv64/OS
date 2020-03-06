@@ -5,6 +5,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "ahci.h"
 
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
@@ -29,6 +30,7 @@ int main(void){
     uartinit();    // serial port
     pinit();       // process table
     tvinit();      // trap vectors
+    ahci_init();   // init ahci
     binit();       // buffer cache
     fileinit();    // file table
     iinit();       // inode cache
