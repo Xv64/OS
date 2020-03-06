@@ -18,6 +18,14 @@ insl(int port, void *addr, int cnt)
                "memory", "cc");
 }
 
+static inline uint32
+amd64_inl(ushort port){
+    uint32 ret;
+    asm volatile( "inl %1, %0"
+                  : "=a"(ret) : "Nd"(port) );
+    return ret;
+}
+
 static inline void
 outb(ushort port, uchar data)
 {
@@ -37,6 +45,12 @@ outsl(int port, const void *addr, int cnt)
                "=S" (addr), "=c" (cnt) :
                "d" (port), "0" (addr), "1" (cnt) :
                "cc");
+}
+
+static inline void
+amd64_outl(short port, uint32 data){
+    asm volatile("outl %0, %1" :
+        : "a"(data), "Nd"(port));
 }
 
 static inline void
