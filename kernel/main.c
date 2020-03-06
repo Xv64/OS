@@ -52,7 +52,17 @@ void mpenter(void){
 
 // Common CPU setup code.
 static void mpmain(void){
-    cprintf("cpu%d: starting\n", cpu->id);
+    int vendor[4];
+    uint regs[4];
+
+    cpuid(0, &regs);
+    vendor[0] = regs[1];
+    vendor[1] = regs[3];
+    vendor[2] = regs[2];
+    vendor[4] = (int)'\0';
+    char *cpu_vendor = (char *)vendor;
+
+    cprintf("cpu%d (%s - %d): starting\n", cpu->id, cpu_vendor, regs[0]);
     idtinit();     // load idt register
     xchg(&cpu->started, 1); // tell startothers() we're up
     scheduler();   // start running processes

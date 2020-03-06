@@ -133,7 +133,7 @@ static inline uint
 xchg(volatile uint *addr, uintp newval)
 {
   uint result;
-  
+
   // The + in "+m" denotes a read-modify-write operand.
   asm volatile("lock; xchgl %0, %1" :
                "+m" (*addr), "=a" (result) :
@@ -151,9 +151,17 @@ rcr2(void)
 }
 
 static inline void
-lcr3(uintp val) 
+lcr3(uintp val)
 {
   asm volatile("mov %0,%%cr3" : : "r" (val));
+}
+
+static inline void
+cpuid(uint ax, uint *p)
+{
+	asm volatile("cpuid"
+			 : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
+			 :  "0" (ax));
 }
 
 //PAGEBREAK: 36
