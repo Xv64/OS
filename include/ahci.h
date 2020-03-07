@@ -5,6 +5,9 @@
 #define AHCI_MAX_SLOT 0x1F
 #define AHCI_HBA_PORT 0xCF8 //???
 
+#define FIS_TYPE_REG_H2D 0x27
+#define ATA_CMD_READ_DMA_EX 0x25
+
 #define AHCI_VENDOR_OFFSET 0x0
 #define AHCI_DEVICE_OFFSET 0x02
 
@@ -14,11 +17,9 @@
 //AHCI devices:
 #define AHCI_ICH9 0x2922
 
-void ahci_init();
-ushort ahci_probe(ushort bus, ushort slot, ushort offset);
-
 
 //The following structs are as documented @ https://wiki.osdev.org/AHCI
+//START
 typedef volatile struct tagHBA_PORT {
 	uint32 clb;		   // 0x00, command list base address, 1K-byte aligned
 	uint32 clbu;	   // 0x04, command list base address upper 32 bits
@@ -43,18 +44,18 @@ typedef volatile struct tagHBA_PORT {
 
 typedef struct tagHBA_CMD_HEADER {
 	// DW0
-	char  cfl:5;    // Command FIS length in DWORDS, 2 ~ 16
-	char  a:1;      // ATAPI
-	char  w:1;      // Write, 1: H2D, 0: D2H
-	char  p:1;      // Prefetchable
+	uint8  cfl:5;    // Command FIS length in DWORDS, 2 ~ 16
+	uint8  a:1;      // ATAPI
+	uint8  w:1;      // Write, 1: H2D, 0: D2H
+	uint8  p:1;      // Prefetchable
 
-	char  r:1;      // Reset
-	char  b:1;      // BIST
-	char  c:1;      // Clear busy upon R_OK
-	char  rsv0:1;   // Reserved
-	char  pmp:4;    // Port multiplier port
+	uint8  r:1;      // Reset
+	uint8  b:1;      // BIST
+	uint8  c:1;      // Clear busy upon R_OK
+	uint8  rsv0:1;   // Reserved
+	uint8  pmp:4;    // Port multiplier port
 
-	ushort prdtl;   // Physical region descriptor table length in entries
+	uint16 prdtl;   // Physical region descriptor table length in entries
 
 	// DW1
 	volatile
@@ -70,41 +71,41 @@ typedef struct tagHBA_CMD_HEADER {
 
 typedef struct tagFIS_REG_H2D {
 	// DWORD 0
-	char  fis_type;  // FIS_TYPE_REG_H2D
+	uint8  fis_type;  // FIS_TYPE_REG_H2D
 
-	char  pmport:4;  // Port multiplier
-	char  rsv0:3;    // Reserved
-	char  c:1;       // 1: Command, 0: Control
+	uint8  pmport:4;  // Port multiplier
+	uint8  rsv0:3;    // Reserved
+	uint8  c:1;       // 1: Command, 0: Control
 
-	char  command;   // Command register
-	char  featurel;  // Feature register, 7:0
+	uint8  command;   // Command register
+	uint8  featurel;  // Feature register, 7:0
 
 	// DWORD 1
-	char  lba0;      // LBA low register, 7:0
-	char  lba1;      // LBA mid register, 15:8
-	char  lba2;      // LBA high register, 23:16
-	char  device;    // Device register
+	uint8  lba0;      // LBA low register, 7:0
+	uint8  lba1;      // LBA mid register, 15:8
+	uint8  lba2;      // LBA high register, 23:16
+	uint8  device;    // Device register
 
 	// DWORD 2
-	char  lba3;     // LBA register, 31:24
-	char  lba4;     // LBA register, 39:32
-	char  lba5;     // LBA register, 47:40
-	char  featureh; // Feature register, 15:8
+	uint8  lba3;     // LBA register, 31:24
+	uint8  lba4;     // LBA register, 39:32
+	uint8  lba5;     // LBA register, 47:40
+	uint8  featureh; // Feature register, 15:8
 
 	// DWORD 3
-	char  countl;   // Count register, 7:0
-	char  counth;   // Count register, 15:8
-	char  icc;      // Isochronous command completion
-	char  control;  // Control register
+	uint8  countl;   // Count register, 7:0
+	uint8  counth;   // Count register, 15:8
+	uint8  icc;      // Isochronous command completion
+	uint8  control;  // Control register
 
 	// DWORD 4
-	char  rsv1[4];  // Reserved
+	uint8  rsv1[4];  // Reserved
 } FIS_REG_H2D;
 
 typedef struct tagHBA_PRDT_ENTRY {
 	uint32 dba;    // Data base address
 	uint32 dbau;   // Data base address upper 32 bits
-	uint32 rsv0;   // Reserved
+	uint32 rsv0;    // Reserved
 
 	// DW3
 	uint32 dbc:22; // Byte count, 4M max
@@ -114,14 +115,18 @@ typedef struct tagHBA_PRDT_ENTRY {
 
 typedef struct tagHBA_CMD_TBL {
 	// 0x00
-	char cfis[64]; // Command FIS
+	uint8 cfis[64]; // Command FIS
 
 	// 0x40
-	char acmd[16]; // ATAPI command, 12 or 16 bytes
+	uint8 acmd[16]; // ATAPI command, 12 or 16 bytes
 
 	// 0x50
-	char rsv[48];  // Reserved
+	uint8 rsv[48];  // Reserved
 
 	// 0x80
 	HBA_PRDT_ENTRY prdt_entry[1];  // Physical region descriptor table entries, 0 ~ 65535
 } HBA_CMD_TBL;
+//END
+
+void ahci_init();
+uint16 ahci_probe(uint16 bus, uint16 slot, uint16 offset);
