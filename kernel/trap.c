@@ -75,13 +75,16 @@ void trap(struct trapframe* tf){
         lapiceoi();
         break;
 
-    //PAGEBREAK: 13
     default:
         if (proc == 0 || (tf->cs & 3) == 0) {
             // In kernel, it must be our mistake.
-            cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
-                    tf->trapno, cpu->id, tf->eip, rcr2());
-            panic("trap");
+            if(tf->trapno == T_PGFLT){
+                panic("PAGE FAULT");
+            }else{
+                cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
+                        tf->trapno, cpu->id, tf->eip, rcr2());
+                panic("trap");
+            }
         }
         // In user space, assume process misbehaved.
         cprintf("pid %d %s: trap %d err %d on cpu %d "
