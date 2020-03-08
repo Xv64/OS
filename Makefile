@@ -217,7 +217,7 @@ CPUS := 3
 endif
 QEMUIDEFS = -hdb fs.img
 QEMUSATAFS =  -drive id=disk,file=fs.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0
-QEMUOPTS = -net none -hda xv6.img $(QEMUIDEFS) -smp $(CPUS) -m 512 $(QEMUEXTRA)
+QEMUOPTS = -net none -hda xv6.img $(QEMUIDEFS) -smp $(CPUS) -cpu phenom -m 512 $(QEMUEXTRA)
 
 qemu: fs.img xv6.img
 	$(QEMU) -serial mon:stdio $(QEMUOPTS)
