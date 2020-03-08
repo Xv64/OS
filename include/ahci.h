@@ -133,6 +133,31 @@ typedef struct tagHBA_CMD_TBL {
 	// 0x80
 	HBA_PRDT_ENTRY prdt_entry[1];  // Physical region descriptor table entries, 0 ~ 65535
 } HBA_CMD_TBL;
+
+typedef volatile struct tagHBA_MEM
+{
+	// 0x00 - 0x2B, Generic Host Control
+	uint32 cap;		// 0x00, Host capability
+	uint32 ghc;		// 0x04, Global host control
+	uint32 is;		// 0x08, Interrupt status
+	uint32 pi;		// 0x0C, Port implemented
+	uint32 vs;		// 0x10, Version
+	uint32 ccc_ctl;	// 0x14, Command completion coalescing control
+	uint32 ccc_pts;	// 0x18, Command completion coalescing ports
+	uint32 em_loc;		// 0x1C, Enclosure management location
+	uint32 em_ctl;		// 0x20, Enclosure management control
+	uint32 cap2;		// 0x24, Host capabilities extended
+	uint32 bohc;		// 0x28, BIOS/OS handoff control and status
+
+	// 0x2C - 0x9F, Reserved
+	uint8  rsv[0xA0-0x2C];
+
+	// 0xA0 - 0xFF, Vendor specific registers
+	uint8  vendor[0x100-0xA0];
+
+	// 0x100 - 0x10FF, Port control registers
+	HBA_PORT	ports[1];	// 1 ~ 32
+} HBA_MEM;
 //END
 
 void ahci_init();
