@@ -3,6 +3,7 @@
 
 #define AHCI_MAX_BUS  0xFF
 #define AHCI_MAX_SLOT 0x1F
+#define AHCI_MAX_FUNC 0x7
 #define AHCI_HBA_PORT 0xCF8 //???
 
 #define FIS_TYPE_REG_H2D 0x27
@@ -161,5 +162,5 @@ typedef volatile struct tagHBA_MEM
 //END
 
 void ahci_init();
-uint16 ahci_probe(uint16 bus, uint16 slot, uint16 offset);
+uint16 ahci_probe(uint16 bus, uint16 slot, uint16 func, uint16 offset);
 uint64 ahci_read(uint16 bus, uint16 slot, uint16 func, uint16 offset);
