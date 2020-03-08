@@ -5,3 +5,5 @@ services:
       context: .
     stdin_open: true
     tty: true
+    volumes:
+      - ./bin:/src/bin

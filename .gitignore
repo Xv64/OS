@@ -12,3 +12,4 @@ mkfs
 out
 fs
 .DS_Store
+bin/**/*

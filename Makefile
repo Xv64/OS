@@ -76,6 +76,7 @@ xv6.img: out/bootblock out/kernel.elf fs.img
 	dd if=/dev/zero of=xv6.img count=10000
 	dd if=out/bootblock of=xv6.img conv=notrunc
 	dd if=out/kernel.elf of=xv6.img seek=1 conv=notrunc
+	cp xv6.img bin/boot.img
 
 xv6memfs.img: out/bootblock out/kernelmemfs.elf
 	dd if=/dev/zero of=xv6memfs.img count=10000
@@ -193,6 +194,7 @@ fs/README.md: README.md
 
 fs.img: out/mkfs README.md $(UPROGS) $(SUBPROGS)
 	out/mkfs fs.img README.md $(UPROGS)
+	cp fs.img bin/fs.img
 
 -include */*.d
 
