@@ -25,7 +25,17 @@ void ahci_init(){
                     for(int i = 0; i != 32; i++){
                         HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
 
-                        cprintf("\tport[%d].ssts = %x\n", i, hba_port->ssts);
+                        uint32 ssts = hba_port->ssts;
+                        uint8 det = ssts & 0x0F;
+
+                        if (det != HBA_PORT_DET_PRESENT)	// Check drive status
+                    		continue;
+
+                        uint32 sig = hba_port->sig;
+                        if(sig != SATA_SIG_ATAPI && sig != SATA_SIG_SEMB && sig != SATA_SIG_PM){
+                            //we found a SATA disk drive!!!
+                            cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
+                        }
                     }
 
                 } else if(ahci_base_mem != 0 && ahci_base_mem != 0xffffffff) {

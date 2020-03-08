@@ -9,6 +9,12 @@
 #define FIS_TYPE_REG_H2D 0x27
 #define ATA_CMD_READ_DMA_EX 0x25
 
+#define HBA_PORT_DET_PRESENT 0x3
+
+#define	SATA_SIG_ATAPI  0xEB140101  // SATAPI drive
+#define	SATA_SIG_SEMB   0xC33C0101  // Enclosure management bridge
+#define	SATA_SIG_PM     0x96690101  // Port multiplier
+
 #define AHCI_VENDOR_OFFSET 0x0
 #define AHCI_DEVICE_OFFSET 0x02
 //...
@@ -23,7 +29,7 @@
 #define AHCI_VENDOR_INTEL 0x8086
 
 //AHCI devices:
-#define AHCI_ICH9 0x2922
+#define AHCI_ICH9  0x2922
 
 
 //The following structs are as documented @ https://wiki.osdev.org/AHCI
