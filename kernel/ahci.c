@@ -11,11 +11,14 @@ void ahci_init(){
 
     for(int bus = 0; bus <= AHCI_MAX_BUS; bus++) {
         for(int slot = 0; slot <= AHCI_MAX_SLOT; slot++) {
-            ushort vendor = ahci_probe(bus, slot, AHCI_VENDOR_OFFSET);
-            ushort device = ahci_probe(bus, slot, AHCI_DEVICE_OFFSET);
+            uint16 vendor = ahci_probe(bus, slot, AHCI_VENDOR_OFFSET);
+            uint16 device = ahci_probe(bus, slot, AHCI_DEVICE_OFFSET);
 
             if(vendor == AHCI_VENDOR_INTEL && device == AHCI_ICH9){
                 cprintf("Intel ICH9 controller found (bus=%d, slot=%d)\n", bus, slot);
+
+                uint64 ahci_base_mem = ahci_read(bus, slot, 0, AHCI_BAR5_OFFSET); //find ABAR
+                cprintf("\t[base mem @ %x]\n", ahci_base_mem);
             }
         }
     }
@@ -36,5 +39,20 @@ ushort ahci_probe(ushort bus, ushort slot, ushort offset){
     amd64_outl(AHCI_HBA_PORT, address);
 
     uint32 register_value = amd64_inl(0xCFC);
+
     return (ushort) ((register_value >> ((offset & 2) * 8)) & 0xFFFF);
- }
+}
+
+uint64 ahci_read(uint16 bus, uint16 slot, uint16 func, uint16 offset){
+    uint32 lbus = (uint32)bus;
+    uint32 lslot = (uint32)slot;
+    uint32 lfunc = (uint32)func;
+    uint64 tmp = 0;
+
+
+    uint32 address = (uint32)((lbus << 16) | (lslot << 11) |
+        (lfunc << 8) | (offset & 0xfc) | ((uint32)0x80000000));
+    amd64_outl(AHCI_HBA_PORT, address);
+    tmp = (uint64)(amd64_inl (0xCFC) /* & 0xffff*/);
+    return (tmp);
+}
