@@ -12,37 +12,41 @@ void ahci_init(){
     for(uint16 bus = 0; bus <= AHCI_MAX_BUS; bus++) {
         for(uint16 slot = 0; slot <= AHCI_MAX_SLOT; slot++) {
             for(uint16 func = 0; func <= AHCI_MAX_FUNC; func++){
-                uint16 vendor = ahci_probe(bus, slot, func, AHCI_VENDOR_OFFSET);
-                uint16 device = ahci_probe(bus, slot, func, AHCI_DEVICE_OFFSET);
-
-                uint64 ahci_base_mem = ahci_read(bus, slot, func, AHCI_BAR5_OFFSET); //find ABAR
-
-                if(vendor == AHCI_VENDOR_INTEL && device == AHCI_ICH9){
-                    cprintf("Intel ICH9 controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", bus, slot, func, ahci_base_mem);
-
-                    HBA_MEM* ptr = (HBA_MEM *) &ahci_base_mem;
-
-                    for(int i = 0; i != 32; i++){
-                        HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
-
-                        uint32 ssts = hba_port->ssts;
-                        uint8 det = ssts & 0x0F;
-
-                        if (det != HBA_PORT_DET_PRESENT)	// Check drive status
-                    		continue;
-
-                        uint32 sig = hba_port->sig;
-                        if(sig != SATA_SIG_ATAPI && sig != SATA_SIG_SEMB && sig != SATA_SIG_PM){
-                            //we found a SATA disk drive!!!
-                            cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
-                        }
-                    }
-
-                } else if(ahci_base_mem != 0 && ahci_base_mem != 0xffffffff) {
-                    cprintf("unknown device found (bus=%d, slot=%d, func=%d, abar=0x%x, vendor=0x%x, device=0x%x)\n", bus, slot, func, ahci_base_mem, vendor, device);
-                }
+                ahci_try_setup_device(bus, slot, func);
             }
         }
+    }
+}
+
+void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
+    uint16 vendor = ahci_probe(bus, slot, func, AHCI_VENDOR_OFFSET);
+    uint16 device = ahci_probe(bus, slot, func, AHCI_DEVICE_OFFSET);
+
+    uint64 ahci_base_mem = ahci_read(bus, slot, func, AHCI_BAR5_OFFSET); //find ABAR
+
+    if(vendor == AHCI_VENDOR_INTEL && device == AHCI_ICH9){
+        cprintf("Intel ICH9 controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", bus, slot, func, ahci_base_mem);
+
+        HBA_MEM* ptr = (HBA_MEM *) &ahci_base_mem;
+
+        for(int i = 0; i != 32; i++){
+            HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
+
+            uint32 ssts = hba_port->ssts;
+            uint8 det = ssts & 0x0F;
+
+            if (det != HBA_PORT_DET_PRESENT)	// Check drive status
+                continue;
+
+            volatile uint32 sig = hba_port->sig;
+            if(sig != SATA_SIG_ATAPI && sig != SATA_SIG_SEMB && sig != SATA_SIG_PM){
+                //we found a SATA disk drive!!!
+                cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
+            }
+        }
+
+    } else if(ahci_base_mem != 0 && ahci_base_mem != 0xffffffff) {
+        cprintf("unknown device found (bus=%d, slot=%d, func=%d, abar=0x%x, vendor=0x%x, device=0x%x)\n", bus, slot, func, ahci_base_mem, vendor, device);
     }
 }
 
