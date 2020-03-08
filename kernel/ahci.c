@@ -19,6 +19,19 @@ void ahci_init(){
 
                 uint64 ahci_base_mem = ahci_read(bus, slot, 0, AHCI_BAR5_OFFSET); //find ABAR
                 cprintf("\t[base mem @ %x]\n", ahci_base_mem);
+
+                HBA_MEM* ptr = (HBA_MEM *)(&ahci_base_mem);
+
+                cprintf("\tcap: %x\n", ptr->cap);
+                cprintf("\tghc: %x\n", ptr->ghc);
+                cprintf("\tis: %x\n", ptr->is);
+                cprintf("\tpi: %x\n", ptr->pi);
+                cprintf("\tvs: %x\n", ptr->vs);
+                for(int i = 0; i != 32; i++){
+                    HBA_PORT *hba_port = (HBA_PORT *)&ptr->ports[i];
+                    cprintf("\tport[%d].ssts = %x\n", i, hba_port->ssts);
+                }
+
             }
         }
     }
