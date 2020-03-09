@@ -10,6 +10,11 @@ inb(ushort port)
 }
 
 static inline void
+amd64_nop(){
+    asm volatile("nop");
+}
+
+static inline void
 insl(int port, void *addr, int cnt)
 {
   asm volatile("cld; rep insl" :
