@@ -15,6 +15,9 @@
 #define	SATA_SIG_SEMB   0xC33C0101  // Enclosure management bridge
 #define	SATA_SIG_PM     0x96690101  // Port multiplier
 
+#define ATA_DEV_BUSY 0x80
+#define ATA_DEV_DRQ  0x08
+
 #define AHCI_VENDOR_OFFSET 0x0
 #define AHCI_DEVICE_OFFSET 0x02
 //...
