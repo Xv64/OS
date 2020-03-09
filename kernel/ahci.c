@@ -9,6 +9,13 @@
 void ahci_init(){
     cprintf("probing AHCI...\n");
 
+    for(uint16 i = 0; i != 50000; i++){
+        //HACK: wait 50,000 loops.
+        //this should give AHCI devices time to do their thing
+        //TODO: find a better solution for waiting
+        amd64_nop();
+    }
+
     for(uint16 bus = 0; bus <= AHCI_MAX_BUS; bus++) {
         for(uint16 slot = 0; slot <= AHCI_MAX_SLOT; slot++) {
             for(uint16 func = 0; func <= AHCI_MAX_FUNC; func++){
