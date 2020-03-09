@@ -13,12 +13,14 @@ static inline void k_spinwait(uint16 loops){
         //this should give AHCI devices time to do their thing
         //TODO: find a better solution for waiting
         cprintf("\b"); //backspace
-        if(i % 3 == 0){
+        if(i % 4 == 0){
             cprintf("|");
-        }else if(i % 3 == 1){
+        }else if(i % 4 == 1){
             cprintf("/");
-        }else if(i % 3 == 2){
+        }else if(i % 4 == 2){
             cprintf("-");
+        }else if(i % 4 == 3){
+            cprintf("\\");
         }
     }
     cprintf("\n");
