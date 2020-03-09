@@ -6,16 +6,20 @@
 //AHCI implementation.
 //See Intel reference docs @ https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/serial-ata-ahci-spec-rev1-3-1.pdf
 
-void ahci_init(){
-    cprintf("probing AHCI...\n");
-
+static inline void k_spinwait(uint16 loops){
     uint16 i = 0;
-    for(volatile uint16 *i_ptr = &i; (*i_ptr) != 50000; i++){
-        //HACK: wait 50,000 loops.
+    for(volatile uint16 *i_ptr = &i; (*i_ptr) != loops; i++){
+        //HACK: wait X loops.
         //this should give AHCI devices time to do their thing
         //TODO: find a better solution for waiting
         if(*i_ptr < 0) break;
     }
+}
+
+void ahci_init(){
+    cprintf("probing AHCI...\n");
+
+    k_spinwait(50000);
 
     for(uint16 bus = 0; bus <= AHCI_MAX_BUS; bus++) {
         for(uint16 slot = 0; slot <= AHCI_MAX_SLOT; slot++) {
