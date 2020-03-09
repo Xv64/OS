@@ -27,9 +27,9 @@ static inline void k_spinwait(uint16 loops){
 }
 
 void ahci_init(){
-    cprintf("probing AHCI...");
+    cprintf("probing AHCI...\n");
 
-    k_spinwait(50000);
+    //k_spinwait(50000);
 
     for(uint16 bus = 0; bus <= AHCI_MAX_BUS; bus++) {
         for(uint16 slot = 0; slot <= AHCI_MAX_SLOT; slot++) {
@@ -48,6 +48,26 @@ void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
 
     if(vendor == AHCI_VENDOR_INTEL && device == AHCI_ICH9){
         cprintf("Intel ICH9 controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", bus, slot, func, ahci_base_mem);
+
+        HBA_MEM* ptr = (HBA_MEM *) &ahci_base_mem;
+
+        for(int i = 0; i != 32; i++){
+            HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
+
+            uint32 ssts = hba_port->ssts;
+            uint8 det = ssts & 0x0F;
+
+            if (det != HBA_PORT_DET_PRESENT)	// Check drive status
+                continue;
+
+            volatile uint32 sig = hba_port->sig;
+            if(sig != SATA_SIG_ATAPI && sig != SATA_SIG_SEMB && sig != SATA_SIG_PM){
+                //we found a SATA disk drive!!!
+                cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
+            }
+        }
+    } else if(vendor == AHCI_VENDOR_INTEL && device == AHCI_PANTHER_POINT){
+        cprintf("Intel Panther Point controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", bus, slot, func, ahci_base_mem);
 
         HBA_MEM* ptr = (HBA_MEM *) &ahci_base_mem;
 
