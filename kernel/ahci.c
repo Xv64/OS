@@ -7,17 +7,25 @@
 //See Intel reference docs @ https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/serial-ata-ahci-spec-rev1-3-1.pdf
 
 static inline void k_spinwait(uint16 loops){
-    uint16 i = 0;
-    for(volatile uint16 *i_ptr = &i; (*i_ptr) != loops; i++){
+    cprintf(".");
+    for(uint16 i = 0; i != loops; i++){
         //HACK: wait X loops.
         //this should give AHCI devices time to do their thing
         //TODO: find a better solution for waiting
-        if(*i_ptr < 0) break;
+        cprintf("\b"); //backspace
+        if(i % 3 == 0){
+            cprintf("|");
+        }else if(i % 3 == 1){
+            cprintf("/");
+        }else if(i % 3 == 2){
+            cprintf("-");
+        }
     }
+    cprintf("\n");
 }
 
 void ahci_init(){
-    cprintf("probing AHCI...\n");
+    cprintf("probing AHCI...");
 
     k_spinwait(50000);
 
