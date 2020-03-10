@@ -1,4 +1,5 @@
-// Routines to let C code use special x86 instructions.
+// Routines to let C code use special amd64 instructions.
+// See: http://ref.x86asm.net/coder64.html
 
 static inline uchar
 inb(ushort port)
