@@ -7,4 +7,4 @@ RUN mkdir -p /src/out
 WORKDIR /src/
 COPY . .
 
-CMD QEMUEXTRA=-nographic make qemu
+CMD make fs.img xv6.img

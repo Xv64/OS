@@ -2,3 +2,5 @@
 
 docker-compose build xv6
 docker-compose run xv6
+
+qemu-system-x86_64 -net none -hda ./bin/boot.img -drive id=disk,file=./bin/fs.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 -smp 6 -m 512 -nographic
