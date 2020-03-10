@@ -77,6 +77,7 @@ xv6.img: out/bootblock out/kernel.elf fs.img
 	dd if=out/bootblock of=xv6.img conv=notrunc
 	dd if=out/kernel.elf of=xv6.img seek=1 conv=notrunc
 	cp xv6.img bin/boot.img
+	qemu-img convert xv6.img -O vdi bin/boot.vdi
 
 xv6memfs.img: out/bootblock out/kernelmemfs.elf
 	dd if=/dev/zero of=xv6memfs.img count=10000
