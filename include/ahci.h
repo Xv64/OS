@@ -31,10 +31,6 @@
 //AHCI vendors:
 #define AHCI_VENDOR_INTEL 0x8086
 
-//AHCI devices:
-#define AHCI_ICH9          0x2922
-#define AHCI_PANTHER_POINT 0x1E03
-
 
 //The following structs are as documented @ https://wiki.osdev.org/AHCI
 //START

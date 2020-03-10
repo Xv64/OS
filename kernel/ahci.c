@@ -6,6 +6,16 @@
 //AHCI implementation.
 //See Intel reference docs @ https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/serial-ata-ahci-spec-rev1-3-1.pdf
 
+static const struct {
+	uint16	vendor;
+	uint16	device;
+	const char	*name;
+} ahci_devices[] = {
+	{AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
+    {AHCI_VENDOR_INTEL, 0x1E03, "Intel Panther Point"},
+    {0, 0, ""} //this is a terminal node - this must be present and the last entry
+};
+
 void ahci_init(){
     cprintf("probing AHCI...\n");
 
@@ -24,14 +34,21 @@ void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
 
     uint64 ahci_base_mem = ahci_read(bus, slot, func, AHCI_BAR5_OFFSET); //find ABAR
 
-    if(vendor == AHCI_VENDOR_INTEL && device == AHCI_ICH9){
-        ahci_try_setup_known_device("Intel ICH9", ahci_base_mem, bus, slot, func);
-
-    } else if(vendor == AHCI_VENDOR_INTEL && device == AHCI_PANTHER_POINT){
-        ahci_try_setup_known_device("Intel Panther Point", ahci_base_mem, bus, slot, func);
-
-    } else if(ahci_base_mem != 0 && ahci_base_mem != 0xffffffff) {
-        cprintf("unknown device found (bus=%d, slot=%d, func=%d, abar=0x%x, vendor=0x%x, device=0x%x)\n", bus, slot, func, ahci_base_mem, vendor, device);
+    if(ahci_base_mem != 0 && ahci_base_mem != 0xffffffff) {
+        //we found something, but what?
+        const char *name;
+        int identified = 0;
+        for(uint16 i = 0; ahci_devices[i].vendor != 0; i++){
+            if(ahci_devices[i].vendor == vendor && ahci_devices[i].device == device){
+                name = ahci_devices[i].name;
+                identified = 1;
+            }
+        }
+        if(identified){
+            ahci_try_setup_known_device(name, ahci_base_mem, bus, slot, func);
+        }else{
+            cprintf("unknown device found (bus=%d, slot=%d, func=%d, abar=0x%x, vendor=0x%x, device=0x%x)\n", bus, slot, func, ahci_base_mem, vendor, device);
+        }
     }
 }
 
