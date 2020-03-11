@@ -203,7 +203,11 @@ fs.img: out/mkfs README.md $(UPROGS) $(SUBPROGS)
 
 clean:
 	rm -rf out fs uobj kobj
+	rm -rf ./bin/*
 	rm -f kernel/vectors.S xv6.img xv6memfs.img fs.img .gdbinit
+	#put these back...
+	touch ./bin/.gitkeep
+	mkdir out
 
 # run in emulators
 
