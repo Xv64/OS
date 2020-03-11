@@ -206,9 +206,11 @@ clean:
 
 # run in emulators
 
-bochs : fs.img xv6.img
-	if [ ! -e .bochsrc ]; then ln -s tools/dot-bochsrc .bochsrc; fi
-	bochs -q
+binaries : fs.img xv6.img
+	#build fs.img & xv6.img, now build vm images...
+	cp Xv64.vmwarevm.tar.gz ./bin/
+	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
+	qemu-img convert xv6.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
 
 # try to generate a unique GDB port
 GDBPORT = $(shell expr `id -u` % 5000 + 25000)

@@ -7,4 +7,4 @@ RUN mkdir -p /src/out
 WORKDIR /src/
 COPY . .
 
-CMD make
+CMD make binaries
