@@ -209,7 +209,6 @@ clean:
 	touch ./bin/.gitkeep
 	mkdir out
 
-# run in emulators
 
 binaries : fs.img xv6.img
 	#build fs.img & xv6.img, now build vm images...
@@ -217,36 +216,3 @@ binaries : fs.img xv6.img
 	cp -r fs ./bin/
 	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
 	qemu-img convert xv6.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
-
-# try to generate a unique GDB port
-GDBPORT = $(shell expr `id -u` % 5000 + 25000)
-# QEMU's gdb stub command line changed in 0.11
-QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
-	then echo "-gdb tcp::$(GDBPORT)"; \
-	else echo "-s -p $(GDBPORT)"; fi)
-ifndef CPUS
-CPUS := 3
-endif
-QEMUIDEFS = -hdb fs.img
-QEMUSATAFS =  -drive id=disk,file=fs.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0
-QEMUOPTS = -net none -hda xv6.img $(QEMUIDEFS) -smp $(CPUS) -cpu phenom -m 512 $(QEMUEXTRA)
-
-qemu: fs.img xv6.img
-	$(QEMU) -serial mon:stdio $(QEMUOPTS)
-
-qemu-memfs: xv6memfs.img
-	$(QEMU) xv6memfs.img -smp $(CPUS)
-
-qemu-nox: fs.img xv6.img
-	$(QEMU) -nographic $(QEMUOPTS)
-
-.gdbinit: tools/gdbinit.tmpl
-	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
-
-qemu-gdb: fs.img xv6.img .gdbinit
-	@echo "*** Now run 'gdb'." 1>&2
-	$(QEMU) -serial mon:stdio $(QEMUOPTS) -S $(QEMUGDB)
-
-qemu-nox-gdb: fs.img xv6.img .gdbinit
-	@echo "*** Now run 'gdb'." 1>&2
-	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
