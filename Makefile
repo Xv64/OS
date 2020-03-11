@@ -197,6 +197,7 @@ fs/README.md: README.md
 fs.img: out/mkfs README.md $(UPROGS) $(SUBPROGS)
 	out/mkfs fs.img README.md $(UPROGS)
 	cp fs.img bin/fs.img
+	qemu-img convert fs.img -O vdi bin/fs.vdi
 
 -include */*.d
 
