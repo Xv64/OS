@@ -29,7 +29,8 @@
 #define AHCI_BAR5_OFFSET   0x24
 
 //AHCI vendors:
-#define AHCI_VENDOR_INTEL 0x8086
+#define AHCI_VENDOR_INTEL  0x8086
+#define AHCI_VENDOR_VMWARE 0x15AD
 
 
 //The following structs are as documented @ https://wiki.osdev.org/AHCI

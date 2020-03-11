@@ -13,6 +13,8 @@ static const struct {
 } ahci_devices[] = {
 	{AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
     {AHCI_VENDOR_INTEL, 0x1E03, "Intel Panther Point"},
+    {AHCI_VENDOR_VMWARE, 0x07E0, "VMWare SATA"},
+    {AHCI_VENDOR_VMWARE, 0x07A0, "VMWare PCIE Root"},
     {0, 0, ""} //this is a terminal node - this must be present and the last entry
 };
 
