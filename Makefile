@@ -214,6 +214,7 @@ clean:
 binaries : fs.img xv6.img
 	#build fs.img & xv6.img, now build vm images...
 	cp Xv64.vmwarevm.tar.gz ./bin/
+	cp -r fs ./bin/
 	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
 	qemu-img convert xv6.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
 
