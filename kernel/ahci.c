@@ -7,11 +7,12 @@
 //See Intel reference docs @ https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/serial-ata-ahci-spec-rev1-3-1.pdf
 
 static const struct {
-	uint16	vendor;
-	uint16	device;
-	const char	*name;
+    uint16	vendor;
+    uint16	device;
+    const char	*name;
 } ahci_devices[] = {
-	{AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
+    {AHCI_VENDOR_INTEL, 0x2829, "Intel ICH8M"},
+    {AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
     {AHCI_VENDOR_INTEL, 0x1E03, "Intel Panther Point"},
     {AHCI_VENDOR_VMWARE, 0x07E0, "VMWare SATA"},
     {AHCI_VENDOR_VMWARE, 0x07A0, "VMWare PCIE Root"},
@@ -61,16 +62,21 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
     for(int i = 0; i != 32; i++){
         HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
 
+
         uint32 ssts = hba_port->ssts;
         uint8 det = ssts & 0x0F;
 
-        if (det != HBA_PORT_DET_PRESENT)	// Check drive status
+        if (det != HBA_PORT_DET_PRESENT){	// Check drive status
             continue;
+        }
 
-        volatile uint32 sig = hba_port->sig;
-        if(sig != SATA_SIG_ATAPI && sig != SATA_SIG_SEMB && sig != SATA_SIG_PM){
+        //volatile uint32 sig = hba_port->sig;
+        if(hba_port->sig != SATA_SIG_ATAPI && hba_port->sig != SATA_SIG_SEMB && hba_port->sig != SATA_SIG_PM){
             //we found a SATA disk drive!!!
             cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
+            uint16 *buf[512];
+            ahci_sata_read(hba_port, 0, 0, 1, &buf);
+            cprintf("done reading\n");
         }
     }
 }
@@ -109,4 +115,8 @@ uint64 ahci_read(ushort bus, ushort slot,ushort func, ushort offset){
     amd64_outl(AHCI_HBA_PORT, address);
     tmp = (uint64)(amd64_inl (0xCFC) /* & 0xffff*/);
     return (tmp);
+}
+
+int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
+    return 0;
 }

@@ -173,3 +173,4 @@ uint16 ahci_probe(uint16 bus, uint16 slot, uint16 func, uint16 offset);
 uint64 ahci_read(uint16 bus, uint16 slot, uint16 func, uint16 offset);
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func);
 void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bus, uint16 slot, uint16 func);
+int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf);
