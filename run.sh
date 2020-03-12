@@ -1,7 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-# docker-compose build xv6
-# docker-compose run xv6
+unset REBUILD
+
+while getopts 'r' c
+do
+  case $c in
+    r) REBUILD=TRUE ;;
+  esac
+done
+
+if [ -n "$REBUILD" ]; then
+  ./build.sh || exit 1
+fi
 
 NETWORK="-net none"
 BOOT_DISK="-hda ./bin/boot.vdi"
