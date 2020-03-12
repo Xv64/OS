@@ -15,6 +15,9 @@ amd64_nop(){
     asm volatile("nop");
 }
 
+
+#define amd64_pause() asm volatile("pause")
+
 static inline void
 insl(int port, void *addr, int cnt)
 {

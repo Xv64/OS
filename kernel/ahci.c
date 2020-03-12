@@ -71,7 +71,7 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
             int i = 0;
             do{
                 ssts = hba_port->ssts;
-                asm volatile("pause"); //slow down
+                amd64_pause(); //slow down
             }while(hba_port->ssts != ssts && i++ < 4000); //give the ssts register a moment to stabilize
 
             uint8 ipm = (ssts >> 8) & 0x0F;
