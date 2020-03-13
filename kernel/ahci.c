@@ -11,9 +11,9 @@ static const struct {
     uint16	device;
     const char	*name;
 } ahci_devices[] = {
-    {AHCI_VENDOR_INTEL, 0x27D0, "ICH7 Port 1"},
-    {AHCI_VENDOR_INTEL, 0x27D2, "ICH7 Port 2"},
-    {AHCI_VENDOR_INTEL, 0x244E, "82801 PCI Bridge"},
+    {AHCI_VENDOR_INTEL, 0x27D0, "Intel ICH7 Port 1"},
+    {AHCI_VENDOR_INTEL, 0x27D2, "Intel ICH7 Port 2"},
+    {AHCI_VENDOR_INTEL, 0x244E, "Intel 82801 PCI Bridge"},
     {AHCI_VENDOR_INTEL, 0x2829, "Intel ICH8M"},
     {AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
     {AHCI_VENDOR_INTEL, 0x1E03, "Intel Panther Point"},
