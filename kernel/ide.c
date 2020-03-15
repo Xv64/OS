@@ -33,7 +33,7 @@
 
 static struct spinlock idelock;
 static struct buf* idequeue;
-uint16 ideChannel = PRIMARY_IDE_CHANNEL_BASE;
+uint16 ideChannel = SECONDARY_IDE_CHANNEL_BASE;
 
 static int havedisk1;
 static void idestart(struct buf*);
