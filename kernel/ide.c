@@ -33,6 +33,7 @@
 
 static struct spinlock idelock;
 static struct buf* idequeue;
+uint16 ideChannel = PRIMARY_IDE_CHANNEL_BASE;
 
 static int havedisk1;
 static void idestart(struct buf*);
@@ -52,21 +53,26 @@ void ideinit(void){
     int i;
 
     initlock(&idelock, "ide");
-    picenable(IRQ_IDE1);
-    ioapicenable(IRQ_IDE1, ncpu - 1);
+    if(ideChannel == PRIMARY_IDE_CHANNEL_BASE){
+        picenable(IRQ_IDE1);
+        ioapicenable(IRQ_IDE1, ncpu - 1);
+    }else{
+        picenable(IRQ_IDE2);
+        ioapicenable(IRQ_IDE2, ncpu - 1);
+    }
     idewait(0);
 
     // Check if disk 1 is present
-    outb(PRIMARY_IDE_CHANNEL_BASE + 6, IDE_SLAVE);
+    outb(ideChannel + 6, IDE_SLAVE);
     for (i = 0; i < 1000; i++) {
-        if (inb(PRIMARY_IDE_CHANNEL_BASE + 7) != 0) {
+        if (inb(ideChannel + 7) != 0) {
             havedisk1 = 1;
             break;
         }
     }
 
     // Switch back to disk 0.
-    outb(PRIMARY_IDE_CHANNEL_BASE + 6, IDE_MASTER);
+    outb(ideChannel + 6, IDE_MASTER);
 }
 
 // Start the request for b.  Caller must hold idelock.
@@ -75,17 +81,17 @@ static void idestart(struct buf* b){
         panic("idestart");
 
     idewait(0);
-    outb(PRIMARY_IDE_INTERRUPT, 0); // generate interrupt
-    outb(PRIMARY_IDE_CHANNEL_BASE + 2, 1); // number of sectors
-    outb(PRIMARY_IDE_CHANNEL_BASE + 3, b->sector & 0xff);
-    outb(PRIMARY_IDE_CHANNEL_BASE + 4, (b->sector >> 8) & 0xff);
-    outb(PRIMARY_IDE_CHANNEL_BASE + 5, (b->sector >> 16) & 0xff);
-    outb(PRIMARY_IDE_CHANNEL_BASE + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
+    outb((ideChannel == PRIMARY_IDE_CHANNEL_BASE ? PRIMARY_IDE_INTERRUPT : SECONDARY_IDE_INTERRUPT), 0); // generate interrupt
+    outb(ideChannel + 2, 1); // number of sectors
+    outb(ideChannel + 3, b->sector & 0xff);
+    outb(ideChannel + 4, (b->sector >> 8) & 0xff);
+    outb(ideChannel + 5, (b->sector >> 16) & 0xff);
+    outb(ideChannel + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
     if (b->flags & B_DIRTY) {
-        outb(PRIMARY_IDE_CHANNEL_BASE + 7, IDE_CMD_WRITE);
-        outsl(PRIMARY_IDE_CHANNEL_BASE, b->data, 512 / 4);
+        outb(ideChannel + 7, IDE_CMD_WRITE);
+        outsl(ideChannel, b->data, 512 / 4);
     } else {
-        outb(PRIMARY_IDE_CHANNEL_BASE + 7, IDE_CMD_READ);
+        outb(ideChannel + 7, IDE_CMD_READ);
     }
 }
 
@@ -104,7 +110,7 @@ void ideintr(void){
 
     // Read data if needed.
     if (!(b->flags & B_DIRTY) && idewait(1) >= 0)
-        insl(PRIMARY_IDE_CHANNEL_BASE, b->data, 512 / 4);
+        insl(ideChannel, b->data, 512 / 4);
 
     // Wake process waiting for this buf.
     b->flags |= B_VALID;
