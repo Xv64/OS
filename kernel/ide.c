@@ -24,6 +24,9 @@
 #define SECONDARY_IDE_CHANNEL_BASE 0x170
 #define SECONDARY_IDE_INTERRUPT    0x376
 
+#define IDE_MASTER (0xe0 | (0 << 4))
+#define IDE_SLAVE  (0xe0 | (1 << 4))
+
 // idequeue points to the buf now being read/written to the disk.
 // idequeue->qnext points to the next buf to be processed.
 // You must hold idelock while manipulating queue.
@@ -54,7 +57,7 @@ void ideinit(void){
     idewait(0);
 
     // Check if disk 1 is present
-    outb(PRIMARY_IDE_CHANNEL_BASE + 6, 0xe0 | (1 << 4));
+    outb(PRIMARY_IDE_CHANNEL_BASE + 6, IDE_SLAVE);
     for (i = 0; i < 1000; i++) {
         if (inb(PRIMARY_IDE_CHANNEL_BASE + 7) != 0) {
             havedisk1 = 1;
@@ -63,7 +66,7 @@ void ideinit(void){
     }
 
     // Switch back to disk 0.
-    outb(PRIMARY_IDE_CHANNEL_BASE + 6, 0xe0 | (0 << 4));
+    outb(PRIMARY_IDE_CHANNEL_BASE + 6, IDE_MASTER);
 }
 
 // Start the request for b.  Caller must hold idelock.
@@ -77,7 +80,7 @@ static void idestart(struct buf* b){
     outb(PRIMARY_IDE_CHANNEL_BASE + 3, b->sector & 0xff);
     outb(PRIMARY_IDE_CHANNEL_BASE + 4, (b->sector >> 8) & 0xff);
     outb(PRIMARY_IDE_CHANNEL_BASE + 5, (b->sector >> 16) & 0xff);
-    outb(PRIMARY_IDE_CHANNEL_BASE + 6, 0xe0 | ((b->dev & 1) << 4) | ((b->sector >> 24) & 0x0f));
+    outb(PRIMARY_IDE_CHANNEL_BASE + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
     if (b->flags & B_DIRTY) {
         outb(PRIMARY_IDE_CHANNEL_BASE + 7, IDE_CMD_WRITE);
         outsl(PRIMARY_IDE_CHANNEL_BASE, b->data, 512 / 4);
