@@ -81,7 +81,7 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
             uint8 spd = (ssts >> 4) & 0x0F;
             uint8 det = ssts & 0x7; //the Device Detection (DET) flags are the bottom 3 bits
 
-            cprintf("ipm=%x, spd=%x, det=%x\n", ipm, spd, det);
+            //cprintf("ipm=%x, spd=%x, det=%x\n", ipm, spd, det);
 
             if (det != HBA_PORT_DET_PRESENT){
                 //In regards to the DET flag, section 3.3.10 of the AHCI spec says...
@@ -102,10 +102,10 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
             //and SPD needs to be != 0x0.
 
             //ok, so it's a SATA disk, and appears to be in a good state, so lets read from it...
-            cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
+            //cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
             uint16 *buf[512];
             ahci_sata_read(hba_port, 0, 0, 1, &buf);
-            cprintf("done reading\n");
+            //cprintf("done reading\n");
         }
 
         pi >>= 1;
