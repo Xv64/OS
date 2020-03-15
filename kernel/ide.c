@@ -19,6 +19,11 @@
 #define IDE_CMD_READ  0x20
 #define IDE_CMD_WRITE 0x30
 
+#define PRIMARY_IDE_CHANNEL_BASE   0x1F0
+#define PRIMARY_IDE_INTERRUPT 0x3F6
+#define SECONDARY_IDE_CHANNEL_BASE 0x170
+#define SECONDARY_IDE_INTERRUPT    0x376
+
 // idequeue points to the buf now being read/written to the disk.
 // idequeue->qnext points to the next buf to be processed.
 // You must hold idelock while manipulating queue.
@@ -33,7 +38,7 @@ static void idestart(struct buf*);
 static int idewait(int checkerr){
     int r;
 
-    while (((r = inb(0x1f7)) & (IDE_BSY | IDE_DRDY)) != IDE_DRDY)
+    while (((r = inb(PRIMARY_IDE_CHANNEL_BASE + 7)) & (IDE_BSY | IDE_DRDY)) != IDE_DRDY)
         ;
     if (checkerr && (r & (IDE_DF | IDE_ERR)) != 0)
         return -1;
@@ -44,21 +49,21 @@ void ideinit(void){
     int i;
 
     initlock(&idelock, "ide");
-    picenable(IRQ_IDE);
-    ioapicenable(IRQ_IDE, ncpu - 1);
+    picenable(IRQ_IDE1);
+    ioapicenable(IRQ_IDE1, ncpu - 1);
     idewait(0);
 
     // Check if disk 1 is present
-    outb(0x1f6, 0xe0 | (1 << 4));
+    outb(PRIMARY_IDE_CHANNEL_BASE + 6, 0xe0 | (1 << 4));
     for (i = 0; i < 1000; i++) {
-        if (inb(0x1f7) != 0) {
+        if (inb(PRIMARY_IDE_CHANNEL_BASE + 7) != 0) {
             havedisk1 = 1;
             break;
         }
     }
 
     // Switch back to disk 0.
-    outb(0x1f6, 0xe0 | (0 << 4));
+    outb(PRIMARY_IDE_CHANNEL_BASE + 6, 0xe0 | (0 << 4));
 }
 
 // Start the request for b.  Caller must hold idelock.
@@ -67,17 +72,17 @@ static void idestart(struct buf* b){
         panic("idestart");
 
     idewait(0);
-    outb(0x3f6, 0); // generate interrupt
-    outb(0x1f2, 1); // number of sectors
-    outb(0x1f3, b->sector & 0xff);
-    outb(0x1f4, (b->sector >> 8) & 0xff);
-    outb(0x1f5, (b->sector >> 16) & 0xff);
-    outb(0x1f6, 0xe0 | ((b->dev & 1) << 4) | ((b->sector >> 24) & 0x0f));
+    outb(PRIMARY_IDE_INTERRUPT, 0); // generate interrupt
+    outb(PRIMARY_IDE_CHANNEL_BASE + 2, 1); // number of sectors
+    outb(PRIMARY_IDE_CHANNEL_BASE + 3, b->sector & 0xff);
+    outb(PRIMARY_IDE_CHANNEL_BASE + 4, (b->sector >> 8) & 0xff);
+    outb(PRIMARY_IDE_CHANNEL_BASE + 5, (b->sector >> 16) & 0xff);
+    outb(PRIMARY_IDE_CHANNEL_BASE + 6, 0xe0 | ((b->dev & 1) << 4) | ((b->sector >> 24) & 0x0f));
     if (b->flags & B_DIRTY) {
-        outb(0x1f7, IDE_CMD_WRITE);
-        outsl(0x1f0, b->data, 512 / 4);
+        outb(PRIMARY_IDE_CHANNEL_BASE + 7, IDE_CMD_WRITE);
+        outsl(PRIMARY_IDE_CHANNEL_BASE, b->data, 512 / 4);
     } else {
-        outb(0x1f7, IDE_CMD_READ);
+        outb(PRIMARY_IDE_CHANNEL_BASE + 7, IDE_CMD_READ);
     }
 }
 
@@ -96,7 +101,7 @@ void ideintr(void){
 
     // Read data if needed.
     if (!(b->flags & B_DIRTY) && idewait(1) >= 0)
-        insl(0x1f0, b->data, 512 / 4);
+        insl(PRIMARY_IDE_CHANNEL_BASE, b->data, 512 / 4);
 
     // Wake process waiting for this buf.
     b->flags |= B_VALID;
