@@ -216,3 +216,6 @@ binaries : fs.img xv6.img
 	cp -r fs ./bin/
 	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
 	qemu-img convert xv6.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
+
+install: binaries
+	./install.sh
