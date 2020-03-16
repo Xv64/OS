@@ -113,17 +113,22 @@ void cprintf(char* fmt, ...){
 }
 
 void panic(char* s){
-    int i;
     uintp pcs[10];
 
     cli();
     cons.locking = 0;
-    cprintf("cpu%d: panic: ", cpu->id);
+    cprintf("\n\nPANIC on cpu %d\n ", cpu->id);
     cprintf(s);
-    cprintf("\n");
+    cprintf("\nSTACK:\n");
     getcallerpcs(&s, pcs);
-    for (i = 0; i < 10; i++)
-        cprintf(" %p", pcs[i]);
+    for (int i = 0; i < 10; i++){
+        uint64 ptr = pcs[i];
+        if(ptr == 0x0){
+            break;
+        }
+        cprintf(" [%d] %p\n",i, pcs[i]);
+    }
+    cprintf("HLT\n");
     panicked = 1; // freeze other CPU
     acpi_halt();
     for (;;)
