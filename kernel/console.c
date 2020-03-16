@@ -121,11 +121,7 @@ void panic(char* s){
     cprintf(s);
     cprintf("\nSTACK:\n");
     getcallerpcs(&s, pcs);
-    for (int i = 0; i < 10; i++){
-        uint64 ptr = pcs[i];
-        if(ptr == 0x0){
-            break;
-        }
+    for (int i = 0; i < 10 && pcs[i] != 0x0; i++){
         cprintf(" [%d] %p\n",i, pcs[i]);
     }
     cprintf("HLT\n");
