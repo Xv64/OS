@@ -70,3 +70,4 @@ struct madt_ioapic {
 } __attribute__((__packed__));
 
 void acpi_halt();
+void acpi_reboot();

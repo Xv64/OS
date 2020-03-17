@@ -1,5 +1,6 @@
 /* vm64.c
  *
+ * Copyright (c) 2020 Jason Whitehorn
  * Copyright (c) 2013 Brian Swetland
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -38,12 +39,26 @@ extern int ismp;
 extern int ncpu;
 extern uchar ioapicid;
 
+//from documentation @ wiki.osdev.org
+//https://wiki.osdev.org/Reboot
+//START
+#define KBRD_INTRFC 0x64
+#define KBRD_BIT_KDATA 0
+#define KBRD_BIT_UDATA 1
+#define KBRD_IO 0x60
+#define KBRD_RESET 0xFE
+#define bit(n) (1<<(n))
+#define check_flag(flags, n) ((flags) & bit(n))
+//END
+
 static struct acpi_rdsp* scan_rdsp(uint base, uint len) {
     uchar* p;
     for (p = p2v(base); len >= sizeof(struct acpi_rdsp); len -= 4, p += 4) {
         if (memcmp(p, SIG_RDSP, 8) == 0) {
             uint sum, n;
             for (sum = 0, n = 0; n < 20; n++)
+            #define KBRD_IO 0x60 /* keyboard IO port */
+#define KBRD_RESET 0xFE /* reset CPU command */
                 sum += p[n];
             if ((sum & 0xff) == 0)
                 return (struct acpi_rdsp*)p;
@@ -54,6 +69,31 @@ static struct acpi_rdsp* scan_rdsp(uint base, uint len) {
 
 void acpi_halt() {
     outw(0x604, 0x2000); //shutdown (only in QEMU)
+    //if issuing a shutdown request failed...
+    loop:
+        amd64_hlt();
+    goto loop; //we should never hit this line
+}
+
+void acpi_reboot(){
+    uint8 temp;
+
+    amd64_cli(); /// disable all IRQs
+
+
+    //from documentation @ wiki.osdev.org
+    //https://wiki.osdev.org/Reboot
+    //START
+    // Clear all keyboard buffers (output and command buffers)
+    do{
+        temp = inb(KBRD_INTRFC); // empty user data
+        if (check_flag(temp, KBRD_BIT_KDATA) != 0)
+            inb(KBRD_IO); // empty keyboard data
+    } while (check_flag(temp, KBRD_BIT_UDATA) != 0);
+
+    outb(KBRD_INTRFC, KBRD_RESET); // pulse CPU reset line
+    //END
+    acpi_halt(); //the above should NEVER fail, but if it does...
 }
 
 static struct acpi_rdsp* find_rdsp(void) {

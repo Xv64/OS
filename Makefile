@@ -189,6 +189,7 @@ UPROGS=\
 	fs/usertests\
 	fs/wc\
 	fs/zombie\
+	fs/reboot\
 
 fs/README.md: README.md
 	@mkdir -p fs

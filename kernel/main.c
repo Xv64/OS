@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "x86.h"
 #include "ahci.h"
+#include "acpi.h"
 
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
@@ -112,6 +113,11 @@ static void startothers(void){
         while (c->started == 0)
             ;
     }
+}
+
+void sys_reboot(){
+    cprintf("Goodbye\n");
+    acpi_reboot();
 }
 
 #ifndef X64
