@@ -18,6 +18,10 @@ amd64_nop(){
 
 #define amd64_pause() asm volatile("pause")
 
+#define amd64_mem_barrier() asm volatile("lock; addl $0,0(%%rsp)" : : : "memory")
+
+#define amd64_mem_read32(addr) (*(volatile int32 *)(addr))
+
 static inline void
 insl(int port, void *addr, int cnt)
 {
