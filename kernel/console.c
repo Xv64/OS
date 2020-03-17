@@ -30,13 +30,13 @@ static struct {
 
 static char digits[] = "0123456789abcdef";
 
-static void printptr(uintp x) {
+static void printptr(uintp x, uint8 color) {
     int i;
     for (i = 0; i < (sizeof(uintp) * 2); i++, x <<= 4)
-        consputc(digits[x >> (sizeof(uintp) * 8 - 4)], WHITE_ON_BLACK);
+        consputc(digits[x >> (sizeof(uintp) * 8 - 4)], color);
 }
 
-static void printint(int xx, int base, int sign){
+static void printint(int xx, int base, int sign, uint8 color){
     char buf[16];
     int i;
     uint x;
@@ -55,7 +55,7 @@ static void printint(int xx, int base, int sign){
         buf[i++] = '-';
 
     while (--i >= 0)
-        consputc(buf[i], WHITE_ON_BLACK);
+        consputc(buf[i], color);
 }
 
 //PAGEBREAK: 50
@@ -75,6 +75,7 @@ void cprintf(char* fmt, ...){
     if (fmt == 0)
         panic("null fmt");
 
+    uint8 color = WHITE_ON_BLACK;
     for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
         if (c != '%') {
             consputc(c, WHITE_ON_BLACK);
@@ -85,27 +86,27 @@ void cprintf(char* fmt, ...){
             break;
         switch (c) {
         case 'd':
-            printint(va_arg(ap, int), 10, 1);
+            printint(va_arg(ap, int), 10, 1, color);
             break;
         case 'x':
-            printint(va_arg(ap, int), 16, 0);
+            printint(va_arg(ap, int), 16, 0, color);
             break;
         case 'p':
-            printptr(va_arg(ap, uintp));
+            printptr(va_arg(ap, uintp), color);
             break;
         case 's':
             if ((s = va_arg(ap, char*)) == 0)
                 s = "(null)";
             for (; *s; s++)
-                consputc(*s, WHITE_ON_BLACK);
+                consputc(*s, color);
             break;
         case '%':
-            consputc('%', WHITE_ON_BLACK);
+            consputc('%', color);
             break;
         default:
             // Print unknown % sequence to draw attention.
-            consputc('%', WHITE_ON_BLACK);
-            consputc(c, WHITE_ON_BLACK);
+            consputc('%', color);
+            consputc(c, color);
             break;
         }
     }
