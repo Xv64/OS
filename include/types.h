@@ -14,10 +14,7 @@ typedef short int16;
 typedef int  int32;
 typedef long int64;
 
-#if X64
+
 typedef unsigned long uintp;
-#else
-typedef unsigned int  uintp;
-#endif
 
 typedef uintp pde_t;
