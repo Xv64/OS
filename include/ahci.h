@@ -18,6 +18,9 @@
 #define ATA_DEV_BUSY 0x80
 #define ATA_DEV_DRQ  0x08
 
+#define AHCI_GHC_OFFSET 0x4
+#define AHCI_GHC_MASK(val)  ((val & 0x7FFFFFFF) >> 31)
+
 #define AHCI_VENDOR_OFFSET 0x0
 #define AHCI_DEVICE_OFFSET 0x02
 //...

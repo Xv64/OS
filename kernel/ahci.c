@@ -62,6 +62,14 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
     cprintf("%s controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", dev_name, bus, slot, func, ahci_base_mem);
 
     HBA_MEM *ptr = (HBA_MEM *)&ahci_base_mem;
+    uint32 ghc = AHCI_GHC_MASK(amd64_spinread32(&ahci_base_mem, AHCI_GHC_OFFSET));
+    cprintf(" HBA in ");
+    if(ghc == 0x0){
+      cprintf("legacy mode\n");
+    }else{
+      cprintf("AHCI-only mode\n");
+    }
+    
     uint32 pi = ptr->pi;
     for(int i = 0; (i != 32) && (pi & 1); i++){
         volatile HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
