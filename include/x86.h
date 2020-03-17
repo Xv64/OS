@@ -22,6 +22,28 @@ amd64_nop(){
 
 #define amd64_mem_read32(addr) (*(volatile int32 *)(addr))
 
+static volatile inline uint32
+amd64_spinread32(uint64 baseAddr, uint32 offset){
+    int16 total = 0;
+    int16 same = 0;
+    uint32 val;
+    while(total < 1000 && same < 1000){
+        amd64_mem_barrier();
+        uint32 newVal = amd64_mem_read32(baseAddr + offset);
+        if(val == newVal){
+            same++;
+        }else{
+            same = 0;
+        }
+        val = newVal;
+        total++;
+    }
+    return val;
+}
+
+#define amd64_hlt() hlt()
+#define amd64_cli() cli()
+
 static inline void
 insl(int port, void *addr, int cnt)
 {
