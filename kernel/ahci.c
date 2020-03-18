@@ -13,7 +13,7 @@ static const struct {
 } ahci_devices[] = {
     {AHCI_VENDOR_INTEL, 0x27D0, "Intel ICH7 Port 1"},
     {AHCI_VENDOR_INTEL, 0x27D2, "Intel ICH7 Port 2"},
-    {AHCI_VENDOR_INTEL, 0x244E, "Intel 82801 PCI Bridge"},
+    //{AHCI_VENDOR_INTEL, 0x244E, "Intel 82801 PCI Bridge"},
     {AHCI_VENDOR_INTEL, 0x2829, "Intel ICH8M"},
     {AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
     {AHCI_VENDOR_INTEL, 0x1E03, "Intel Panther Point"},
@@ -69,7 +69,7 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
     }else{
       cprintf("AHCI-only mode\n");
     }
-    
+
     uint32 pi = ptr->pi;
     for(int i = 0; (i != 32) && (pi & 1); i++){
         volatile HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
