@@ -159,8 +159,9 @@ void ahci_rebase_port(HBA_PORT *port, int num) {
 }
 
 uint16 ahci_stop_port(HBA_PORT *port) {
-	// Clear ST (bit0)
-	port->cmd &= ~HBA_PxCMD_ST;
+    //TODO set port->FBU "with a valid pointer to the FIS receive area"
+	port->cmd |= HBA_PxCMD_FRE; //System software must not set this bit until PxFB (PxFBU) have been programmed with a valid pointer to the FIS receive area... (SATA/AHCI spec 1.3.1, section 3.3.7)
+	port->cmd &= ~HBA_PxCMD_ST; //This bit shall only be set to ‘1’ by software after PxCMD.FRE has been set to ‘1’ (SATA/AHCI spec 1.3.1, section 3.3.7)
 
     uint64 cmd;
     uint16 count = 0;
