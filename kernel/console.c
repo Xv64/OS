@@ -78,7 +78,7 @@ void cprintf(char* fmt, ...){
     uint8 color = WHITE_ON_BLACK;
     for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
         if (c != '%') {
-            consputc(c, WHITE_ON_BLACK);
+            consputc(c, color);
             continue;
         }
         c = fmt[++i] & 0xff;
