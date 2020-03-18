@@ -80,25 +80,25 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
 
         if(hba_port->sig != SATA_SIG_ATAPI && hba_port->sig != SATA_SIG_SEMB && hba_port->sig != SATA_SIG_PM){
             //we may have found a SATA device, but what is the status of this device?
-            uint64 ssts = hba_port->ssts;
+            uint64 ssts = amd64_spinread64(&hba_port->ssts, 0);
 
             uint8 ipm = (ssts >> 8) & 0x0F;
             uint8 spd = (ssts >> 4) & 0x0F;
             uint8 det = ssts & 0x7; //the Device Detection (DET) flags are the bottom 3 bits
-
-            cprintf("ipm=%x, spd=%x, det=%x\n", ipm, spd, det);
 
             if (det != HBA_PORT_DET_PRESENT && ipm != HBA_PORT_IPM_ACTIVE){
                 //nope
 		 	}else if(hba_port->sig==SATA_SIG_ATAPI){
                 //ATAPI device
 			}else if(hba_port->sig==SATA_SIG_SEMB){
-				
+
 			}else if(hba_port->sig==SATA_SIG_PM){
                 //port multiplier detected
 			}else{
                 cprintf("SATA device detected:\n");
                 cprintf("   port[%d].sig = %x\n", i, hba_port->sig);
+                cprintf("   ipm=%x, spd=%x, det=%x\n", ipm, spd, det);
+                ahci_sata_init(hba_port, i);
 			}
         }
     }
@@ -142,4 +142,48 @@ uint64 ahci_read(ushort bus, ushort slot,ushort func, ushort offset){
 
 int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
     return 0;
+}
+
+void ahci_sata_init(HBA_PORT *port, int num){
+	ahci_rebase_port(port,num);
+    //TODO
+}
+
+void ahci_rebase_port(HBA_PORT *port, int num) {
+
+    if(!ahci_stop_port(port)){
+        cprintf("   unable to stop command engine, skipping HBA\n");
+        return;
+    }
+    //TODO
+}
+
+uint16 ahci_stop_port(HBA_PORT *port) {
+	// Clear ST (bit0)
+	port->cmd &= ~HBA_PxCMD_ST;
+
+    uint64 cmd;
+    uint16 count = 0;
+    do { // Wait until FR (bit14), CR (bit15) are cleared
+        cmd = amd64_spinread64(&port->cmd, 0);
+        if (cmd & HBA_PxCMD_FR){
+            continue;
+        }
+        if (cmd & HBA_PxCMD_CR){
+            continue;
+        }
+        break;
+    }while(count++ < 1000);
+
+    if(count >= 1000){
+        return 0;
+    }
+
+	// Clear FRE (bit4)
+	port->cmd &= ~HBA_PxCMD_FRE;
+    return 1;
+}
+
+void ahci_start_port(HBA_PORT *port) {
+	//TODO
 }

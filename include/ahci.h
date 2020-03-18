@@ -5,6 +5,11 @@
 #define AHCI_MAX_SLOT 0x1F
 #define AHCI_MAX_FUNC 0x7
 #define AHCI_HBA_PORT 0xCF8 //???
+#define	AHCI_BASE     0x400000
+#define HBA_PxCMD_ST    0x0001
+#define HBA_PxCMD_FRE   0x0010
+#define HBA_PxCMD_FR    0x4000
+#define HBA_PxCMD_CR    0x8000
 
 #define FIS_TYPE_REG_H2D 0x27
 #define ATA_CMD_READ_DMA_EX 0x25
@@ -172,9 +177,14 @@ typedef volatile struct tagHBA_MEM
 } HBA_MEM;
 //END
 
-void ahci_init();
+void   ahci_init();
 uint16 ahci_probe(uint16 bus, uint16 slot, uint16 func, uint16 offset);
 uint64 ahci_read(uint16 bus, uint16 slot, uint16 func, uint16 offset);
-void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func);
-void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bus, uint16 slot, uint16 func);
-int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf);
+void   ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func);
+void   ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bus, uint16 slot, uint16 func);
+int    ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf);
+void   ahci_sata_init(HBA_PORT *port, int num);
+
+void   ahci_rebase_port(HBA_PORT *port, int num);
+uint16 ahci_stop_port(HBA_PORT *port);
+void   ahci_start_port(HBA_PORT *port);

@@ -20,16 +20,36 @@ amd64_nop(){
 
 #define amd64_mem_barrier() asm volatile("lock; addl $0,0(%%rsp)" : : : "memory")
 
-#define amd64_mem_read32(addr) (*(volatile int32 *)(addr))
+#define amd64_mem_read32(addr) (*(volatile uint32 *)(addr))
+#define amd64_mem_read64(addr) (*(volatile uint64 *)(addr))
 
 static volatile inline uint32
 amd64_spinread32(uint64 baseAddr, uint32 offset){
     int16 total = 0;
     int16 same = 0;
     uint32 val;
-    while(total < 1000 && same < 1000){
+    while(total < 1000 && same < 100){
         amd64_mem_barrier();
         uint32 newVal = amd64_mem_read32(baseAddr + offset);
+        if(val == newVal){
+            same++;
+        }else{
+            same = 0;
+        }
+        val = newVal;
+        total++;
+    }
+    return val;
+}
+
+static volatile inline uint64
+amd64_spinread64(uint64 baseAddr, uint32 offset){
+    int16 total = 0;
+    int16 same = 0;
+    uint64 val;
+    while(total < 1000 && same < 100){
+        amd64_mem_barrier();
+        uint64 newVal = amd64_mem_read32(baseAddr + offset);
         if(val == newVal){
             same++;
         }else{
