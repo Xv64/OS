@@ -22,4 +22,4 @@ if [ -n "$IDE_MODE" ]; then
     ROOT_DISK="-hdd ./bin/fs.vdi"
 fi
 
-qemu-system-x86_64 -device ahci,id=ahci -smp 3 -m 512 -nographic $NETWORK $BOOT_DISK $ROOT_DISK
+qemu-system-x86_64 -device ahci,id=ahci -smp 3 -m 512 $NETWORK $BOOT_DISK $ROOT_DISK
