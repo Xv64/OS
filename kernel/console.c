@@ -19,7 +19,25 @@
 
 static void consputc(int, uint32);
 
-#define WHITE_ON_BLACK 0x0700
+#define CGA_BLACK         0x0
+#define CGA_BLUE          0x1
+#define CGA_GREEN         0x2
+#define CGA_CYAN          0x3
+#define CGA_RED           0x4
+#define CGA_MAGENTA       0x5
+#define CGA_BROWN         0x6
+#define CGA_LIGHT_GRAY    0x7
+#define CGA_DARK_GRAY     0x8
+#define CGA_LIGHT_BLUE    0x9
+#define CGA_LIGHT_GREEN   0xA
+#define CGA_LIGHT_CYAN    0xB
+#define CGA_LIGHT_RED     0xC
+#define CGA_LIGHT_MAGENTA 0xD
+#define CGA_YELLOW        0xE
+#define CGA_WHITE         0xF
+
+#define CGA_FONT_COLOR(foreground, background) ((background << 4) + foreground)
+#define DEFAULT_CONSOLE_COLOR  CGA_FONT_COLOR(CGA_LIGHT_GRAY, CGA_BLACK)
 
 static int panicked = 0;
 
@@ -72,7 +90,7 @@ void cprintf(char* fmt, ...){
     if (fmt == 0)
         panic("null fmt");
 
-    uint32 color = WHITE_ON_BLACK;
+    uint32 color = DEFAULT_CONSOLE_COLOR;
     for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
         if (c != '%') {
             consputc(c, color);
@@ -150,7 +168,7 @@ static void cgaputc(int c, uint32 color){
     else if (c == BACKSPACE) {
         if (pos > 0) --pos;
     } else
-        crt[pos++] = (c & 0xff) | color;
+        crt[pos++] = (c & 0xFF) | (color << 8);
 
     if ((pos / 80) >= 24) { // Scroll up.
         memmove(crt, crt + 80, sizeof(crt[0]) * 23 * 80);
@@ -206,20 +224,20 @@ void consoleintr(int (*getc)(void)){
             while (input.e != input.w &&
                    input.buf[(input.e - 1) % INPUT_BUF] != '\n') {
                 input.e--;
-                consputc(BACKSPACE, WHITE_ON_BLACK);
+                consputc(BACKSPACE, DEFAULT_CONSOLE_COLOR);
             }
             break;
         case C('H'): case '\x7f': // Backspace
             if (input.e != input.w) {
                 input.e--;
-                consputc(BACKSPACE, WHITE_ON_BLACK);
+                consputc(BACKSPACE, DEFAULT_CONSOLE_COLOR);
             }
             break;
         default:
             if (c != 0 && input.e - input.r < INPUT_BUF) {
                 c = (c == '\r') ? '\n' : c;
                 input.buf[input.e++ % INPUT_BUF] = c;
-                consputc(c, WHITE_ON_BLACK);
+                consputc(c, DEFAULT_CONSOLE_COLOR);
                 if (c == '\n' || c == C('D') || input.e == input.r + INPUT_BUF) {
                     input.w = input.e;
                     wakeup(&input.r);
@@ -273,7 +291,7 @@ int consolewrite(struct inode* ip, char* buf, int n){
     iunlock(ip);
     acquire(&cons.lock);
     for (i = 0; i < n; i++)
-        consputc(buf[i] & 0xff, WHITE_ON_BLACK);
+        consputc(buf[i] & 0xff, DEFAULT_CONSOLE_COLOR);
     release(&cons.lock);
     ilock(ip);
 
