@@ -17,9 +17,9 @@
 #include "x86.h"
 #include "acpi.h"
 
-static void consputc(int, uint8);
+static void consputc(int, uint32);
 
-#define WHITE_ON_BLACK 0x07
+#define WHITE_ON_BLACK 0x0700
 
 static int panicked = 0;
 
@@ -30,13 +30,13 @@ static struct {
 
 static char digits[] = "0123456789abcdef";
 
-static void printptr(uintp x, uint8 color) {
+static void printptr(uintp x, uint32 color) {
     int i;
     for (i = 0; i < (sizeof(uintp) * 2); i++, x <<= 4)
         consputc(digits[x >> (sizeof(uintp) * 8 - 4)], color);
 }
 
-static void printint(int xx, int base, int sign, uint8 color){
+static void printint(int xx, int base, int sign, uint32 color){
     char buf[16];
     int i;
     uint x;
@@ -58,9 +58,6 @@ static void printint(int xx, int base, int sign, uint8 color){
         consputc(buf[i], color);
 }
 
-//PAGEBREAK: 50
-
-// Print to the console. only understands %d, %x, %p, %s.
 void cprintf(char* fmt, ...){
     va_list ap;
     int i, c, locking;
@@ -75,7 +72,7 @@ void cprintf(char* fmt, ...){
     if (fmt == 0)
         panic("null fmt");
 
-    uint8 color = WHITE_ON_BLACK;
+    uint32 color = WHITE_ON_BLACK;
     for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
         if (c != '%') {
             consputc(c, color);
@@ -139,7 +136,7 @@ void panic(char* s){
 #define CRTPORT 0x3d4
 static ushort* crt = (ushort*)P2V(0xb8000);  // CGA memory
 
-static void cgaputc(int c, uint8 color){
+static void cgaputc(int c, uint32 color){
     int pos;
 
     // Cursor position: col + 80*row.
@@ -153,7 +150,7 @@ static void cgaputc(int c, uint8 color){
     else if (c == BACKSPACE) {
         if (pos > 0) --pos;
     } else
-        crt[pos++] = (c & 0xff) | (color << 8);
+        crt[pos++] = (c & 0xff) | color;
 
     if ((pos / 80) >= 24) { // Scroll up.
         memmove(crt, crt + 80, sizeof(crt[0]) * 23 * 80);
@@ -168,7 +165,7 @@ static void cgaputc(int c, uint8 color){
     crt[pos] = ' ' | 0x0700;
 }
 
-static void consputc(int c, uint8 color){
+static void consputc(int c, uint32 color){
     if (panicked) {
         cli();
         for (;;)
