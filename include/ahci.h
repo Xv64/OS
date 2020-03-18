@@ -9,6 +9,7 @@
 #define FIS_TYPE_REG_H2D 0x27
 #define ATA_CMD_READ_DMA_EX 0x25
 
+#define HBA_PORT_IPM_ACTIVE  0x1
 #define HBA_PORT_DET_PRESENT 0x3
 
 #define	SATA_SIG_ATAPI  0xEB140101  // SATAPI drive
@@ -39,25 +40,25 @@
 //The following structs are as documented @ https://wiki.osdev.org/AHCI
 //START
 typedef volatile struct tagHBA_PORT {
-	uint32 clb;		   // 0x00, command list base address, 1K-byte aligned
-	uint32 clbu;	   // 0x04, command list base address upper 32 bits
-	uint32 fb;         // 0x08, FIS base address, 256-byte aligned
-	uint32 fbu;        // 0x0C, FIS base address upper 32 bits
-	uint32 is;         // 0x10, interrupt status
-	uint32 ie;         // 0x14, interrupt enable
-	uint32 cmd;        // 0x18, command and status
-	uint32 rsv0;       // 0x1C, Reserved
-	uint32 tfd;        // 0x20, task file data
-	uint32 sig;        // 0x24, signature
-	uint32 ssts;       // 0x28, SATA status (SCR0:SStatus)
-	uint32 sctl;       // 0x2C, SATA control (SCR2:SControl)
-	uint32 serr;       // 0x30, SATA error (SCR1:SError)
-	uint32 sact;       // 0x34, SATA active (SCR3:SActive)
-	uint32 ci;         // 0x38, command issue
-	uint32 sntf;       // 0x3C, SATA notification (SCR4:SNotification)
-	uint32 fbs;        // 0x40, FIS-based switch control
-	uint32 rsv1[11];   // 0x44 ~ 0x6F, Reserved
-	uint32 vendor[4];  // 0x70 ~ 0x7F, vendor specific
+	uint64 clb;		   // 0x00, command list base address, 1K-byte aligned
+	uint64 clbu;	   // 0x04, command list base address upper 32 bits
+	uint64 fb;         // 0x08, FIS base address, 256-byte aligned
+	uint64 fbu;        // 0x0C, FIS base address upper 32 bits
+	uint64 is;         // 0x10, interrupt status
+	uint64 ie;         // 0x14, interrupt enable
+	uint64 cmd;        // 0x18, command and status
+	uint64 rsv0;       // 0x1C, Reserved
+	uint64 tfd;        // 0x20, task file data
+	uint64 sig;        // 0x24, signature
+	uint64 ssts;       // 0x28, SATA status (SCR0:SStatus)
+	uint64 sctl;       // 0x2C, SATA control (SCR2:SControl)
+	uint64 serr;       // 0x30, SATA error (SCR1:SError)
+	uint64 sact;       // 0x34, SATA active (SCR3:SActive)
+	uint64 ci;         // 0x38, command issue
+	uint64 sntf;       // 0x3C, SATA notification (SCR4:SNotification)
+	uint64 fbs;        // 0x40, FIS-based switch control
+	uint64 rsv1[11];   // 0x44 ~ 0x6F, Reserved
+	uint64 vendor[4];  // 0x70 ~ 0x7F, vendor specific
 } HBA_PORT;
 
 typedef struct tagHBA_CMD_HEADER {
@@ -148,17 +149,17 @@ typedef struct tagHBA_CMD_TBL {
 typedef volatile struct tagHBA_MEM
 {
 	// 0x00 - 0x2B, Generic Host Control
-	uint32 cap;		// 0x00, Host capability
-	uint32 ghc;		// 0x04, Global host control
-	uint32 is;		// 0x08, Interrupt status
-	uint32 pi;		// 0x0C, Port implemented
-	uint32 vs;		// 0x10, Version
-	uint32 ccc_ctl;	// 0x14, Command completion coalescing control
-	uint32 ccc_pts;	// 0x18, Command completion coalescing ports
-	uint32 em_loc;		// 0x1C, Enclosure management location
-	uint32 em_ctl;		// 0x20, Enclosure management control
-	uint32 cap2;		// 0x24, Host capabilities extended
-	uint32 bohc;		// 0x28, BIOS/OS handoff control and status
+	uint64 cap;		// 0x00, Host capability
+	uint64 ghc;		// 0x04, Global host control
+	uint64 is;		// 0x08, Interrupt status
+	uint64 pi;		// 0x0C, Port implemented
+	uint64 vs;		// 0x10, Version
+	uint64 ccc_ctl;	// 0x14, Command completion coalescing control
+	uint64 ccc_pts;	// 0x18, Command completion coalescing ports
+	uint64 em_loc;		// 0x1C, Enclosure management location
+	uint64 em_ctl;		// 0x20, Enclosure management control
+	uint64 cap2;		// 0x24, Host capabilities extended
+	uint64 bohc;		// 0x28, BIOS/OS handoff control and status
 
 	// 0x2C - 0x9F, Reserved
 	uint8  rsv[0xA0-0x2C];

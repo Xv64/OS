@@ -62,61 +62,45 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
     cprintf("%s controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", dev_name, bus, slot, func, ahci_base_mem);
 
     HBA_MEM *ptr = (HBA_MEM *)&ahci_base_mem;
-    uint32 ghc = AHCI_GHC_MASK(amd64_spinread32(&ahci_base_mem, AHCI_GHC_OFFSET));
     cprintf(" HBA in ");
-    if(ghc == 0x0){
-      cprintf("legacy mode\n");
+    if(ptr->ghc == 0x0){
+        cprintf("legacy mode\n");
     }else{
-      cprintf("AHCI-only mode\n");
+        cprintf("AHCI-only mode\n");
     }
 
-    uint32 pi = ptr->pi;
-    for(int i = 0; (i != 32) && (pi & 1); i++){
-        volatile HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
+    uint64 pi = ptr->pi;
+    for(int i = 0; (i != 32); i++){
+        uint64 port_mask = 1 << i;
+        if((pi & port_mask) == 0x0){
+            continue;
+        }
 
+        HBA_PORT *hba_port = (HBA_PORT *) &ptr->ports[i];
 
         if(hba_port->sig != SATA_SIG_ATAPI && hba_port->sig != SATA_SIG_SEMB && hba_port->sig != SATA_SIG_PM){
             //we may have found a SATA device, but what is the status of this device?
-
-            uint32 ssts = hba_port->ssts;
-            int i = 0;
-            do{
-                ssts = hba_port->ssts;
-                amd64_pause(); //slow down
-            }while(hba_port->ssts != ssts && i++ < 4000); //give the ssts register a moment to stabilize
+            uint64 ssts = hba_port->ssts;
 
             uint8 ipm = (ssts >> 8) & 0x0F;
             uint8 spd = (ssts >> 4) & 0x0F;
             uint8 det = ssts & 0x7; //the Device Detection (DET) flags are the bottom 3 bits
 
-            //cprintf("ipm=%x, spd=%x, det=%x\n", ipm, spd, det);
+            cprintf("ipm=%x, spd=%x, det=%x\n", ipm, spd, det);
 
-            if (det != HBA_PORT_DET_PRESENT){
-                //In regards to the DET flag, section 3.3.10 of the AHCI spec says...
-                // 0h No device detected and Phy communication not established
-                // 1h Device presence detected but Phy communication not established
-                // 3h Device presence detected and Phy communication established
-                // 4h Phy in offline mode as a result of the interface being disabled or running in a
-                //      BIST loopback mode
-                //All other values reserved
-                continue;   //therefore, if DET doesn't exactly equal 0x3, we should ignore it
-            }
-
-            //the spec seems to imply that we should check Interface Power Management (IPM) & Current Interface Speed (SPD)
-            //but on QEMU these seem incorrect. Specifically QEMU appears to be using bit 12 are part of the IPM,
-            //whereas the spec says this should be limited to bits 8 through 11.
-
-            //if/when we want to validate this, IPM should be 0x1 at minimum (not sure how device wakeup works),
-            //and SPD needs to be != 0x0.
-
-            //ok, so it's a SATA disk, and appears to be in a good state, so lets read from it...
-            //cprintf("\tport[%d].sig = %x\n", i, hba_port->sig);
-            uint16 *buf[512];
-            ahci_sata_read(hba_port, 0, 0, 1, &buf);
-            //cprintf("done reading\n");
+            if (det != HBA_PORT_DET_PRESENT && ipm != HBA_PORT_IPM_ACTIVE){
+                //nope
+		 	}else if(hba_port->sig==SATA_SIG_ATAPI){
+                //ATAPI device
+			}else if(hba_port->sig==SATA_SIG_SEMB){
+				
+			}else if(hba_port->sig==SATA_SIG_PM){
+                //port multiplier detected
+			}else{
+                cprintf("SATA device detected:\n");
+                cprintf("   port[%d].sig = %x\n", i, hba_port->sig);
+			}
         }
-
-        pi >>= 1;
     }
 }
 
