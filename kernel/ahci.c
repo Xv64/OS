@@ -167,13 +167,8 @@ uint16 ahci_stop_port(HBA_PORT *port) {
     uint16 count = 0;
     do { // Wait until FR (bit14), CR (bit15) are cleared
         cmd = amd64_spinread64(&port->cmd, 0);
-        if (cmd & HBA_PxCMD_FR){
-            continue;
-        }
-        if (cmd & HBA_PxCMD_CR){
-            continue;
-        }
-        break;
+        if(!(port->cmd & (HBA_PxCMD_CR | HBA_PxCMD_FR)))
+            break;
     }while(count++ < 1000);
 
     if(count >= 1000){
