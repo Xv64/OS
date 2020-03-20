@@ -62,9 +62,6 @@ static void vga_putc(unsigned char c, unsigned char forecolour, unsigned char ba
 
 #define COLUMNS 80
 
-static uint8 g_80x25_text[] = VGA_80X25_TEXT_MODE;
-static uint8 g_8x16_font[4096] = VGA_8X16_FONT;
-
 static int panicked = 0;
 
 static struct {
@@ -329,12 +326,14 @@ int consolewrite(struct inode* ip, char* buf, int n){
 
 
 static void vga_init(){
-  vga_write_regs(g_80x25_text);
+  uint8 registers[] = VGA_80X25_TEXT_MODE;
+  vga_write_regs(registers);
 
 
-  for (uint16 i = 0; i < 4096; i += 16) {
+  uint8 font[VGA_8X16_FONT_SIZE] = VGA_8X16_FONT;
+  for (uint16 i = 0; i < VGA_8X16_FONT_SIZE; i += 16) {
       for (uint16 j = 0; j < 16; j++) {
-          ((char *) KERNBASE + 0xa0000)[2*i+j] = g_8x16_font[i+j];
+          ((char *) KERNBASE + 0xa0000)[2*i+j] = font[i+j];
       }
   }
 }
