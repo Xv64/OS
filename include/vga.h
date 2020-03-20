@@ -2,7 +2,7 @@
 #define __INCLUDE_VGA_H
 
 /* vga.c
- * Copyright (c) 20202 Jason Whitehorn
+ * Copyright (c) 2020 Jason Whitehorn
  * Copyright (c) 2019 Benson Chau, ngreenwald3, DannyFannyPack, tmaddali, DanielWygant
  *
  * Permission is hereby granted, free of charge, to any person obtaining
