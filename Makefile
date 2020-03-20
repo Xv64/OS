@@ -47,6 +47,7 @@ OBJS := \
 	kobj/uart.o\
 	kobj/vectors.o\
 	kobj/vm.o\
+	kobj/vga.o\
 	$(XOBJS)
 
 ifneq ("$(MEMFS)","")
