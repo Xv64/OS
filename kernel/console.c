@@ -17,6 +17,7 @@
 #include "x86.h"
 #include "acpi.h"
 #include "vga.h"
+#include "vga_modes.h"
 
 static void consputc(int, uint32);
 static void vga_putc(unsigned char c, unsigned char forecolour, unsigned char backcolour, int x, int y);
@@ -174,10 +175,9 @@ void panic(char* s){
         ;
 }
 
-//PAGEBREAK: 50
 #define BACKSPACE 0x100
 #define CRTPORT 0x3d4
-static uint16* crt = (uint16*)P2V(0xb8000);  // CGA memory
+static uint16* crt = (uint16*)P2V(VGA_TEXT_MEM);
 
 static void console_setbackgroundcolor(uint32 color){
   memset(crt, color, 0xFA00);
