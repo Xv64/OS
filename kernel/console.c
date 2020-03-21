@@ -57,7 +57,11 @@ static void vga_putc(unsigned char c, unsigned char forecolour, unsigned char ba
 #define VGA_WHITE         0x3F
 
 #define CGA_FONT_COLOR(foreground, background) ((background << 4) + foreground)
+#ifdef VGA_GRAPHICS
 #define DEFAULT_CONSOLE_COLOR CGA_FONT_COLOR(VGA_LIGHT_GRAY, VGA_BLACK)
+#else
+#define DEFAULT_CONSOLE_COLOR CGA_FONT_COLOR(CGA_LIGHT_GRAY, CGA_BLACK)
+#endif
 #define CGA_GET_FONT_BACKGROUND_COLOR(color) ((color & 0xFF00) >> 4)
 
 #define COLUMNS 80
@@ -349,15 +353,24 @@ void consoleinit(void){
     picenable(IRQ_KBD);
     ioapicenable(IRQ_KBD, 0);
 
-    vga_init();
-    console_setbackgroundcolor(VGA_BLACK);
-
     uint32 backColor = CGA_GET_FONT_BACKGROUND_COLOR(DEFAULT_CONSOLE_COLOR);
-    cprintf("VGA ");
-    consputc('C', CGA_FONT_COLOR(VGA_RED, backColor));
-    consputc('O', CGA_FONT_COLOR(VGA_MAGENTA, backColor));
-    consputc('L', CGA_FONT_COLOR(VGA_LIGHT_GREEN, backColor));
-    consputc('O', CGA_FONT_COLOR(VGA_YELLOW, backColor));
-    consputc('R', CGA_FONT_COLOR(VGA_GREEN, backColor));
+    #ifdef VGA_GRAPHICS
+        vga_init();
+        console_setbackgroundcolor(VGA_BLACK);
+        cprintf("VGA ");
+        consputc('C', CGA_FONT_COLOR(VGA_RED, backColor));
+        consputc('O', CGA_FONT_COLOR(VGA_MAGENTA, backColor));
+        consputc('L', CGA_FONT_COLOR(VGA_LIGHT_GREEN, backColor));
+        consputc('O', CGA_FONT_COLOR(VGA_YELLOW, backColor));
+        consputc('R', CGA_FONT_COLOR(VGA_GREEN, backColor));
+    #else
+        cprintf("CGA ");
+        consputc('C', CGA_FONT_COLOR(CGA_RED, backColor));
+        consputc('O', CGA_FONT_COLOR(CGA_MAGENTA, backColor));
+        consputc('L', CGA_FONT_COLOR(CGA_LIGHT_GREEN, backColor));
+        consputc('O', CGA_FONT_COLOR(CGA_YELLOW, backColor));
+        consputc('R', CGA_FONT_COLOR(CGA_GREEN, backColor));
+    #endif
+
     cprintf(" Console\n");
 }
