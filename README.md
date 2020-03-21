@@ -10,13 +10,13 @@ merged from work done by Brian Swetland.
 
 ## Getting Started
 
-Ensure that you have docker installed and execute `./build.sh` to compile the OS. Once compiled you can run it locally by either:
+Ensure that you have Docker† installed and execute `./build.sh` to compile the OS. Once compiled you can run it locally by either:
 
-1. running `./run.sh` (assuming you have qemu installed)
+###### 1. QEMU
 
 This supplied `run.sh` script takes a variety of parameters:
 
-`-r` - this parameter rebuilds the app. This is not needed if the contents of `/bin` are present or otherwise do not need to be rebuilt. This can also be omitted if you prefer not to use Docker, and instead run `make binaries` and the the `run.sh` script WITHOUT the `-r` parameter.
+`-r` - this parameter rebuilds the app. This is not needed if the contents of `bin` are present or otherwise do not need to be rebuilt. This can also be omitted if you prefer not to use Docker, and instead run `make binaries` and the the `run.sh` script WITHOUT the `-r` parameter.
 
 `-l` - this parameter stands for "legacy" and enables IDE drives. At the moment SATA drives are a work-in-progress, so if you actually want to run the OS (as opposed to developing AHCI/SATA support) you will want to INCLUDE this parameter.
 
@@ -24,9 +24,20 @@ Additional QEMU arguments can be supplied with the `QEMU_OPTS` environmental var
 
 `env QEMU_OPTS=-nographic ./run.sh`
 
-2. using the compiled VMWare image `Xv64.vmwarevm` located in the `bin` folder.
-3. manually setting up Virtual Box using the compiled VDI images located in `bin`.
-4. installing on real hardware (see INSTALL.md for details) - see system requirements.
+###### 2. VMWare
+
+A VMWare image is built during compile time, and can be located in the `bin` folder. This image is not well tested, so the machine's configuration may need to be tweaked on an as-need basis.
+
+###### 3. Virtual Box
+
+Virtual Box compatible VDI (virtual hard drives) are built during compilation and are located in the `bin` folder. If you desire to use Virtual Box you will want to create a new VM in Virtual Box and reference these drives. Such instruction is beyond the scope of this document.
+
+###### 4. Real hardware
+
+Xv64 supports executed directly on REAL hardware. If you desire to go this route please see the system requirements below and read the INSTALL.md document for details.
+
+
+† you do NOT need Docker to build or run Xv64. Provided the correct dependencies are installed, you can run `make` directly from your host OS - most likely Debian Linux. The Docker configuration is provided for ease of setup, please refer to the Dockerfile for details of what system dependencies (like `build-essential`, etc) are required if you forgo Docker.
 
 ## System Requirements
 
