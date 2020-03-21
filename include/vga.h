@@ -1,7 +1,4 @@
-#ifndef __INCLUDE_VGA_H
-#define __INCLUDE_VGA_H
-
-/* vga.c
+/* vga.h
  * Copyright (c) 2020 Jason Whitehorn
  * Copyright (c) 2019 Benson Chau, ngreenwald3, DannyFannyPack, tmaddali, DanielWygant
  *
@@ -26,6 +23,9 @@
  *
  */
 
+ #ifndef __INCLUDE_VGA_H
+ #define __INCLUDE_VGA_H
+
 
 #define VGA_ATTR_ADDR_REG        0x3C0
 #define VGA_ATTR_DATA_REG        0x3C1
@@ -42,8 +42,10 @@
 #define VGA_GRAPHICS_LEN         0x9
 #define VGA_ATTR_LEN             0xD
 #define VGA_TEXT_MEM             0xB8000
+#define VGA_VIDEO_MEM_ADDR       0xA0000
 
 void vga_write_regs(uchar *mode);
+void vga_setpixel4p(uint32 x, uint32 y, uint32 c);
 
 
 #endif

@@ -173,8 +173,7 @@ void panic(char* s){
 }
 
 #define BACKSPACE 0x100
-#define CRTPORT 0x3d4
-static uint16* crt = (uint16*)P2V(VGA_TEXT_MEM);
+static uint16* crt = (uint16*)P2V(VGA_VIDEO_MEM_ADDR);
 
 static void console_setbackgroundcolor(uint32 color){
   memset(crt, color, 0xFA00);
@@ -184,10 +183,10 @@ static void cgaputc(int c, uint32 color){
     int pos;
 
     // Cursor position: col + 80*row.
-    outb(CRTPORT, 14);
-    pos = inb(CRTPORT + 1) << 8;
-    outb(CRTPORT, 15);
-    pos |= inb(CRTPORT + 1);
+    outb(VGA_CRTC_ADDR_REG, 14);
+    pos = inb(VGA_CRTC_ADDR_REG + 1) << 8;
+    outb(VGA_CRTC_ADDR_REG, 15);
+    pos |= inb(VGA_CRTC_ADDR_REG + 1);
 
     if (c == '\n')
         pos += COLUMNS - pos % COLUMNS;
@@ -196,16 +195,16 @@ static void cgaputc(int c, uint32 color){
     } else
         crt[pos++] = (c & 0xFF) | (color << 8);
 
-    if ((pos / COLUMNS) >= 24) { // Scroll up.
-        memmove(crt, crt + COLUMNS, sizeof(crt[0]) * 23 * COLUMNS);
+    if ((pos / COLUMNS) >= 49) { // Scroll up.
+        memmove(crt, crt + COLUMNS, sizeof(crt[0]) * 48 * COLUMNS);
         pos -= COLUMNS;
-        memset(crt + pos, 0, sizeof(crt[0]) * (24 * COLUMNS - pos));
+        memset(crt + pos, 0, sizeof(crt[0]) * (49 * COLUMNS - pos));
     }
 
-    outb(CRTPORT, 14);
-    outb(CRTPORT + 1, pos >> 8);
-    outb(CRTPORT, 15);
-    outb(CRTPORT + 1, pos);
+    outb(VGA_CRTC_ADDR_REG, 14);
+    outb(VGA_CRTC_ADDR_REG + 1, pos >> 8);
+    outb(VGA_CRTC_ADDR_REG, 15);
+    outb(VGA_CRTC_ADDR_REG + 1, pos);
     crt[pos] = ' ' | 0x0700;
 }
 
@@ -326,16 +325,18 @@ int consolewrite(struct inode* ip, char* buf, int n){
 
 
 static void vga_init(){
-  uint8 registers[] = VGA_80X25_TEXT_MODE;
+  uint8 registers[] = VGA_640X480_16COLOR;
   vga_write_regs(registers);
 
+  console_setbackgroundcolor(0);
 
-  uint8 font[VGA_8X16_FONT_SIZE] = VGA_8X16_FONT;
-  for (uint16 i = 0; i < VGA_8X16_FONT_SIZE; i += 16) {
-      for (uint16 j = 0; j < 16; j++) {
-          ((char *) KERNBASE + 0xa0000)[2*i+j] = font[i+j];
-      }
-  }
+
+  // uint8 font[VGA_8X8_FONT_SIZE] = VGA_8X8_FONT;
+  // for (uint16 i = 0; i < VGA_8X8_FONT_SIZE; i += 8) {
+  //     for (uint16 j = 0; j < 8; j++) {
+  //         ((char *) KERNBASE + 0xa0000)[2*i+j] = font[i+j];
+  //     }
+  // }
 }
 
 void consoleinit(void){
@@ -350,7 +351,18 @@ void consoleinit(void){
     ioapicenable(IRQ_KBD, 0);
 
     vga_init();
-    console_setbackgroundcolor(VGA_BLACK);
+    //console_setbackgroundcolor(2);
+    //while(1){}
+    //static uint16* vga = (uint16*)P2V(VGA_VIDEO_MEM_ADDR);
+    vga_setpixel4p(20, 20, VGA_BLUE);
+    while(1){
+      // for(int i = 0; i != 640; i++){
+      //   for(int j = 0; j != 480; j++){
+      //     //crt[640 * i * j] = VGA_BLUE;
+      //     vga_setpixel4p(i, j, VGA_BLUE);
+      //   }
+      // }
+    }
 
     uint32 backColor = CGA_GET_FONT_BACKGROUND_COLOR(DEFAULT_CONSOLE_COLOR);
     cprintf("VGA ");
