@@ -14,9 +14,9 @@ Ensure that you have Docker† installed and execute `./build.sh` to compile the
 
 ###### 1. QEMU
 
-This supplied `run.sh` script takes a variety of parameters:
+QEMU is perhaps the most tested option for running Xv64 within a virtual environment. For ease of use a helper script called `run.sh` is provided. This script takes a variety of parameters:
 
-`-r` - this parameter rebuilds the app. This is not needed if the contents of `bin` are present or otherwise do not need to be rebuilt. This can also be omitted if you prefer not to use Docker, and instead run `make binaries` and the the `run.sh` script WITHOUT the `-r` parameter.
+`-r` - this parameter rebuilds the app. This is not needed if the contents of `bin` are present or otherwise do not need to be rebuilt. This can also be omitted if you prefer not to use Docker, and instead run `make binaries` and the the `run.sh` script WITHOUT the `-r` parameter. Conversly, if you supply the `-r` parameter you do NOT need to manually invoke `./build.sh`.
 
 `-l` - this parameter stands for "legacy" and enables IDE drives. At the moment SATA drives are a work-in-progress, so if you actually want to run the OS (as opposed to developing AHCI/SATA support) you will want to INCLUDE this parameter.
 
