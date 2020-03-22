@@ -48,6 +48,7 @@ OBJS := \
 	kobj/vectors.o\
 	kobj/vm.o\
 	kobj/vga.o\
+	kobj/pci.o\
 	$(XOBJS)
 
 ifneq ("$(MEMFS)","")
