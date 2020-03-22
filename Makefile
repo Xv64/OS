@@ -2,17 +2,11 @@
 
 X64 ?= yes
 
-ifeq ("$(X64)","yes")
 BITS = 64
 XOBJS = kobj/vm64.o
 XFLAGS = -m64 -DX64 -mcmodel=kernel -mtls-direct-seg-refs -mno-red-zone
 LDFLAGS = -m elf_x86_64 -nodefaultlibs
 QEMU ?= qemu-system-x86_64
-else
-XFLAGS = -m32
-LDFLAGS = -m elf_i386 -nodefaultlibs
-QEMU ?= qemu-system-i386
-endif
 
 OPT ?= -O0
 
@@ -178,7 +172,6 @@ $(SUBPROGS): FORCE
 UPROGS=\
 	fs/cat\
 	fs/echo\
-	fs/forktest\
 	fs/grep\
 	fs/init\
 	fs/kill\
@@ -187,8 +180,6 @@ UPROGS=\
 	fs/mkdir\
 	fs/rm\
 	fs/sh\
-	fs/stressfs\
-	fs/usertests\
 	fs/wc\
 	fs/zombie\
 	fs/reboot\
