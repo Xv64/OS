@@ -20,7 +20,6 @@
 #include "vga_modes.h"
 
 static void consputc(int, uint32);
-static void vga_putc(unsigned char c, unsigned char forecolour, unsigned char backcolour, int x, int y);
 
 #define CGA_BLACK         0x0
 #define CGA_BLUE          0x1
@@ -180,9 +179,11 @@ void panic(char* s){
 #define CRTPORT 0x3d4
 static uint16* crt = (uint16*)P2V(VGA_TEXT_MEM);
 
+#ifdef VGA_GRAPHICS
 static void console_setbackgroundcolor(uint32 color){
   memset(crt, color, 0xFA00);
 }
+#endif
 
 static void cgaputc(int c, uint32 color){
     int pos;
@@ -329,6 +330,7 @@ int consolewrite(struct inode* ip, char* buf, int n){
 }
 
 
+#ifdef VGA_GRAPHICS
 static void vga_init(){
   uint8 registers[] = VGA_80X25_TEXT_MODE;
   vga_write_regs(registers);
@@ -341,6 +343,7 @@ static void vga_init(){
       }
   }
 }
+#endif
 
 void consoleinit(void){
     initlock(&cons.lock, "console");
