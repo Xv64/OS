@@ -22,7 +22,7 @@ QEMU is perhaps the most tested option for running Xv64 within a virtual environ
 
 `-l` - this parameter stands for "legacy" and enables IDE drives. At the moment SATA drives are a work-in-progress, so if you actually want to run the OS (as opposed to developing AHCI/SATA support) you will want to INCLUDE this parameter.
 
-Additional QEMU arguments can be supplied with the `QEMU_OPTS` environmental variable. For example, if you wanted to supply to QEMU option to disable its graphical UI (`-nographic`), you'd do that like:
+Additional QEMU arguments can be supplied with the `QEMU_OPTS` environmental variable. For example, if you wanted to supply the QEMU option to disable its graphical UI (`-nographic`), you'd do that like:
 
 `env QEMU_OPTS=-nographic ./run.sh`
 
