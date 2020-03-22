@@ -51,7 +51,7 @@ void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
             }
         }
         if(identified){
-            ahci_try_setup_known_device(name, ahci_base_mem, bus, slot, func);
+            ahci_try_setup_known_device((char *)name, ahci_base_mem, bus, slot, func);
         }else{
             cprintf("unknown device found (bus=%d, slot=%d, func=%d, abar=0x%x, vendor=0x%x, device=0x%x)\n", bus, slot, func, ahci_base_mem, vendor, device);
         }
@@ -163,10 +163,10 @@ uint16 ahci_stop_port(HBA_PORT *port) {
 	port->cmd |= HBA_PxCMD_FRE; //System software must not set this bit until PxFB (PxFBU) have been programmed with a valid pointer to the FIS receive area... (SATA/AHCI spec 1.3.1, section 3.3.7)
 	port->cmd &= ~HBA_PxCMD_ST; //This bit shall only be set to ‘1’ by software after PxCMD.FRE has been set to ‘1’ (SATA/AHCI spec 1.3.1, section 3.3.7)
 
-    uint64 cmd;
+    //uint64 cmd;
     uint16 count = 0;
     do { // Wait until FR (bit14), CR (bit15) are cleared
-        cmd = amd64_spinread64(&port->cmd, 0);
+        //cmd = amd64_spinread64(&port->cmd, 0);
         if(!(port->cmd & (HBA_PxCMD_CR | HBA_PxCMD_FR)))
             break;
     }while(count++ < 1000);

@@ -43,7 +43,7 @@ amd64_spinread32(uint64 baseAddr, uint32 offset){
 }
 
 static volatile inline uint64
-amd64_spinread64(uint64 baseAddr, uint32 offset){
+amd64_spinread64(volatile uint64 *baseAddr, uint32 offset){
     int16 total = 0;
     int16 same = 0;
     uint64 val;
