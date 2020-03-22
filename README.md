@@ -2,7 +2,7 @@
 
 Xv64 is a 64-bit UNIX-like operating system targeting AMD64.
 
-![](http://www.xv64.org/docs/pics/Screen%20Shot%202020-03-21%20at%207.01.40%20PM.png)
+![](docs/pics/Screen%20Shot%202020-03-21%20at%207.01.40%20PM.png)
 
 # Special Thanks
 
@@ -53,4 +53,4 @@ See [INSTALL.md](INSTALL.md) for additional requirements and specific installati
 
 ## License
 
-This open-source software is licensed under the terms in the included `LICENSE` file.
+This open-source software is licensed under the terms in the included [LICENSE](LICENSE)  file.
