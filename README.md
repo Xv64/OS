@@ -2,6 +2,8 @@
 
 Xv64 is a 64-bit UNIX-like operating system targeting AMD64.
 
+![](http://www.xv64.org/docs/pics/Screen%20Shot%202020-03-21%20at%207.01.40%20PM.png)
+
 # Special Thanks
 
 Inspired by Dennis Ritchie's and Ken Thompson's Unix Version 6 and forked from
@@ -34,7 +36,7 @@ Virtual Box compatible VDI (virtual hard drives) are built during compilation an
 
 ###### 4. Real hardware
 
-Xv64 supports executed directly on REAL hardware. If you desire to go this route please see the system requirements below and read the INSTALL.md document for details.
+Xv64 supports executed directly on REAL hardware. If you desire to go this route please see the system requirements below and read the [INSTALL.md](INSTALL.md) document for details.
 
 
 † you do NOT need Docker to build or run Xv64. Provided the correct dependencies are installed, you can run `make` directly from your host OS - most likely Debian Linux. The Docker configuration is provided for ease of setup, please refer to the Dockerfile for details of what system dependencies (like `build-essential`, etc) are required if you forgo Docker.
@@ -47,7 +49,7 @@ Boot environment must be legacy BIOS if using the provided bootloader. The OS ca
 
 Boot device can either be a SATA or IDE disk, but the root device must be IDE.
 
-See INSTALL.md for additional requirements and specific installation steps.
+See [INSTALL.md](INSTALL.md) for additional requirements and specific installation steps.
 
 ## License
 
