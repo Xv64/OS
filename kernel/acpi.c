@@ -68,7 +68,7 @@ static struct acpi_rdsp* scan_rdsp(uint base, uint len) {
 }
 
 void acpi_halt() {
-    outw(0x604, 0x2000); //shutdown (only in QEMU)
+    amd64_out16(0x604, 0x2000); //shutdown (only in QEMU)
     //if issuing a shutdown request failed...
     loop:
         amd64_hlt();
