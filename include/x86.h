@@ -73,8 +73,7 @@ insl(int port, void *addr, int cnt)
                "memory", "cc");
 }
 
-static inline uint32
-amd64_inl(ushort port){
+static inline uint32 amd64_in32(uint16 port){
     uint32 ret;
     asm volatile( "inl %1, %0"
                   : "=a"(ret) : "Nd"(port) );

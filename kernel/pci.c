@@ -58,7 +58,7 @@ static uint32
 pci_conf_read(struct pci_func *f, uint32 off)
 {
 	pci_conf1_set_addr(f->bus->busno, f->dev, f->func, off);
-	return amd64_inl(pci_conf1_data_ioport);
+	return amd64_in32(pci_conf1_data_ioport);
 }
 
 static void
