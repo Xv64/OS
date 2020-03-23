@@ -226,7 +226,7 @@ lcr3(uintp val)
 }
 
 static inline void
-cpuid(uint ax, uint *p)
+amd64_cpuid(uint ax, uint32 *p)
 {
 	asm volatile("cpuid"
 			 : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])

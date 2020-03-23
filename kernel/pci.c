@@ -260,9 +260,7 @@ pci_init(void)
 	return pci_scan_bus(&root_bus);
 }
 
-void
-pciinit(void)
-{
+void pciinit(void) {
     cprintf("probing PCI...\n");
 	(void)pci_init();
 }

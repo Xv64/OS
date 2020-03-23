@@ -7,8 +7,9 @@
 #include "x86.h"
 #include "ahci.h"
 #include "acpi.h"
+#include "pci.h"
 
-static void bsd4_bsd();
+static void bsd4_spam();
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t* kpgdir;
@@ -66,14 +67,14 @@ void mpenter(void){
 
 // Common CPU setup code.
 static void mpmain(void){
-    int vendor[4];
-    uint regs[4];
+    uint32 vendor[4];
+    uint32 regs[4];
 
-    cpuid(0, &regs);
+    amd64_cpuid(0, regs);
     vendor[0] = regs[1];
     vendor[1] = regs[3];
     vendor[2] = regs[2];
-    vendor[4] = (int)'\0';
+    vendor[4] = (uint32)'\0';
     char *cpu_vendor = (char *)vendor;
 
     idtinit();     // load idt register
@@ -87,7 +88,6 @@ static void mpmain(void){
     scheduler();   // start running processes
 }
 
-pde_t entrypgdir[];  // For entry.S
 void entry32mp(void);
 
 // Start the non-boot (AP) processors.
@@ -111,15 +111,9 @@ static void startothers(void){
         // pgdir to use. We cannot use kpgdir yet, because the AP processor
         // is running in low  memory, so we use entrypgdir for the APs too.
         stack = kalloc();
-#if X64
         *(uint32*)(code - 4) = 0x8000; // just enough stack to get us to entry64mp
         *(uint32*)(code - 8) = v2p(entry32mp);
         *(uint64*)(code - 16) = (uint64)(stack + KSTACKSIZE);
-#else
-        *(void**)(code - 4) = stack + KSTACKSIZE;
-        *(void**)(code - 8) = mpenter;
-        *(int**)(code - 12) = (void*)v2p(entrypgdir);
-#endif
 
         lapicstartap(c->apicid, v2p(code));
 
@@ -133,24 +127,3 @@ void sys_reboot(){
     cprintf("Goodbye\n");
     acpi_reboot();
 }
-
-#ifndef X64
-// Boot page table used in entry.S and entryother.S.
-// Page directories (and page tables), must start on a page boundary,
-// hence the "__aligned__" attribute.
-// Use PTE_PS in page directory entry to enable 4Mbyte pages.
-__attribute__((__aligned__(PGSIZE)))
-pde_t entrypgdir[NPDENTRIES] = {
-    // Map VA's [0, 4MB) to PA's [0, 4MB)
-    [0] = (0) | PTE_P | PTE_W | PTE_PS,
-    // Map VA's [KERNBASE, KERNBASE+4MB) to PA's [0, 4MB)
-    [KERNBASE >> PDXSHIFT] = (0) | PTE_P | PTE_W | PTE_PS,
-};
-#endif
-
-//PAGEBREAK!
-// Blank page.
-//PAGEBREAK!
-// Blank page.
-//PAGEBREAK!
-// Blank page.

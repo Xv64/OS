@@ -1,6 +1,8 @@
 #ifndef JOS_KERN_PCI_H
 #define JOS_KERN_PCI_H
 
+void pciinit(void);
+
 // PCI subsystem interface
 enum { pci_res_bus, pci_res_mem, pci_res_io, pci_res_max };
 
