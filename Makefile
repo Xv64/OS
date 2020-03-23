@@ -4,7 +4,7 @@ X64 ?= yes
 
 BITS = 64
 XOBJS = kobj/vm64.o
-XFLAGS = -m64 -DX64 -mcmodel=kernel -mtls-direct-seg-refs -mno-red-zone
+XFLAGS = -Werror -m64 -DX64 -mcmodel=kernel -mtls-direct-seg-refs -mno-red-zone
 LDFLAGS = -m elf_x86_64 -nodefaultlibs
 QEMU ?= qemu-system-x86_64
 
