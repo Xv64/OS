@@ -91,7 +91,7 @@ void acpi_reboot(){
             inb(KBRD_IO); // empty keyboard data
     } while (check_flag(temp, KBRD_BIT_UDATA) != 0);
 
-    outb(KBRD_INTRFC, KBRD_RESET); // pulse CPU reset line
+    amd64_out8(KBRD_INTRFC, KBRD_RESET); // pulse CPU reset line
     //END
     acpi_halt(); //the above should NEVER fail, but if it does...
 }

@@ -39,8 +39,8 @@
 static void vga_write_regset(uchar *mode, uint len, uint addr_reg, uint data_reg) {
     int i;
     for (i = 0; i < len; i++) {
-        outb(addr_reg, i);
-        outb(data_reg, mode[i]);
+        amd64_out8(addr_reg, i);
+        amd64_out8(data_reg, mode[i]);
     }
 }
 
@@ -49,7 +49,7 @@ void vga_write_regs(uchar *mode) {
     // attribute regs.
 
     // Write miscellaneous regs
-    outb(VGA_MISC_REG, mode[0]);
+    amd64_out8(VGA_MISC_REG, mode[0]);
     mode++;
 
     // Write sequencer regs
@@ -58,11 +58,11 @@ void vga_write_regs(uchar *mode) {
 
     // Unlock & write CRTC regs
     // Enables vertical retracing:
-    outb(VGA_CRTC_ADDR_REG, 0x03);
-    outb(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) | 0x80);
+    amd64_out8(VGA_CRTC_ADDR_REG, 0x03);
+    amd64_out8(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) | 0x80);
     // disables CRTC Registers Protect Enable, so 0x00h-0x07h are writable.
-    outb(VGA_CRTC_ADDR_REG, 0x11);
-    outb(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) & ~0x80);
+    amd64_out8(VGA_CRTC_ADDR_REG, 0x11);
+    amd64_out8(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) & ~0x80);
     // modify mode contents to reflect our unlocking changes
     mode[0x03] |= 0x80;
     mode[0x11] &= ~0x80;
@@ -81,5 +81,5 @@ void vga_write_regs(uchar *mode) {
     // Can't find the docs for why we need to set the VGA attribute
     // index register to 0x20?
     inb(VGA_INSTAT_READ);
-    outb(VGA_ATTR_ADDR_REG, 0x20);
+    amd64_out8(VGA_ATTR_ADDR_REG, 0x20);
 }

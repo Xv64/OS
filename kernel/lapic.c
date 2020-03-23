@@ -144,8 +144,8 @@ void lapicstartap(uchar apicid, uint addr){
     // "The BSP must initialize CMOS shutdown code to 0AH
     // and the warm reset vector (DWORD based at 40:67) to point at
     // the AP startup code prior to the [universal startup algorithm]."
-    outb(IO_RTC, 0xF); // offset 0xF is shutdown code
-    outb(IO_RTC + 1, 0x0A);
+    amd64_out8(IO_RTC, 0xF); // offset 0xF is shutdown code
+    amd64_out8(IO_RTC + 1, 0x0A);
     wrv = (ushort*)P2V((0x40 << 4 | 0x67)); // Warm reset vector
     wrv[0] = 0;
     wrv[1] = addr >> 4;

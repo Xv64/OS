@@ -189,9 +189,9 @@ static void cgaputc(int c, uint32 color){
     int pos;
 
     // Cursor position: col + 80*row.
-    outb(CRTPORT, 14);
+    amd64_out8(CRTPORT, 14);
     pos = inb(CRTPORT + 1) << 8;
-    outb(CRTPORT, 15);
+    amd64_out8(CRTPORT, 15);
     pos |= inb(CRTPORT + 1);
 
     if (c == '\n')
@@ -207,10 +207,10 @@ static void cgaputc(int c, uint32 color){
         memset(crt + pos, 0, sizeof(crt[0]) * (24 * COLUMNS - pos));
     }
 
-    outb(CRTPORT, 14);
-    outb(CRTPORT + 1, pos >> 8);
-    outb(CRTPORT, 15);
-    outb(CRTPORT + 1, pos);
+    amd64_out8(CRTPORT, 14);
+    amd64_out8(CRTPORT + 1, pos >> 8);
+    amd64_out8(CRTPORT, 15);
+    amd64_out8(CRTPORT + 1, pos);
     crt[pos] = ' ' | 0x0700;
 }
 

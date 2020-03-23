@@ -63,7 +63,7 @@ void ideinit(void){
     idewait(0);
 
     // Check if disk 1 is present
-    outb(ideChannel + 6, IDE_SLAVE);
+    amd64_out8(ideChannel + 6, IDE_SLAVE);
     for (i = 0; i < 1000; i++) {
         if (inb(ideChannel + 7) != 0) {
             havedisk1 = 1;
@@ -72,7 +72,7 @@ void ideinit(void){
     }
 
     // Switch back to disk 0.
-    outb(ideChannel + 6, IDE_MASTER);
+    amd64_out8(ideChannel + 6, IDE_MASTER);
 }
 
 // Start the request for b.  Caller must hold idelock.
@@ -81,17 +81,17 @@ static void idestart(struct buf* b){
         panic("idestart");
 
     idewait(0);
-    outb((ideChannel == PRIMARY_IDE_CHANNEL_BASE ? PRIMARY_IDE_INTERRUPT : SECONDARY_IDE_INTERRUPT), 0); // generate interrupt
-    outb(ideChannel + 2, 1); // number of sectors
-    outb(ideChannel + 3, b->sector & 0xff);
-    outb(ideChannel + 4, (b->sector >> 8) & 0xff);
-    outb(ideChannel + 5, (b->sector >> 16) & 0xff);
-    outb(ideChannel + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
+    amd64_out8((ideChannel == PRIMARY_IDE_CHANNEL_BASE ? PRIMARY_IDE_INTERRUPT : SECONDARY_IDE_INTERRUPT), 0); // generate interrupt
+    amd64_out8(ideChannel + 2, 1); // number of sectors
+    amd64_out8(ideChannel + 3, b->sector & 0xff);
+    amd64_out8(ideChannel + 4, (b->sector >> 8) & 0xff);
+    amd64_out8(ideChannel + 5, (b->sector >> 16) & 0xff);
+    amd64_out8(ideChannel + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
     if (b->flags & B_DIRTY) {
-        outb(ideChannel + 7, IDE_CMD_WRITE);
+        amd64_out8(ideChannel + 7, IDE_CMD_WRITE);
         outsl(ideChannel, b->data, 512 / 4);
     } else {
-        outb(ideChannel + 7, IDE_CMD_READ);
+        amd64_out8(ideChannel + 7, IDE_CMD_READ);
     }
 }
 

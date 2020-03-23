@@ -73,6 +73,10 @@ insl(int port, void *addr, int cnt)
                "memory", "cc");
 }
 
+static inline void amd64_out8(uint16 port, uint8 data) {
+  asm volatile("out %0,%1" : : "a" (data), "d" (port));
+}
+
 static inline void amd64_out16(uint16 port, uint16 data) {
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
@@ -82,12 +86,6 @@ static inline uint32 amd64_in32(uint16 port){
     asm volatile( "inl %1, %0"
                   : "=a"(ret) : "Nd"(port) );
     return ret;
-}
-
-static inline void
-outb(ushort port, uchar data)
-{
-  asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
 

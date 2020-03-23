@@ -136,7 +136,7 @@ void mpinit(void){
     if (mp->imcrp) {
         // Bochs doesn't support IMCR, so this doesn't run on Bochs.
         // But it would on real hardware.
-        outb(0x22, 0x70); // Select IMCR
-        outb(0x23, inb(0x23) | 1); // Mask external interrupts.
+        amd64_out8(0x22, 0x70); // Select IMCR
+        amd64_out8(0x23, inb(0x23) | 1); // Mask external interrupts.
     }
 }
