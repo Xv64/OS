@@ -185,3 +185,6 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+//useful for when debugging - clearly/easily stop execution at a certain point
+#define STOP while(1){}
