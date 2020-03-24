@@ -2,7 +2,7 @@
 
 Xv64 is a 64-bit UNIX-like operating system targeting AMD64 compatible processors.
 
-![](docs/pics/Screen%20Shot%202020-03-21%20at%207.01.40%20PM.png)
+![](docs/pics/Xv64-2020-03-24.gif)
 
 # Special Thanks
 
