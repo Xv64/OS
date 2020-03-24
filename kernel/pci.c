@@ -51,7 +51,7 @@ pci_conf1_set_addr(uint32 bus,
 
 	uint32 v = (1 << 31) |		// config-space
 		(bus << 16) | (dev << 11) | (func << 8) | (offset);
-	amd64_outl(pci_conf1_addr_ioport, v);
+	amd64_out32(pci_conf1_addr_ioport, v);
 }
 
 static uint32
@@ -65,7 +65,7 @@ static void
 pci_conf_write(struct pci_func *f, uint32 off, uint32 v)
 {
 	pci_conf1_set_addr(f->bus->busno, f->dev, f->func, off);
-	amd64_outl(pci_conf1_data_ioport, v);
+	amd64_out32(pci_conf1_data_ioport, v);
 }
 
 static int __attribute__((warn_unused_result))

@@ -118,7 +118,7 @@ ushort ahci_probe(ushort bus, ushort slot, uint16 func, ushort offset){
           | (offset & 0xFC)
           | ((uint32) 0x80000000)
       );
-    amd64_outl(AHCI_HBA_PORT, address);
+    amd64_out32(AHCI_HBA_PORT, address);
 
     uint32 register_value = amd64_in32(0xCFC);
 
@@ -135,7 +135,7 @@ uint64 ahci_read(ushort bus, ushort slot,ushort func, ushort offset){
 
     uint32 address = (uint32)((lbus << 16) | (lslot << 11) |
               (lfunc << 8) | (offset & 0xfc) | ((uint32)0x80000000));
-    amd64_outl(AHCI_HBA_PORT, address);
+    amd64_out32(AHCI_HBA_PORT, address);
     tmp = (uint64)(amd64_in32 (0xCFC) /* & 0xffff*/);
     return (tmp);
 }
