@@ -77,19 +77,33 @@ static inline void amd64_out8(uint16 port, uint8 data) {
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
 }
 
+static inline uint16 amd64_in16(uint16 port){
+    uint16 result;
+    asm volatile( "inw %1, %0"
+                  : "=a"(result) : "Nd"(port) );
+    return result;
+}
+
 static inline void amd64_out16(uint16 port, uint16 data) {
   asm volatile("out %0,%1" : : "a" (data), "d" (port));
+}
+
+static inline uint32 amd64_in32(uint16 port){
+    uint32 result;
+    asm volatile( "inl %1, %0"
+                  : "=a"(result) : "Nd"(port) );
+    return result;
 }
 
 static inline void amd64_out32(uint16 port, uint32 data){
     asm volatile("outl %0, %1" : : "a"(data), "Nd"(port));
 }
 
-static inline uint32 amd64_in32(uint16 port){
-    uint32 ret;
-    asm volatile( "inl %1, %0"
-                  : "=a"(ret) : "Nd"(port) );
-    return ret;
+static inline uint8 amd64_in8(uint16 port){
+    uint8 result;
+    asm volatile( "inb %1, %0"
+                  : "=a"(result) : "Nd"(port) );
+    return result;
 }
 
 
