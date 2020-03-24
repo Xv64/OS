@@ -188,3 +188,8 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 //useful for when debugging - clearly/easily stop execution at a certain point
 #define STOP while(1){}
+
+//useful for unused arguments in a function - let the compiler know that
+//we're aware it's unused
+//NOTE: GCC ONLY
+#define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
