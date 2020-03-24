@@ -1,6 +1,6 @@
 # Xv64
 
-Xv64 is a 64-bit UNIX-like operating system targeting AMD64.
+Xv64 is a 64-bit UNIX-like operating system targeting AMD64 compatible processors.
 
 ![](docs/pics/Screen%20Shot%202020-03-21%20at%207.01.40%20PM.png)
 
@@ -43,7 +43,7 @@ Xv64 supports executed directly on REAL hardware. If you desire to go this route
 
 ## System Requirements
 
-Xv64, as it's name implies requires a 64-bit processor, specifically an AMD64 compatible one. Two or more cores/threads/sockets are required - no support for uniprocessors.
+Xv64, as it's name implies requires a 64-bit processor, specifically an AMD64 compatible one like those manufactured by Intel or AMD since approximately 2003/2004. Two or more cores/threads/sockets are required - no support for uniprocessors.
 
 Boot environment must be legacy BIOS if using the provided bootloader. The OS can also be configured through GRUB using the ext2 extension and placing the kernel on a ext2 formatted partition.
 
