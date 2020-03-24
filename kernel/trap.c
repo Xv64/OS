@@ -14,7 +14,6 @@ extern uintp vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
-#ifndef X64
 void tvinit(void){
     int i;
 
@@ -29,9 +28,6 @@ void idtinit(void){
     lidt(idt, sizeof(idt));
 }
 
-#endif
-
-//PAGEBREAK: 41
 void trap(struct trapframe* tf){
     if (tf->trapno == T_SYSCALL) {
         if (proc->killed)
