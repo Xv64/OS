@@ -3,7 +3,7 @@
 #include "types.h"
 #include "defs.h"
 #include "param.h"
-#include "traps.h"
+#include "irq.h"
 #include "spinlock.h"
 #include "fs.h"
 #include "file.h"

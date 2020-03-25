@@ -7,12 +7,18 @@
 #include "x86.h"
 #include "traps.h"
 #include "spinlock.h"
+#include "irq.h"
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uintp vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
+
+struct spinlock irqHandlersLock;
+void (*irqHandlers[MAX_IRQS])(uint16);
+
+irqhandler get_registered_handler(uint16 irq);
 
 void trap(struct trapframe* tf){
     if (tf->trapno == T_SYSCALL) {
@@ -59,7 +65,15 @@ void trap(struct trapframe* tf){
         break;
 
     default:
-        if (proc == 0 || (tf->cs & 3) == 0) {
+        acquire(&irqHandlersLock);
+        void (*dynamicIrqHandler)(uint16) = get_registered_handler(tf->trapno);
+        release(&irqHandlersLock);
+
+        if(dynamicIrqHandler){
+            //all's good, we found a dyanmic IRQ handler that was defined for this
+            dynamicIrqHandler(tf->trapno);
+            lapiceoi();
+        }else if (proc == 0 || (tf->cs & 3) == 0) {
             // In kernel, it must be our mistake.
             if(tf->trapno == T_PGFLT){
                 panic("PAGE FAULT");
@@ -68,13 +82,14 @@ void trap(struct trapframe* tf){
                         tf->trapno, cpu->id, tf->eip, rcr2());
                 panic("trap");
             }
+        } else {
+            // In user space, assume process misbehaved.
+            cprintf("pid %d %s: trap %d err %d on cpu %d "
+                    "eip 0x%x addr 0x%x--kill proc\n",
+                    proc->pid, proc->name, tf->trapno, tf->err, cpu->id, tf->eip,
+                    rcr2());
+            proc->killed = 1;
         }
-        // In user space, assume process misbehaved.
-        cprintf("pid %d %s: trap %d err %d on cpu %d "
-                "eip 0x%x addr 0x%x--kill proc\n",
-                proc->pid, proc->name, tf->trapno, tf->err, cpu->id, tf->eip,
-                rcr2());
-        proc->killed = 1;
     }
 
     // Force process exit if it has been killed and is in user space.
@@ -91,4 +106,24 @@ void trap(struct trapframe* tf){
     // Check if the process has been killed since we yielded
     if (proc && proc->killed && (tf->cs & 3) == DPL_USER)
         exit();
+}
+
+uint8 irq_register_handler(uint16 irq, void (*handler)(uint16)) {
+    if(irq >= MAX_IRQS){
+        return 0; //sorry
+    }
+    acquire(&irqHandlersLock);
+    irqHandlers[irq] = handler;
+    release(&irqHandlersLock);
+    return 1;
+}
+
+irqhandler get_registered_handler(uint16 irq) {
+    void (*result)(uint16) = 0;
+    if(irq < MAX_IRQS){
+        acquire(&irqHandlersLock);
+        result = irqHandlers[irq];
+        release(&irqHandlersLock);
+    }
+    return result;
 }

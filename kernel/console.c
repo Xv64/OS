@@ -7,7 +7,6 @@
 #include "types.h"
 #include "defs.h"
 #include "param.h"
-#include "traps.h"
 #include "spinlock.h"
 #include "fs.h"
 #include "file.h"
@@ -18,6 +17,7 @@
 #include "acpi.h"
 #include "vga.h"
 #include "vga_modes.h"
+#include "irq.h"
 
 static void consputc(int, uint32);
 

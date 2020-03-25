@@ -4,7 +4,7 @@
 
 #include "types.h"
 #include "defs.h"
-#include "traps.h"
+#include "irq.h"
 #include "x86.h"
 
 #define IO_TIMER1       0x040           // 8253 Timer #1
