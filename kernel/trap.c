@@ -16,7 +16,7 @@ struct spinlock tickslock;
 uint ticks;
 
 struct spinlock irqHandlersLock;
-void (*irqHandlers[MAX_IRQS])(uint16);
+irqhandler irqHandlers[MAX_IRQS];
 
 irqhandler get_registered_handler(uint16 irq);
 
@@ -108,7 +108,7 @@ void trap(struct trapframe* tf){
         exit();
 }
 
-uint8 irq_register_handler(uint16 irq, void (*handler)(uint16)) {
+uint8 irq_register_handler(uint16 irq, irqhandler handler) {
     if(irq >= MAX_IRQS){
         return 0; //sorry
     }
@@ -119,7 +119,7 @@ uint8 irq_register_handler(uint16 irq, void (*handler)(uint16)) {
 }
 
 irqhandler get_registered_handler(uint16 irq) {
-    void (*result)(uint16) = 0;
+    irqhandler result = 0;
     if(irq < MAX_IRQS){
         acquire(&irqHandlersLock);
         result = irqHandlers[irq];
