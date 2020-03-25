@@ -83,7 +83,6 @@ void acpi_reboot(){
 
     //from documentation @ wiki.osdev.org
     //https://wiki.osdev.org/Reboot
-    //START
     // Clear all keyboard buffers (output and command buffers)
     do{
         temp = inb(KBRD_INTRFC); // empty user data
@@ -91,9 +90,9 @@ void acpi_reboot(){
             inb(KBRD_IO); // empty keyboard data
     } while (check_flag(temp, KBRD_BIT_UDATA) != 0);
 
-    amd64_out8(KBRD_INTRFC, KBRD_RESET); // pulse CPU reset line
-    //END
-    acpi_halt(); //the above should NEVER fail, but if it does...
+    do{
+      amd64_out8(KBRD_INTRFC, KBRD_RESET); // pulse CPU reset line
+    }while(1); //the above should NEVER fail, but if it does...
 }
 
 static struct acpi_rdsp* find_rdsp(void) {
