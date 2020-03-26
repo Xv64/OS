@@ -59,7 +59,7 @@ static void pci_conf_write(struct pci_func* f, uint32 off, uint32 v){
     amd64_out32(pci_conf1_data_ioport, v);
 }
 
-static int __attribute__((warn_unused_result)) pci_attach_match(uint32 key1, uint32 key2, struct pci_driver* list, struct pci_func* pcif){
+static int pci_attach_match(uint32 key1, uint32 key2, struct pci_driver* list, struct pci_func* pcif){
     uint32 i;
 
     for (i = 0; list[i].attachfn; i++) {
@@ -99,15 +99,23 @@ static const char* pci_class[] =
 
 static void pci_print_func(struct pci_func* f){
     const char* class = pci_class[0];
+	uint32 bar5addr = 0x0;
     if (PCI_CLASS(f->dev_class) < ARRAY_SIZE(pci_class)) {
         class = pci_class[PCI_CLASS(f->dev_class)];
+		if(PCI_CLASS(f->dev_class) == 0x1){
+			bar5addr = pci_conf_read(f, 0x24);
+		}
     }
 
     cprintf("PCI: %x:%x.%d: %x:%x: class: %x.%x ",
             f->bus->busno, f->dev, f->func,
             PCI_VENDOR(f->dev_id), PCI_PRODUCT(f->dev_id),
             PCI_CLASS(f->dev_class), PCI_SUBCLASS(f->dev_class));
-    cprintf("(%s) irq: %d\n", class, f->irq_line);
+    cprintf("(%s) irq: %d", class, f->irq_line);
+	if(bar5addr != 0x0){
+		cprintf(" bar5: %x", bar5addr);
+	}
+	cprintf("\n");
 }
 
 static int pci_scan_bus(struct pci_bus* bus){
