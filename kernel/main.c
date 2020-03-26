@@ -37,7 +37,7 @@ int main(void){
     pinit();       // process table
     tvinit();      // trap vectors
     pciinit();     // initialize PCI bus
-    ahci_init();   // init ahci
+    //ahci_init();   // init ahci
     binit();       // buffer cache
     fileinit();    // file table
     iinit();       // inode cache

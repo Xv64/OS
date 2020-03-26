@@ -32,6 +32,13 @@ struct pci_bus {
 #define PCI_DEV_CLASS_MEMCONTROLLER 0x5
 #define PCI_DEV_CLASS_BRIDGE        0x6
 
+#define PCI_BAR0_OFFSET   0x10
+#define PCI_BAR1_OFFSET   0x14
+#define PCI_BAR2_OFFSET   0x18
+#define PCI_BAR3_OFFSET   0x1C
+#define PCI_BAR4_OFFSET   0x20
+#define PCI_BAR5_OFFSET   0x24
+
 void pciinit(void);
 
 #endif

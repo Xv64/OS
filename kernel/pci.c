@@ -4,6 +4,7 @@
 #include "pci.h"
 #include "pcireg.h"
 #include "assert.h"
+#include "ahci.h"
 
 #define ARRAY_SIZE(a)   (sizeof(a) / sizeof(a[0]))
 
@@ -76,6 +77,10 @@ static int pci_attach_match(uint32 key1, uint32 key2, struct pci_driver* list, s
     return 0;
 }
 
+static void pci_attach_storage_dev(struct pci_func* f){
+	ahci_try_setup_device(f->bus->busno, f->dev, f->func);
+}
+
 static int pci_fallback_attach(struct pci_func* f){ //TODO: remove in favor of dev class specific functions
     return
         pci_attach_match(PCI_CLASS(f->dev_class),
@@ -88,10 +93,14 @@ static int pci_fallback_attach(struct pci_func* f){ //TODO: remove in favor of d
 
 static void pci_try_attach(struct pci_func *f){
 	uint16 devClass = PCI_CLASS(f->dev_class);
-	if(devClass == 0x1){
-		//TODO: deligate to AHCI
-	}else {
-		pci_fallback_attach(f);
+	switch(devClass){
+		case PCI_DEV_CLASS_STORAGE:
+			pci_attach_storage_dev(f);
+			break;
+		default:
+			//non-supported/unknown device
+			pci_fallback_attach(f); //one last ditch attempt
+			break;
 	}
 }
 
@@ -197,8 +206,7 @@ void pci_func_enable(struct pci_func* f){
 
     uint32 bar_width;
     uint32 bar;
-    for (bar = PCI_MAPREG_START; bar < PCI_MAPREG_END;
-         bar += bar_width) {
+    for (bar = PCI_BAR0_OFFSET; bar <= PCI_BAR5_OFFSET; bar += bar_width) {
         uint32 oldv = pci_conf_read(f, bar);
 
         bar_width = 4;
