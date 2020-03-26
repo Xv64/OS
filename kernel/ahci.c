@@ -40,8 +40,6 @@ void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
         }
         if(identified){
             ahci_try_setup_known_device((char *)name, ahci_base_mem, bus, slot, func);
-        }else{
-            cprintf("unknown device found (bus=%d, slot=%d, func=%d, abar=0x%x, vendor=0x%x, device=0x%x)\n", bus, slot, func, ahci_base_mem, vendor, device);
         }
     }
 }

@@ -52,7 +52,7 @@ int main(void){
 void bsd4_spam(){
     //I LOVE the BSD license, but the 4-clause license is spammy.
     //put any 4-clause BSD notices in this method
-    cprintf("This product includes software developed by Charles M. Hannum, Christopher G. Demetriou\n");
+    cprintf("This product includes software developed by Charles M. Hannum, Christopher G. Demetriou\n"); //include/pcireg.hj
 }
 
 // Other CPUs jump here from entryother.S.

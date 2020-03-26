@@ -30,11 +30,6 @@
 #define AHCI_VENDOR_OFFSET 0x0
 #define AHCI_DEVICE_OFFSET 0x02
 //...
-#define AHCI_BAR0_OFFSET   0x10
-#define AHCI_BAR1_OFFSET   0x14
-#define AHCI_BAR2_OFFSET   0x18
-#define AHCI_BAR3_OFFSET   0x1C
-#define AHCI_BAR4_OFFSET   0x20
 #define AHCI_BAR5_OFFSET   0x24
 
 //AHCI vendors:
