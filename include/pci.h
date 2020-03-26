@@ -9,7 +9,7 @@ enum { pci_res_bus, pci_res_mem, pci_res_io, pci_res_max };
 struct pci_bus;
 
 struct pci_func {
-    struct pci_bus *bus;	// Primary bus for bridges
+    struct pci_bus* bus;    // Primary bus for bridges
 
     uint32 dev;
     uint32 func;
@@ -23,7 +23,7 @@ struct pci_func {
 };
 
 struct pci_bus {
-    struct pci_func *parent_bridge;
+    struct pci_func* parent_bridge;
     uint32 busno;
 };
 
