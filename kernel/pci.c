@@ -98,12 +98,12 @@ static void pci_try_attach(struct pci_func *f){
 static const char* pci_class[] =
 {
     [0x0] = "Unknown",
-    [0x1] = "Storage controller",
-    [0x2] = "Network controller",
-    [0x3] = "Display controller",
-    [0x4] = "Multimedia device",
-    [0x5] = "Memory controller",
-    [0x6] = "Bridge device",
+    [PCI_DEV_CLASS_STORAGE]       = "Storage controller",
+    [PCI_DEV_CLASS_NETWORKING]    = "Network controller",
+    [PCI_DEV_CLASS_DISPLAY]       = "Display controller",
+    [PCI_DEV_CLASS_MULTIMEDIA]    = "Multimedia device",
+    [PCI_DEV_CLASS_MEMCONTROLLER] = "Memory controller",
+    [PCI_DEV_CLASS_BRIDGE]        = "Bridge device",
 };
 
 static void pci_print_func(struct pci_func* f){
