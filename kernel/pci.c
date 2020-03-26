@@ -76,7 +76,7 @@ static int pci_attach_match(uint32 key1, uint32 key2, struct pci_driver* list, s
     return 0;
 }
 
-static int pci_attach(struct pci_func* f){
+static int pci_fallback_attach(struct pci_func* f){ //TODO: remove in favor of dev class specific functions
     return
         pci_attach_match(PCI_CLASS(f->dev_class),
                          PCI_SUBCLASS(f->dev_class),
@@ -84,6 +84,15 @@ static int pci_attach(struct pci_func* f){
         pci_attach_match(PCI_VENDOR(f->dev_id),
                          PCI_PRODUCT(f->dev_id),
                          &pci_attach_vendor[0], f);
+}
+
+static void pci_try_attach(struct pci_func *f){
+	uint16 devClass = PCI_CLASS(f->dev_class);
+	if(devClass == 0x1){
+		//TODO: deligate to AHCI
+	}else {
+		pci_fallback_attach(f);
+	}
 }
 
 static const char* pci_class[] =
@@ -146,7 +155,7 @@ static int pci_scan_bus(struct pci_bus* bus){
             af.dev_class = pci_conf_read(&af, PCI_CLASS_REG);
             if (pci_show_devs)
                 pci_print_func(&af);
-            pci_attach(&af);
+            pci_try_attach(&af);
         }
     }
 
