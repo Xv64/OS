@@ -11,6 +11,7 @@ QEMU ?= qemu-system-x86_64
 OPT ?= -O0
 
 OBJS := \
+	kobj/trap.o\
 	kobj/bio.o\
 	kobj/ahci.o\
 	kobj/console.o\
@@ -37,12 +38,13 @@ OBJS := \
 	kobj/sysproc.o\
 	kobj/timer.o\
 	kobj/trapasm$(BITS).o\
-	kobj/trap.o\
 	kobj/uart.o\
 	kobj/vectors.o\
 	kobj/vm.o\
 	kobj/vga.o\
 	kobj/pci.o\
+	kobj/net.o\
+	kobj/rtl8139.o\
 	$(XOBJS)
 
 ifneq ("$(MEMFS)","")
@@ -81,6 +83,10 @@ xv6memfs.img: out/bootblock out/kernelmemfs.elf
 	dd if=out/kernelmemfs.elf of=xv6memfs.img seek=1 conv=notrunc
 
 # kernel object files
+kobj/%.o: kernel/%.c
+	@mkdir -p kobj
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 kobj/%.o: kernel/%.c
 	@mkdir -p kobj
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -193,7 +199,7 @@ fs.img: out/mkfs README.md $(UPROGS) $(SUBPROGS)
 	cp fs.img bin/fs.img
 	qemu-img convert fs.img -O vdi bin/fs.vdi
 
--include */*.d
+-include */*.d */*/*.d */*/*/*.d */*/*/*/*.d
 
 clean:
 	rm -rf out fs uobj kobj

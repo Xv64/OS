@@ -4,8 +4,10 @@
 #include "pci.h"
 #include "pcireg.h"
 #include "assert.h"
+#include "rtl8139.h"
 
 #define ARRAY_SIZE(a)	(sizeof(a) / sizeof(a[0]))
+
 
 // Flag to do "lspci" at bootup
 static int pci_show_devs = 1;
@@ -34,6 +36,7 @@ struct pci_driver pci_attach_class[] = {
 // and key2 should be the vendor ID and device ID respectively
 struct pci_driver pci_attach_vendor[] = {
 	//{ 0x8086, 0x100e, &e1000_init },
+	{ RTL8139_VENDOR_ID, RTL8139_DEVICE_ID, &rtl8139_init },
 	{ 0, 0, 0 },
 };
 
@@ -161,6 +164,80 @@ pci_scan_bus(struct pci_bus *bus)
 	}
 
 	return totaldev;
+}
+
+uint32 dev_pci_bits_from_fields(struct pci_dev dev) {
+	uint32 bits = 0;
+
+	bits |= (dev.enable) << 31;
+	bits |= (dev.reserved) << 24;
+	bits |= (dev.bus_num) << 16;
+	bits |= (dev.device_num) << 11;
+	bits |= (dev.function_num) << 8;
+	bits |= (dev.register_offset & 0xFC); /* 2 first bits at zero */
+
+	return bits;
+}
+
+static uint32 pci_size_map(uint32 field) {
+	switch (field)
+	{
+		case PCI_SUBCLASS_ADDR:
+		case PCI_CLASS_ADDR:
+		case PCI_CACHE_LINE_SIZE:
+		case PCI_LATENCY_TIMER:
+		case PCI_HEADER_TYPE:
+		case PCI_BIST_ADDR:
+		case PCI_INTERRUPT_LINE_ADDR:
+		case PCI_SECONDARY_BUS:
+			return 1;
+		case PCI_VENDOR_ID:
+		case PCI_DEVICE_ID:
+		case PCI_COMMAND:
+		case PCI_STATUS:
+			return 2;
+		case PCI_BAR0:
+		case PCI_BAR1:
+		case PCI_BAR2:
+		case PCI_BAR3:
+		case PCI_BAR4:
+		case PCI_BAR5:
+			return 4;
+		default:
+			return 0;
+	}
+}
+
+uint32 dev_pci_read(struct pci_dev dev, uint32 register_offset) {
+	uint32 size;
+	/* Add the chosen register to the device informations */
+	dev.register_offset = register_offset;
+	dev.enable = 1;
+
+	/* Request the information */
+	amd64_out32(PCI_CONFIG_ADDRESS, dev_pci_bits_from_fields(dev));
+
+	size = pci_size_map(register_offset);
+	if (size == 1)
+	{
+		/* Read the first byte (3rd because of little endian) */
+		return amd64_in8(PCI_CONFIG_DATA + (register_offset & 3));
+	}
+	else if (size == 2)
+	{
+		return amd64_in16(PCI_CONFIG_DATA + (register_offset & 2));
+	}
+	else if (size == 4)
+	{
+		return amd64_in32(PCI_CONFIG_DATA);
+	}
+	return 0xffff;
+}
+
+uint32 pci_get_device_type(struct pci_dev dev)
+{
+	uint32 t = dev_pci_read(dev, PCI_CLASS_ADDR) << 8;
+	return t | dev_pci_read(dev, PCI_SUBCLASS_ADDR);
 }
 
 static int
