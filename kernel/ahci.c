@@ -22,18 +22,6 @@ static const struct {
     {0, 0, ""} //this is a terminal node - this must be present and the last entry
 };
 
-void ahci_init(){
-    cprintf("probing AHCI...\n");
-
-    for(uint16 bus = 0; bus <= AHCI_MAX_BUS; bus++) {
-        for(uint16 slot = 0; slot <= AHCI_MAX_SLOT; slot++) {
-            for(uint16 func = 0; func <= AHCI_MAX_FUNC; func++){
-                ahci_try_setup_device(bus, slot, func);
-            }
-        }
-    }
-}
-
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
     uint16 vendor = ahci_probe(bus, slot, func, AHCI_VENDOR_OFFSET);
     uint16 device = ahci_probe(bus, slot, func, AHCI_DEVICE_OFFSET);

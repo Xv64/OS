@@ -5,7 +5,6 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
-#include "ahci.h"
 #include "acpi.h"
 #include "pci.h"
 
@@ -36,8 +35,7 @@ int main(void){
     uartinit();    // serial port
     pinit();       // process table
     tvinit();      // trap vectors
-    pciinit();     // initialize PCI bus
-    //ahci_init();   // init ahci
+    pciinit();     // initialize PCI bus (AHCI also)
     binit();       // buffer cache
     fileinit();    // file table
     iinit();       // inode cache

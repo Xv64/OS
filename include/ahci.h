@@ -177,7 +177,6 @@ typedef volatile struct tagHBA_MEM
 } HBA_MEM;
 //END
 
-void   ahci_init();
 uint16 ahci_probe(uint16 bus, uint16 slot, uint16 func, uint16 offset);
 uint64 ahci_read(uint16 bus, uint16 slot, uint16 func, uint16 offset);
 void   ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func);
