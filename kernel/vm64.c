@@ -31,6 +31,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "elf.h"
+#include "string.h"
 
 __thread struct cpu* cpu;
 __thread struct proc* proc;

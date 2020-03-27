@@ -19,6 +19,7 @@
 #include "buf.h"
 #include "fs.h"
 #include "file.h"
+#include "string.h"
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
 static void itrunc(struct inode*);

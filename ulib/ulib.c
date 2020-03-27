@@ -49,13 +49,6 @@ strlen(char *s)
   return n;
 }
 
-void*
-memset(void *dst, int c, uint n)
-{
-  stosb(dst, c, n);
-  return dst;
-}
-
 char*
 strchr(const char *s, char c)
 {

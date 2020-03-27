@@ -5,6 +5,7 @@
 #include "pcireg.h"
 #include "assert.h"
 #include "ahci.h"
+#include "string.h"
 
 #define ARRAY_SIZE(a)   (sizeof(a) / sizeof(a[0]))
 

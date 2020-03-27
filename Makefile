@@ -139,7 +139,7 @@ MKVECTORS = tools/vectors$(BITS).pl
 kernel/vectors.S: $(MKVECTORS)
 	perl $(MKVECTORS) > kernel/vectors.S
 
-ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o
+ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o uobj/string.o
 
 fs/%: uobj/%.o $(ULIB)
 	@mkdir -p fs out

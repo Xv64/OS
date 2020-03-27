@@ -135,7 +135,6 @@ void            popcli(void);
 
 // string.c
 void*           memmove(void*, const void*, uint);
-void*           memset(void*, int, uint);
 char*           safestrcpy(char*, const char*, int);
 int             strlen(const char*);
 int             strncmp(const char*, const char*, uint);
