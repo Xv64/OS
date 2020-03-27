@@ -35,7 +35,7 @@ void uartearlyinit(void){
     uart = 1;
 
     // Announce that we're here.
-    for (p = "xv6...\n"; *p; p++)
+    for (p = "Xv64...\n"; *p; p++)
         uartputc(*p);
 }
 
