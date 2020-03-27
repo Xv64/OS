@@ -98,6 +98,9 @@ static void pci_try_attach(struct pci_func *f){
 		case PCI_DEV_CLASS_STORAGE:
 			pci_attach_storage_dev(f);
 			break;
+    case PCI_DEV_CLASS_BRIDGE:
+			pci_attach_storage_dev(f);
+			break;
 		default:
 			//non-supported/unknown device
 			pci_fallback_attach(f); //one last ditch attempt
