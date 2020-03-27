@@ -42,11 +42,6 @@ void* memmove(void* dst, const void* src, uint n){
     return dst;
 }
 
-// memcpy exists to placate GCC.  Use memmove.
-void* memcpy(void* dst, const void* src, uint n){
-    return memmove(dst, src, n);
-}
-
 int strncmp(const char* p, const char* q, uint n){
     while (n > 0 && *p && *p == *q)
         n--, p++, q++;
