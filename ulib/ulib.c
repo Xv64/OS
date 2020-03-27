@@ -5,60 +5,6 @@
 #include "x86.h"
 
 char*
-strcpy(char *s, char *t)
-{
-  char *os;
-
-  os = s;
-  while((*s++ = *t++) != 0)
-    ;
-  return os;
-}
-
-int
-strcmp(const char *p, const char *q)
-{
-  while(*p && *p == *q)
-    p++, q++;
-  return (uchar)*p - (uchar)*q;
-}
-
-char* strcat_s(char *dest, char *right, int max_len) {
-    int writing = -1;
-    for(int i = 0; i !=max_len; i++){
-        if(writing < 0 && dest[i] == 0){
-            writing = i;
-        }
-        if(writing >= 0){
-            dest[i] = right[i - writing];
-            if(dest[i] == 0){
-                break;
-            }
-        }
-    }
-    return dest;
-}
-
-uint
-strlen(char *s)
-{
-  int n;
-
-  for(n = 0; s[n]; n++)
-    ;
-  return n;
-}
-
-char*
-strchr(const char *s, char c)
-{
-  for(; *s; s++)
-    if(*s == c)
-      return (char*)s;
-  return 0;
-}
-
-char*
 gets(char *buf, int max)
 {
   int i, cc;
@@ -88,27 +34,4 @@ stat(char *n, struct stat *st)
   r = fstat(fd, st);
   close(fd);
   return r;
-}
-
-int
-atoi(const char *s)
-{
-  int n;
-
-  n = 0;
-  while('0' <= *s && *s <= '9')
-    n = n*10 + *s++ - '0';
-  return n;
-}
-
-void*
-memmove(void *vdst, void *vsrc, int n)
-{
-  char *dst, *src;
-
-  dst = vdst;
-  src = vsrc;
-  while(n-- > 0)
-    *dst++ = *src++;
-  return vdst;
 }

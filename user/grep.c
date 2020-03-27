@@ -3,6 +3,7 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
+#include "string.h"
 
 char buf[1024];
 int match(char*, char*);
@@ -12,7 +13,7 @@ grep(char *pattern, int fd)
 {
   int n, m;
   char *p, *q;
-  
+
   m = 0;
   while((n = read(fd, buf+m, sizeof(buf)-m)) > 0){
     m += n;
@@ -39,13 +40,13 @@ main(int argc, char *argv[])
 {
   int fd, i;
   char *pattern;
-  
+
   if(argc <= 1){
     printf(2, "usage: grep pattern [file ...]\n");
     exit();
   }
   pattern = argv[1];
-  
+
   if(argc <= 2){
     grep(pattern, 0);
     exit();
@@ -103,4 +104,3 @@ int matchstar(int c, char *re, char *text)
   }while(*text!='\0' && (*text++==c || c=='.'));
   return 0;
 }
-

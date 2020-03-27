@@ -133,15 +133,6 @@ void            release(struct spinlock*);
 void            pushcli(void);
 void            popcli(void);
 
-// string.c
-void*           memmove(void*, const void*, uint);
-char*           safestrcpy(char*, const char*, int);
-int             strlen(const char*);
-int             strncmp(const char*, const char*, uint);
-char*           strncpy(char*, const char*, int);
-
-#define memcpy(dst, src, n) (memmove(dst, src, n))
-
 // syscall.c
 int             argint(int, int*);
 int             argptr(int, char**, int);

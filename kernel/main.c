@@ -7,6 +7,7 @@
 #include "x86.h"
 #include "acpi.h"
 #include "pci.h"
+#include "string.h"
 
 static void bsd4_spam();
 static void startothers(void);
