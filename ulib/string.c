@@ -123,3 +123,17 @@ char* strchr(const char *s, char c) {
       return (char*)s;
   return 0;
 }
+
+char* strstr(const char *str1, char *str2) {
+    int32 len = strlen(str2);
+    const char sentinel = '\0';
+
+    while (*str1 != sentinel) {
+        if (strncmp(str1, str2, len) == 0){
+            return (char *) str1;
+        }
+        str1++;
+    }
+
+    return 0;
+}
