@@ -20,18 +20,18 @@ main(void)
   dup(0);  // stderr
 
   for(;;){
-    printf(1, "init: starting sh\n");
+    fprintf(stdout, "init: starting sh\n");
     pid = fork();
     if(pid < 0){
-      printf(1, "init: fork failed\n");
+      fprintf(stdout, "init: fork failed\n");
       exit();
     }
     if(pid == 0){
       exec("/bin/sh", argv);
-      printf(1, "init: exec sh failed\n");
+      fprintf(stdout, "init: exec sh failed\n");
       exit();
     }
     while((wpid=wait()) >= 0 && wpid != pid)
-      printf(1, "zombie!\n");
+      fprintf(stdout, "zombie!\n");
   }
 }

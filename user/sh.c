@@ -82,14 +82,14 @@ runcmd(struct cmd *cmd)
     strcpy(buf, "/bin/");   //try in /bin if not in c.w.d.
     strcat_s(buf, ecmd->argv[0], 256);
     exec(buf, ecmd->argv);
-    printf(2, "exec %s failed\n", ecmd->argv[0]);
+    fprintf(stderr, "exec %s failed\n", ecmd->argv[0]);
     break;
 
   case REDIR:
     rcmd = (struct redircmd*)cmd;
     close(rcmd->fd);
     if(open(rcmd->file, rcmd->mode) < 0){
-      printf(2, "open %s failed\n", rcmd->file);
+      fprintf(stderr, "open %s failed\n", rcmd->file);
       exit();
     }
     runcmd(rcmd->cmd);
@@ -139,7 +139,7 @@ runcmd(struct cmd *cmd)
 int
 getcmd(char *buf, int nbuf)
 {
-  printf(2, "$ ");
+  fprintf(stderr, "$ ");
   memset(buf, 0, nbuf);
   gets(buf, nbuf);
   if(buf[0] == 0) // EOF
@@ -168,7 +168,7 @@ main(void)
       // Chdir has no effect on the parent if run in the child.
       buf[strlen(buf)-1] = 0;  // chop \n
       if(chdir(buf+3) < 0)
-        printf(2, "cannot cd %s\n", buf+3);
+        fprintf(stderr, "cannot cd %s\n", buf+3);
       continue;
     }
     if(fork1() == 0)
@@ -181,7 +181,7 @@ main(void)
 void
 panic(char *s)
 {
-  printf(2, "%s\n", s);
+  fprintf(stderr, "%s\n", s);
   exit();
 }
 
@@ -341,7 +341,7 @@ parsecmd(char *s)
   cmd = parseline(&s, es);
   peek(&s, es, "");
   if(s != es){
-    printf(2, "leftovers: %s\n", s);
+    fprintf(stderr, "leftovers: %s\n", s);
     panic("syntax");
   }
   nulterminate(cmd);
