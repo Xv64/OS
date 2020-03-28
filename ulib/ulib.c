@@ -7,6 +7,10 @@
 #include "x86.h"
 #include "console.h"
 
+//defining these k-level syscalls here for use in ioctl
+void kconsole_info(struct winsize *winsz);
+//end
+
 char*
 gets(char *buf, int max)
 {
@@ -46,8 +50,7 @@ int32 ioctl(int32 fd, uint64 cmd, ...){
     if(cmd == TIOCGWINSZ){
         //this is really the only call we support right now
         struct winsize *winsz = va_arg(ap, struct winsize *);
-        winsz->ws_row = 80; //TODO: actually wire this up to console.c to get real values
-        winsz->ws_col = 25; //for now, we are ok because this is the only console mode we support :-(
+        kconsole_info(winsz);
         return 0;
     }
     return -1;

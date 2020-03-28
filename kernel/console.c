@@ -19,6 +19,7 @@
 #include "vga_modes.h"
 #include "irq.h"
 #include "string.h"
+#include "console.h"
 
 static void consputc(int, uint32);
 
@@ -345,6 +346,15 @@ static void vga_init(){
   }
 }
 #endif
+
+void kconsole_info(struct winsize *winsz) {
+    //TODO: when we support more resolutions, update this
+    //method accordingly
+    winsz->ws_row = 80;
+    winsz->ws_col = 25;
+    winsz->ws_xpixel = 640;
+    winsz->ws_ypixel = 200;
+}
 
 void consoleinit(void){
     initlock(&cons.lock, "console");
