@@ -26,12 +26,16 @@ void reboot(void);
 
 // ulib.c
 #define TIOCGWINSZ 0x100
-
-int stat(char*, struct stat*);
-int strcmp(const char*, const char*);
-void printf(int, char*, ...);
-int32 snprintf(char *s, uint32 n, const char *fmt, ...);
-void* malloc(uint);
-void free(void*);
+int   stat(char*, struct stat*);
 char* gets(char *buf, int max);
 int32 ioctl(int32 fd, uint64 cmd, ...);
+
+
+// printf.c
+void  printf(int, char*, ...);
+int32 snprintf(char *s, uint32 n, const char *fmt, ...);
+
+
+// umalloc.c
+void* malloc(uint);
+void  free(void*);
