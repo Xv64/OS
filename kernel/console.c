@@ -347,7 +347,7 @@ static void vga_init(){
 }
 #endif
 
-void kconsole_info(struct winsize *winsz) {
+void sys_kconsole_info(struct winsize *winsz) {
     //TODO: when we support more resolutions, update this
     //method accordingly
     winsz->ws_row = 80;
