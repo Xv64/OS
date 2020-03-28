@@ -55,3 +55,14 @@ int32 ioctl(int32 fd, uint64 cmd, ...){
     }
     return -1;
 }
+
+char *ttyname(int32 fd){
+    //this is a BASIC implementation
+    if(fd == stdout){
+        //TODO: what terminal are they on? what device does this map to?
+        //none of these questions are answered (nor implemented), but
+        //need to be in a proper impl.
+        return "/dev/tty0"; //for now, let's fudge it.
+    }
+    return 0;
+}

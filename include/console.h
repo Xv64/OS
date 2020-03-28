@@ -17,3 +17,5 @@ struct termios {
     tcflag_t c_lflag;   /* local              */
     cc_t     c_cc[NCCS];/* control characters */
 };
+
+char *ttyname(int32 fd);
