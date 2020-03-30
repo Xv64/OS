@@ -30,7 +30,6 @@ OBJS := \
 	kobj/pipe.o\
 	kobj/proc.o\
 	kobj/spinlock.o\
-	kobj/string.o\
 	kobj/swtch$(BITS).o\
 	kobj/syscall.o\
 	kobj/sysfile.o\
@@ -43,7 +42,7 @@ OBJS := \
 	kobj/vm.o\
 	kobj/vga.o\
 	kobj/pci.o\
-	ulib/string.o\
+	ulib/posix.o\
 	$(XOBJS)
 
 ifneq ("$(MEMFS)","")
@@ -139,7 +138,7 @@ MKVECTORS = tools/vectors$(BITS).pl
 kernel/vectors.S: $(MKVECTORS)
 	perl $(MKVECTORS) > kernel/vectors.S
 
-ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o uobj/string.o uobj/posix.o
+ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o uobj/posix.o
 
 fs/%: uobj/%.o $(ULIB)
 	@mkdir -p fs out
