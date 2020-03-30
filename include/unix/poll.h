@@ -17,7 +17,7 @@ struct pollfd {
     short revents; // The output event flags (see below).
 };
 
-typedef uint64 nfds_t;
+typedef unsigned long nfds_t;
 
 //defined in posix.c:
 int poll(struct pollfd fds[], nfds_t nfds, int timeout);
