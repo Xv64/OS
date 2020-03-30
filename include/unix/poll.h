@@ -12,12 +12,12 @@
 #define POLLNVAL    0b100000000
 
 struct pollfd {
-    int32 fd;     // The following descriptor being polled.
-    int16 events; // The input event flags (see below).
-    int16 revents; // The output event flags (see below).
+    int fd;     // The following descriptor being polled.
+    short events; // The input event flags (see below).
+    short revents; // The output event flags (see below).
 };
 
 typedef uint64 nfds_t;
 
 //defined in posix.c:
-int32 poll(struct pollfd fds[], nfds_t nfds, int32 timeout);
+int poll(struct pollfd fds[], nfds_t nfds, int timeout);
