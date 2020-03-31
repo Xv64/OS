@@ -4,6 +4,8 @@
 #include "stat.h"
 #include "user.h"
 
+#define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+
 static void
 putc(int fd, char c)
 {
@@ -78,4 +80,8 @@ void fprintf(int32 fd, char *fmt, ...){
 			state = 0;
 		}
 	}
+}
+
+int snprintf(char *UNUSED(s), unsigned int UNUSED(n), const char *UNUSED(fmt), ...) {
+    return -1;
 }
