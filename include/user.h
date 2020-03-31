@@ -36,7 +36,6 @@ int32 ioctl(int32 fd, uint64 cmd, ...);
 #define stderr 2
 
 void  fprintf(int32, char*, ...);
-int32 snprintf(char *s, uint32 n, const char *fmt, ...);
 
 
 // umalloc.c
