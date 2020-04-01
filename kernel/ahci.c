@@ -138,9 +138,9 @@ void ahci_sata_init(HBA_PORT *port, int num){
 }
 
 void ahci_rebase_port(HBA_PORT *port, int num) {
-
+    cprintf("   rebasing port...");
     if(!ahci_stop_port(port)){
-        cprintf("   unable to stop command engine, skipping HBA\n");
+        cprintf("FAILED\n");
         return;
     }
 
@@ -178,7 +178,7 @@ void ahci_rebase_port(HBA_PORT *port, int num) {
     }
 
     ahci_start_port(port);
-    cprintf("   port ready\n");
+    cprintf("DONE\n");
 }
 
 uint16 ahci_stop_port(HBA_PORT *port) {
