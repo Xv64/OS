@@ -2,6 +2,8 @@
 #include "types.h"
 #include "defs.h"
 #include "x86.h"
+#include "unix/string.h"
+#include "memlayout.h"
 
 //AHCI implementation.
 //See Intel reference docs @ https://www.intel.com/content/dam/www/public/us/en/documents/technical-specifications/serial-ata-ahci-spec-rev1-3-1.pdf
@@ -141,7 +143,42 @@ void ahci_rebase_port(HBA_PORT *port, int num) {
         cprintf("   unable to stop command engine, skipping HBA\n");
         return;
     }
-    //TODO
+
+    port->clb = (((uint64) AHCI_BASE & 0xffffffff));
+    port->clbu = 0;
+    port->fb = (((uint64) AHCI_BASE + (uint64) ((32 << 10) / 8))
+            & 0xffffffff);
+    port->fbu =
+            ((((uint64) AHCI_BASE + (uint64) ((32 << 10) / 8))
+                    >> 32) & 0xffffffff);
+
+    port->serr = 1; //For each implemented port, clear the PxSERR register, by writing 1 to each implemented location
+    port->is = 0; //
+    port->ie = 1;
+
+    uint64 addr = ((port->clbu << 32) | port->clb) + KERNBASE;
+    memset((void *) addr, 0, 1024);
+
+    addr = ((port->fbu << 32) | port->fb) + KERNBASE;
+    memset((void*) addr, 0, 256);
+
+    addr = ((port->clbu << 32) | port->clb) + KERNBASE;
+    HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER *) addr;
+
+    for (uint8 i = 0; i < 32; i++) {
+        cmdheader[i].prdtl = 8; // 8 prdt entries per command table
+                                // 256 bytes per command table, 64+16+48+16*8
+                                // Command table offset: 40K + 8K*portno + cmdheader_index*256
+        cmdheader[i].ctba = (((uint64) AHCI_BASE
+                + (uint64) ((40 << 10) / 8) + (uint64) ((i << 8) / 8))
+                & 0xffffffff);
+        cmdheader[i].ctbau =
+                ((((uint64) AHCI_BASE + (uint64) ((40 << 10) / 8)
+                        + (uint64) ((i << 8) / 8)) >> 32) & 0xffffffff);
+    }
+
+    ahci_start_port(port);
+    cprintf("   port ready\n");
 }
 
 uint16 ahci_stop_port(HBA_PORT *port) {
@@ -167,5 +204,12 @@ uint16 ahci_stop_port(HBA_PORT *port) {
 }
 
 void ahci_start_port(HBA_PORT *port) {
-	//TODO
+    while (port->cmd & HBA_PxCMD_CR)
+        ;
+
+    port->cmd |= HBA_PxCMD_FRE;
+    port->cmd |= HBA_PxCMD_ST;
+
+    port->is = 0;
+    port->ie = 0xffffffff;
 }
