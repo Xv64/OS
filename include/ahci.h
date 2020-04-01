@@ -10,6 +10,7 @@
 #define HBA_PxCMD_FRE   0x0010
 #define HBA_PxCMD_FR    0x4000
 #define HBA_PxCMD_CR    0x8000
+#define HBA_PxIS_TFES   0x40000000
 
 #define FIS_TYPE_REG_H2D 0x27
 #define ATA_CMD_READ_DMA_EX 0x25
