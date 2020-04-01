@@ -138,7 +138,7 @@ void ahci_sata_init(HBA_PORT *port, int num){
     }
 }
 
-uint8 ahci_rebase_port(HBA_PORT *port, int num) {
+int8 ahci_rebase_port(HBA_PORT *port, int num) {
     cprintf("   rebasing port...");
     if(!ahci_stop_port(port)){
         cprintf("FAILED\n");

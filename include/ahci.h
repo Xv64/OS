@@ -179,6 +179,6 @@ void   ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 
 int    ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf);
 void   ahci_sata_init(HBA_PORT *port, int num);
 
-uint8  ahci_rebase_port(HBA_PORT *port, int num);
+int8   ahci_rebase_port(HBA_PORT *port, int num);
 uint16 ahci_stop_port(HBA_PORT *port);
 void   ahci_start_port(HBA_PORT *port);
