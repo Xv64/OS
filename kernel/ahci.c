@@ -133,15 +133,16 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 }
 
 void ahci_sata_init(HBA_PORT *port, int num){
-	ahci_rebase_port(port,num);
-    //TODO
+    if(ahci_rebase_port(port,num) > 0){
+        //TODO: rest of init
+    }
 }
 
-void ahci_rebase_port(HBA_PORT *port, int num) {
+uint8 ahci_rebase_port(HBA_PORT *port, int num) {
     cprintf("   rebasing port...");
     if(!ahci_stop_port(port)){
         cprintf("FAILED\n");
-        return;
+        return -1;
     }
 
     port->clb = (((uint64) AHCI_BASE & 0xffffffff));
@@ -179,6 +180,7 @@ void ahci_rebase_port(HBA_PORT *port, int num) {
 
     ahci_start_port(port);
     cprintf("DONE\n");
+    return 1;
 }
 
 uint16 ahci_stop_port(HBA_PORT *port) {
