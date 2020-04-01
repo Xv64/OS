@@ -182,3 +182,4 @@ void   ahci_sata_init(HBA_PORT *port, int num);
 int8   ahci_rebase_port(HBA_PORT *port, int num);
 uint16 ahci_stop_port(HBA_PORT *port);
 void   ahci_start_port(HBA_PORT *port);
+int32  ahci_find_cmdslot(HBA_PORT *port);

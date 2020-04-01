@@ -128,6 +128,17 @@ uint64 ahci_read(ushort bus, ushort slot,ushort func, ushort offset){
     return (tmp);
 }
 
+int32 ahci_find_cmdslot(HBA_PORT *port) {
+    // If not set in SACT and CI, the slot is free
+    uint32 slots = (port->sact | port->ci);
+    for (int32 i=0; i<AHCI_MAX_SLOT; i++) {
+      if ((slots&1) == 0)
+        return i;
+      slots >>= 1;
+    }
+    return -1;
+}
+
 int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
     return 0;
 }
