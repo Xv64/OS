@@ -8,6 +8,8 @@
 //defined on page 404 of POSIX Base Definitions, Issue 6
 
 #define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
+#define PRINT_SCREEN 0
+#define PRINT_BUFFER 1
 
 static void putc(int fd, char c) {
 	write(fd, &c, 1);
@@ -39,40 +41,68 @@ static void printint(int fd, int xx, int base, int sgn) {
 }
 
 // Print to the given fd. Only understands %d, %x, %p, %s.
-static void vprintf(int32 fd, char *fmt,  va_list ap){
+static void vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxlen), char *fmt,  va_list ap){
 	char *s;
 	int c, i, state;
 
-	state = 0;
+    state = 0;
 	for(i = 0; fmt[i]; i++) {
 		c = fmt[i] & 0xff;
 		if(state == 0) {
 			if(c == '%') {
 				state = '%';
 			} else {
-				putc(fd, c);
+                if(mode == PRINT_SCREEN){
+    				putc(fd, c);
+                }else{
+                    //TODO
+                }
 			}
 		} else if(state == '%') {
 			if(c == 'd') {
-				printint(fd, va_arg(ap, int), 10, 1);
+                if(mode == PRINT_SCREEN){
+    				printint(fd, va_arg(ap, int), 10, 1);
+                }else{
+                    //TODO
+                }
 			} else if(c == 'x' || c == 'p') {
-				printint(fd, va_arg(ap, int), 16, 0);
+                if(mode == PRINT_SCREEN){
+    				printint(fd, va_arg(ap, int), 16, 0);
+                }else{
+                    //TODO
+                }
 			} else if(c == 's') {
 				s = va_arg(ap, char*);
 				if(s == 0)
 					s = "(null)";
 				while(*s != 0) {
-					putc(fd, *s);
+                    if(mode == PRINT_SCREEN){
+        				putc(fd, *s);
+                    }else{
+                        //TODO
+                    }
 					s++;
 				}
 			} else if(c == 'c') {
-				putc(fd, va_arg(ap, uint));
+                if(mode == PRINT_SCREEN){
+                    putc(fd, va_arg(ap, uint));
+                }else{
+                    //TODO
+                }
 			} else if(c == '%') {
-				putc(fd, c);
+                if(mode == PRINT_SCREEN){
+                    putc(fd, c);
+                }else{
+                    //TODO
+                }
 			} else {
 				// Unknown % sequence.  Print it to draw attention.
-				putc(fd, '%');
-				putc(fd, c);
+                if(mode == PRINT_SCREEN){
+                    putc(fd, '%');
+    				putc(fd, c);
+                }else{
+                    //TODO
+                }
 			}
 			state = 0;
 		}
@@ -82,14 +112,14 @@ static void vprintf(int32 fd, char *fmt,  va_list ap){
 void fprintf(int32 fd, char *fmt, ...){
     va_list args;
     va_start(args, fmt);
-    vprintf(fd, fmt, args);
+    vprintf(PRINT_SCREEN, fd, 0, 0, fmt, args);
     va_end(args);
 }
 
 void printf(char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vprintf(0, fmt, args);
+    vprintf(PRINT_SCREEN, 0, 0, 0, fmt, args);
     va_end(args);
 }
 
