@@ -46,7 +46,7 @@
 #define SEG_UDATA 5  // user data+stack
 #define SEG_TSS   6  // this process's task state
 
-//PAGEBREAK!
+
 #ifndef __ASSEMBLER__
 // Segment Descriptor
 struct segdesc {

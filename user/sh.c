@@ -196,7 +196,7 @@ fork1(void)
   return pid;
 }
 
-//PAGEBREAK!
+
 // Constructors
 
 struct cmd*
@@ -263,7 +263,7 @@ backcmd(struct cmd *subcmd)
   cmd->cmd = subcmd;
   return (struct cmd*)cmd;
 }
-//PAGEBREAK!
+
 // Parsing
 
 char whitespace[] = " \t\r\n\v";
