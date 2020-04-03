@@ -9,3 +9,4 @@
 //implemented in ulib/printf.c:
 int snprintf(char *s, size_t n, const char *fmt, ...);
 void fprintf(int fd, char *fmt, ...);
+void printf(char *fmt, ...);

@@ -4,17 +4,16 @@
 #include "stat.h"
 #include "user.h"
 
+//printf family of functions
+//defined on page 404 of POSIX Base Definitions, Issue 6
+
 #define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
 
-static void
-putc(int fd, char c)
-{
+static void putc(int fd, char c) {
 	write(fd, &c, 1);
 }
 
-static void
-printint(int fd, int xx, int base, int sgn)
-{
+static void printint(int fd, int xx, int base, int sgn) {
 	static char digits[] = "0123456789ABCDEF";
 	char buf[16];
 	int i, neg;
@@ -40,11 +39,9 @@ printint(int fd, int xx, int base, int sgn)
 }
 
 // Print to the given fd. Only understands %d, %x, %p, %s.
-void fprintf(int32 fd, char *fmt, ...){
-	va_list ap;
+static void vprintf(int32 fd, char *fmt,  va_list ap){
 	char *s;
 	int c, i, state;
-	va_start(ap, fmt);
 
 	state = 0;
 	for(i = 0; fmt[i]; i++) {
@@ -80,6 +77,20 @@ void fprintf(int32 fd, char *fmt, ...){
 			state = 0;
 		}
 	}
+}
+
+void fprintf(int32 fd, char *fmt, ...){
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fd, fmt, args);
+    va_end(args);
+}
+
+void printf(char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vprintf(0, fmt, args);
+    va_end(args);
 }
 
 int snprintf(char *UNUSED(s), unsigned int UNUSED(n), const char *UNUSED(fmt), ...) {
