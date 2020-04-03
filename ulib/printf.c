@@ -40,8 +40,8 @@ static void printint(int fd, int xx, int base, int sgn) {
 		putc(fd, buf[i]);
 }
 
-// Print to the given fd. Only understands %d, %x, %p, %s.
-static void vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxlen), char *fmt,  va_list ap){
+// This is the core print method, all external functions delegate to this.
+static int32 vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxlen), const char *fmt,  va_list ap){
 	char *s;
 	int c, i, state;
 
@@ -107,22 +107,28 @@ static void vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxle
 			state = 0;
 		}
 	}
+
+    return 0; //TODO
 }
 
-void fprintf(int32 fd, char *fmt, ...){
+void fprintf(int32 fd, const char *fmt, ...){
     va_list args;
     va_start(args, fmt);
     vprintf(PRINT_SCREEN, fd, 0, 0, fmt, args);
     va_end(args);
 }
 
-void printf(char *fmt, ...) {
+void printf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
     vprintf(PRINT_SCREEN, 0, 0, 0, fmt, args);
     va_end(args);
 }
 
-int snprintf(char *UNUSED(s), unsigned int UNUSED(n), const char *UNUSED(fmt), ...) {
-    return -1;
+int snprintf(char *s, unsigned int n, const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int result = vprintf(PRINT_BUFFER, 0, s, n, fmt, args);
+    va_end(args);
+    return result;
 }

@@ -35,7 +35,7 @@ int32 ioctl(int32 fd, uint64 cmd, ...);
 #define stdout 1
 #define stderr 2
 
-void  fprintf(int32, char*, ...);
+void  fprintf(int32, const char*, ...);
 
 
 // umalloc.c
