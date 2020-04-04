@@ -45,7 +45,7 @@ static int32 printint(int fd, int xx, int base, int sgn) {
 }
 
 // This is the core print method, all external functions delegate to this.
-static int32 vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxlen), const char *fmt,  va_list ap){
+static int32 vprintf(uint8 mode, int32 fd, char *buf, uint32 maxlen, const char *fmt,  va_list ap){
 	char *s;
 	int c, i, state;
 	int32 len = 0; //based on mode this will either represent:
@@ -62,7 +62,10 @@ static int32 vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxl
 				if(mode == PRINT_SCREEN) {
 					len += putc(fd, c);
 				}else{
-					//TODO
+					if(len < maxlen) {
+						buf[len] = c;
+					}
+					len++;
 				}
 			}
 		} else if(state == '%') {
@@ -86,7 +89,10 @@ static int32 vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxl
 					if(mode == PRINT_SCREEN) {
 						len += putc(fd, *s);
 					}else{
-						//TODO
+						if(len < maxlen) {
+							buf[len] = *s;
+						}
+						len++;
 					}
 					s++;
 				}
@@ -94,13 +100,19 @@ static int32 vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxl
 				if(mode == PRINT_SCREEN) {
 					len += putc(fd, va_arg(ap, uint));
 				}else{
-					//TODO
+					if(len < maxlen) {
+						buf[len] = va_arg(ap, uint);
+					}
+					len++;
 				}
 			} else if(c == '%') {
 				if(mode == PRINT_SCREEN) {
 					len += putc(fd, c);
 				}else{
-					//TODO
+					if(len < maxlen) {
+						buf[len] = c;
+					}
+					len++;
 				}
 			} else {
 				// Unknown % sequence.  Print it to draw attention.
@@ -108,13 +120,23 @@ static int32 vprintf(uint8 mode, int32 fd, char *UNUSED(buf), uint32 UNUSED(maxl
 					len += putc(fd, '%');
 					len += putc(fd, c);
 				}else{
-					//TODO
+					if(len < maxlen) {
+						buf[len] = '%';
+					}
+					len++;
+					if(len < maxlen) {
+						buf[len] = c;
+					}
+					len++;
 				}
 			}
 			state = 0;
 		}
 	}
-
+	if(mode == PRINT_BUFFER) {
+		//null terminate our string, but do NOT increment len in the process
+		buf[ len < maxlen ? len + 1 : maxlen ] = '\0';
+	}
 	return len;
 }
 
