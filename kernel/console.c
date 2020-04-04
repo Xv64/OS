@@ -227,8 +227,9 @@ static void consputc(int c, uint32 color){
         uartputc('\b');
         uartputc(' ');
         uartputc('\b');
-    } else
+    } else {
         uartputc(c);
+    }
     cgaputc(c, color);
 }
 
