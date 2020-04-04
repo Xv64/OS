@@ -16,7 +16,7 @@ static int32 putc(int fd, char c) {
 	return 1;
 }
 
-static int32 printint(int fd, int xx, int base, int sgn) {
+static int8 printint(int xx, int base, int sgn, char *outbuf) {
 	static char digits[] = "0123456789ABCDEF";
 	char buf[16];
 	int i, neg;
@@ -38,8 +38,9 @@ static int32 printint(int fd, int xx, int base, int sgn) {
 		buf[i++] = '-';
 	int32 len = i;
 
-	while(--i >= 0)
-		putc(fd, buf[i]);
+	while(--i >= 0){
+		outbuf[len - (i + 1)] = buf[i];
+	}
 
 	return len;
 }
@@ -70,16 +71,30 @@ static int32 vprintf(uint8 mode, int32 fd, char *buf, uint32 maxlen, const char 
 			}
 		} else if(state == '%') {
 			if(c == 'd') {
-				if(mode == PRINT_SCREEN) {
-					len += printint(fd, va_arg(ap, int), 10, 1);
-				}else{
-					//TODO
+				char buf[16];
+				int8 segmentLen = printint(va_arg(ap, int), 10, 1, &buf[0]);
+				for(uint8 j = 0; j != segmentLen; j++){
+					if(mode == PRINT_SCREEN) {
+						len += putc(fd, buf[j]);
+					}else {
+						if(len < maxlen) {
+							buf[len] = c;
+						}
+						len++;
+					}
 				}
 			} else if(c == 'x' || c == 'p') {
-				if(mode == PRINT_SCREEN) {
-					len += printint(fd, va_arg(ap, int), 16, 0);
-				}else{
-					//TODO
+				char buf[16];
+				int8 segmentLen = printint(va_arg(ap, int), 16, 0, &buf[0]);
+				for(uint8 j = 0; j != segmentLen; j++){
+					if(mode == PRINT_SCREEN) {
+						len += putc(fd, buf[j]);
+					}else {
+						if(len < maxlen) {
+							buf[len] = c;
+						}
+						len++;
+					}
 				}
 			} else if(c == 's') {
 				s = va_arg(ap, char*);
