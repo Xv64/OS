@@ -224,7 +224,9 @@ static void consputc(int c, uint32 color){
     }
 
     if (c == BACKSPACE) {
-        uartputc('\b'); uartputc(' '); uartputc('\b');
+        uartputc('\b');
+        uartputc(' ');
+        uartputc('\b');
     } else
         uartputc(c);
     cgaputc(c, color);
@@ -347,13 +349,22 @@ static void vga_init(){
 }
 #endif
 
-void sys_kconsole_info(struct winsize *winsz) {
-    //TODO: when we support more resolutions, update this
-    //method accordingly
-    winsz->ws_row = 80;
-    winsz->ws_col = 25;
-    winsz->ws_xpixel = 640;
-    winsz->ws_ypixel = 200;
+void sys_kconsole_info(struct winsize *winsz, struct termios *termios) {
+    //TODO: when we support more resolutions, etc.,
+    //update this method accordingly.
+    if(winsz != 0){
+        winsz->ws_row = 80;
+        winsz->ws_col = 25;
+        winsz->ws_xpixel = 640;
+        winsz->ws_ypixel = 200;
+    }
+    if(termios != 0){
+        termios->c_iflag = 0;
+        termios->c_oflag = 0;
+        termios->c_cflag = 0;
+        termios->c_lflag = 0;
+        //???
+    }
 }
 
 void consoleinit(void){
