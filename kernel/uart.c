@@ -52,12 +52,12 @@ void uartinit(void){
 }
 
 void uartputc(int c){
-    int i;
-
-    if (!uart)
+    if (!uart){
         return;
-    for (i = 0; i < 128 && !(inb(COM1 + 5) & 0x20); i++)
+    }
+    while(!(inb(COM1 + 5) & 0x20)) {
         microdelay(10);
+    }
     amd64_out8(COM1 + 0, c);
 }
 
