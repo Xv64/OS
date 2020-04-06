@@ -11,7 +11,10 @@
 #include "proc.h"
 #include "x86.h"
 
-#define COM1      0x3f8
+#define COM1      0x3F8
+#define COM2      0x2F8
+#define COM3      0x3E8
+#defien COM4      0x2E8
 #define BAUD_RATE 115200
 
 static int uart;    // is there a uart?
