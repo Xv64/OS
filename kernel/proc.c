@@ -70,7 +70,6 @@ static struct proc* allocproc(void){
     return p;
 }
 
-//PAGEBREAK: 32
 // Set up first user process.
 void userinit(void){
     struct proc* p;
