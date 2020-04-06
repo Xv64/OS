@@ -35,7 +35,8 @@ struct devsw {
 
 extern struct devsw devsw[];
 
-#define CONSOLE 1
+#define TTY0    1
+#define TTY1    2
 
 struct pollfd {
     int   fd;         /* file descriptor */

@@ -372,8 +372,8 @@ void consoleinit(void){
     initlock(&cons.lock, "console");
     initlock(&input.lock, "input");
 
-    devsw[CONSOLE].write = consolewrite;
-    devsw[CONSOLE].read = consoleread;
+    devsw[TTY0].write = consolewrite;
+    devsw[TTY0].read = consoleread;
     cons.locking = 1;
 
     picenable(IRQ_KBD);
