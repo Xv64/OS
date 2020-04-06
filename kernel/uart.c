@@ -39,7 +39,7 @@ void uartearlyinit(void){
     uart = 1;
 
     // Announce that we're here.
-    for (p = "Xv64...\n"; *p; p++)
+    for (p = "Xv64 UART Console 1\n"; *p; p++)
         uartputc(*p);
 }
 
