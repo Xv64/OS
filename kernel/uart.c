@@ -11,7 +11,8 @@
 #include "proc.h"
 #include "x86.h"
 
-#define COM1    0x3f8
+#define COM1      0x3f8
+#define BAUD_RATE 115200
 
 static int uart;    // is there a uart?
 
@@ -21,9 +22,9 @@ void uartearlyinit(void){
     // Turn off the FIFO
     amd64_out8(COM1 + 2, 0);
 
-    // 9600 baud, 8 data bits, 1 stop bit, parity off.
+    // 115200 baud, 8 data bits, 1 stop bit, parity off.
     amd64_out8(COM1 + 3, 0x80); // Unlock divisor
-    amd64_out8(COM1 + 0, 115200 / 9600);
+    amd64_out8(COM1 + 0, 115200 / BAUD_RATE);
     amd64_out8(COM1 + 1, 0);
     amd64_out8(COM1 + 3, 0x03); // Lock divisor, 8 data bits.
     amd64_out8(COM1 + 4, 0);
