@@ -26,7 +26,7 @@ void uartearlyinit(void){
     // 115200 baud, 8 data bits, 1 stop bit, parity off.
     amd64_out8(COM1 + 3, 0x80); // Unlock divisor
     amd64_out8(COM1 + 0, 115200 / BAUD_RATE);
-    amd64_out8(COM1 + 1, 0);    // enable RxRDY interrupt
+    amd64_out8(COM1 + 1, 0);
     amd64_out8(COM1 + 3, 0x03); // Lock divisor, 8 data bits.
     amd64_out8(COM1 + 4, 0);
     amd64_out8(COM1 + 1, 0x01); // Enable receive interrupts.
