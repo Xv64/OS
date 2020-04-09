@@ -15,6 +15,8 @@ extern uintp vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+#define POLL_UART
+
 struct spinlock irqHandlersLock;
 irqhandler irqHandlers[MAX_IRQS];
 
@@ -37,6 +39,12 @@ void trap(struct trapframe* tf){
             acquire(&tickslock);
             ticks++;
             wakeup(&ticks);
+            #ifdef POLL_UART
+            //hack
+            if(ticks % 100){
+              uartintr();
+            }
+            #endif
             release(&tickslock);
         }
         lapiceoi();
