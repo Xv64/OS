@@ -15,6 +15,7 @@
 # define static_assert(a, b) do { switch (0) case 0: case (a):; } while (0)
 #endif // static_assert
 
+#define MAX_PATH_LEN 2048
 #define FREESPACE 3000
 int nblocks = (995-LOGSIZE) + FREESPACE;
 int nlog = LOGSIZE;
@@ -140,9 +141,19 @@ int main(int argc, char *argv[]) {
 			name += 2;
 		}
 
+		char localpath[MAX_PATH_LEN + 1];
+		strcpy(localpath, name);
+
 		char *lastSlash = strrchr(name, '/');
 		while(lastSlash != 0 && name++ != lastSlash)
 			;
+
+		for(int j = strlen(localpath); j >= 0; j--){
+			if(localpath[j] == '/'){
+				localpath[j+1] = '\0';
+				break;
+			}
+		}
 
 		assert(index(name, '/') == 0);
 
@@ -150,12 +161,13 @@ int main(int argc, char *argv[]) {
 			perror(argv[i]);
 			exit(1);
 		}
-		printf("Copying %s...", name);
+		printf("Copying %s%s...", localpath, name);
 
 		uint path = binino;
 
-		if(strcmp(name, "init") == 0)
+		if(strcmp(localpath, "/") == 0){
 			path = rootino;
+		}//TODO: more dynamic path inode creation/lookup
 
 		inum = ialloc(T_FILE);
 
