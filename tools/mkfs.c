@@ -15,10 +15,12 @@
 # define static_assert(a, b) do { switch (0) case 0: case (a):; } while (0)
 #endif // static_assert
 
-int nblocks = (995-LOGSIZE);
+#define FREESPACE 3000
+int nblocks = (995-LOGSIZE) + FREESPACE;
 int nlog = LOGSIZE;
 int ninodes = 200;
-int size = 1024;
+int size = 1024 + FREESPACE;
+//size MUST EQUAL nblocks + usedblocks + nlog
 
 int fsfd;
 struct superblock sb;
