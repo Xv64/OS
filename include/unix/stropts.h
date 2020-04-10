@@ -1,4 +1,4 @@
-//poll.h - POSIX Base Definitions, Issue 6 - page 334
+//stropts.h - POSIX Base Definitions, Issue 6 - page 334
 
 
 //implemented in ulib/ulib.c:

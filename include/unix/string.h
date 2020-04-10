@@ -1,4 +1,4 @@
-//poll.h - POSIX Base Definitions, Issue 6 - page 31
+//string.h - POSIX Base Definitions, Issue 6 - page 31
 
 #define memcpy(dst, src, n) (memmove(dst, src, n))
 

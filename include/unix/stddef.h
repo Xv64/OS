@@ -1,4 +1,4 @@
-//poll.h - POSIX Base Definitions, Issue 6 - page 315
+//stddef.h - POSIX Base Definitions, Issue 6 - page 315
 
 #define NULL 0x0
 

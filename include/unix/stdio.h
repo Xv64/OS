@@ -1,4 +1,4 @@
-//poll.h - POSIX Base Definitions, Issue 6 - page 323
+//stdio.h - POSIX Base Definitions, Issue 6 - page 323
 #include "stddef.h"
 
 

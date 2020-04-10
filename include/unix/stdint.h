@@ -1,4 +1,4 @@
-//poll.h - POSIX Base Definitions, Issue 6 - page 316
+//stdint.h - POSIX Base Definitions, Issue 6 - page 316
 
 
 typedef char int8_t;
