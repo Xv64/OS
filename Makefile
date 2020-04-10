@@ -140,8 +140,14 @@ kernel/vectors.S: $(MKVECTORS)
 
 ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o uobj/posix.o
 
+fs/bin/%: uobj/%.o $(ULIB)
+	@mkdir -p fs out fs/bin
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(OBJDUMP) -S $@ > out/$*.asm
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > out/$*.sym
+
 fs/%: uobj/%.o $(ULIB)
-	@mkdir -p fs out
+	@mkdir -p fs out fs/bin
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > out/$*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > out/$*.sym
@@ -170,26 +176,31 @@ $(SUBPROGS): FORCE
 	$(MAKE) -C $@
 
 UPROGS=\
-	fs/cat\
-	fs/echo\
-	fs/grep\
+	fs/bin/cat\
+	fs/bin/echo\
+	fs/bin/grep\
 	fs/init\
-	fs/kill\
-	fs/ln\
-	fs/ls\
-	fs/mkdir\
-	fs/rm\
-	fs/sh\
-	fs/wc\
-	fs/zombie\
-	fs/reboot\
+	fs/bin/kill\
+	fs/bin/ln\
+	fs/bin/ls\
+	fs/bin/mkdir\
+	fs/bin/rm\
+	fs/bin/sh\
+	fs/bin/wc\
+	fs/bin/zombie\
+	fs/bin/reboot\
 
 fs/README.md: README.md
 	@mkdir -p fs
 	cp README.md fs/README.md
 
-fs.img: out/mkfs README.md $(UPROGS) $(SUBPROGS)
-	out/mkfs fs.img README.md fs/*
+# headers: FORCE
+# 	@mkdir -p fs/src/include
+# 	cp -r include fs/src
+
+fs.img: out/mkfs fs/README.md $(UPROGS) $(SUBPROGS)
+	find fs -type f | xargs out/mkfs fs.img $0
+	touch fs.img
 	cp fs.img bin/fs.img
 	qemu-img convert fs.img -O vdi bin/fs.vdi
 

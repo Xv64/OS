@@ -136,8 +136,13 @@ int main(int argc, char *argv[]) {
 	for(i = 2; i < argc; i++) {
 		char *name = argv[i];
 
-		if (!strncmp(name, "fs/", 3))
-			name += 3;
+		if (!strncmp(name, "fs/", 3)){
+			name += 2;
+		}
+
+		char *lastSlash = strrchr(name, '/');
+		while(lastSlash != 0 && name++ != lastSlash)
+			;
 
 		assert(index(name, '/') == 0);
 
@@ -145,6 +150,7 @@ int main(int argc, char *argv[]) {
 			perror(argv[i]);
 			exit(1);
 		}
+		printf("Copying %s...", name);
 
 		uint path = binino;
 
@@ -158,9 +164,13 @@ int main(int argc, char *argv[]) {
 		strncpy(de.name, name, DIRSIZ);
 		iappend(path, &de, sizeof(de));
 
-		while((cc = read(fd, buf, sizeof(buf))) > 0)
+		int finalsize = 0;
+		while((cc = read(fd, buf, sizeof(buf))) > 0){
+			finalsize += cc;
 			iappend(inum, buf, cc);
+		}
 
+		printf(" %d\n", finalsize);
 		close(fd);
 	}
 
