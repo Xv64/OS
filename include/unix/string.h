@@ -12,6 +12,7 @@ char* strcat_s(char *dest, char *right, int max_len);
 char* strchr(const char *s, char c);
 char* strcpy(char *s, char *t);
 int   strlen(const char* s);
+int   strcmp(const char *s1, const char *s2);
 int   strncmp(const char* p, const char* q, unsigned int n);
 char* strncpy(char* s, const char* t, int n);
 char* strstr(const char *s, char *s2);

@@ -140,6 +140,10 @@ int strncmp(const char* p, const char* q, uint n) {
     return (uchar) * p - (uchar) * q;
 }
 
+int strcmp(const char *s1, const char *s2) {
+    return strncmp(s1, s2, (uint)(-1));
+}
+
 int atoi(const char *s) {
   int n;
 
