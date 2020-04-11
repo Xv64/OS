@@ -2,6 +2,7 @@
 #include "user.h"
 #include "poll.h"
 #include "x86.h"
+#include "unix/stdio.h"
 
 int32 poll(struct pollfd fds[], nfds_t nfds, int32 timeout) {
     //See: UNIX Systems Programming for SVR4 (1e), page 149
@@ -184,4 +185,16 @@ int isspace(int c) {
         return 1;
     }
     return 0;
+}
+
+int  fgetc(FILE *stream) {
+    if(stream->readable == -1){
+        return EOF;
+    }
+    unsigned char buf;
+    stream->readable = read(stream->fd, &buf, sizeof(buf));
+    if(stream->readable == -1){
+        return EOF;
+    }
+    return (int)buf;
 }
