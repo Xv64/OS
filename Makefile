@@ -42,7 +42,7 @@ OBJS := \
 	kobj/vm.o\
 	kobj/vga.o\
 	kobj/pci.o\
-	ulib/posix.o\
+	kobj/sysstring.o\
 	$(XOBJS)
 
 ifneq ("$(MEMFS)","")

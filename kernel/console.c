@@ -18,7 +18,7 @@
 #include "vga.h"
 #include "vga_modes.h"
 #include "irq.h"
-#include "string.h"
+#include "kernel/string.h"
 #include "console.h"
 
 static void consputc(int, uint32);

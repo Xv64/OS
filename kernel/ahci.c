@@ -2,7 +2,7 @@
 #include "types.h"
 #include "defs.h"
 #include "x86.h"
-#include "unix/string.h"
+#include "kernel/string.h"
 #include "memlayout.h"
 
 //AHCI implementation.
