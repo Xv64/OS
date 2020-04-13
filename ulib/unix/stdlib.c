@@ -79,3 +79,7 @@ void* malloc(uint nbytes) {
 				return 0;
 	}
 }
+
+void abort(void) {
+    //TODO
+}
