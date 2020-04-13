@@ -109,3 +109,7 @@ long atol(const char *str) {
     }
     return result * multiplier;
 }
+
+void exit(int status) {
+	procexit();
+}
