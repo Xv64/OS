@@ -60,6 +60,19 @@ char* strcpy(char *s, char *t) {
   return os;
 }
 
+// Like strncpy but guaranteed to NUL-terminate.
+char* safestrcpy(char* s, const char* t, int n) {
+    char* os;
+
+    os = s;
+    if (n <= 0)
+        return os;
+    while (--n > 0 && (*s++ = *t++) != 0)
+        ;
+    *s = 0;
+    return os;
+}
+
 char* strcat_s(char *dest, char *right, int max_len) {
     int writing = -1;
     for(int i = 0; i !=max_len; i++){

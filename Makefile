@@ -98,6 +98,18 @@ uobj/%.o: ulib/%.c
 	@mkdir -p uobj
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+uobj/unix/%.o: ulib/unix/%.c
+	@mkdir -p uobj/unix
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+POSIXLIB = uobj/unix/ctype.o\
+		   uobj/unix/stdio.o\
+		   uobj/unix/string.o\
+		   uobj/unix/poll.o
+
+uobj/posix.o: $(POSIXLIB)
+	ar rcs uobj/posix.o uobj/unix/*.o
+
 uobj/%.o: ulib/%.S
 	@mkdir -p uobj
 	$(CC) $(ASFLAGS) -c -o $@ $<
@@ -138,7 +150,7 @@ MKVECTORS = tools/vectors$(BITS).pl
 kernel/vectors.S: $(MKVECTORS)
 	perl $(MKVECTORS) > kernel/vectors.S
 
-ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o uobj/posix.o
+ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o uobj/string.o
 
 fs/bin/%: uobj/%.o $(ULIB)
 	@mkdir -p fs out fs/bin
@@ -221,6 +233,10 @@ binaries : fs.img xv6.img
 	cp -r fs ./bin/
 	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
 	qemu-img convert xv6.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
+	mkdir bin/artifacts
+	cp -r uobj bin/artifacts/
+	cp -r kobj bin/artifacts/
+	cp -r out bin/artifacts/
 
 install: binaries
 	./install.sh
