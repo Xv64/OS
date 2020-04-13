@@ -10,7 +10,7 @@ int sys_fork(void){
     return fork();
 }
 
-int sys_exit(void){
+int sys_procexit(void){
     exit();
     return 0; // not reached
 }

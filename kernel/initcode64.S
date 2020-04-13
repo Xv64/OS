@@ -14,7 +14,7 @@ start:
 
 # for(;;) exit();
 exit:
-  mov $SYS_exit, %rax
+  mov $SYS_procexit, %rax
   int $T_SYSCALL
   jmp exit
 
@@ -27,4 +27,3 @@ init:
 argv:
   .quad init
   .quad 0
-

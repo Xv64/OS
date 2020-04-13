@@ -97,7 +97,7 @@ extern int sys_chdir(void);
 extern int sys_close(void);
 extern int sys_dup(void);
 extern int sys_exec(void);
-extern int sys_exit(void);
+extern int sys_procexit(void);
 extern int sys_fork(void);
 extern int sys_fstat(void);
 extern int sys_getpid(void);
@@ -119,7 +119,7 @@ extern int sys_kconsole_info(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]          sys_fork,
-    [SYS_exit]          sys_exit,
+    [SYS_procexit]      sys_procexit,
     [SYS_wait]          sys_wait,
     [SYS_pipe]          sys_pipe,
     [SYS_read]          sys_read,

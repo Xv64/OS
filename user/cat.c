@@ -13,7 +13,7 @@ cat(int fd)
     write(1, buf, n);
   if(n < 0){
     fprintf(stdout, "cat: read error\n");
-    exit();
+    procexit();
   }
 }
 
@@ -24,16 +24,16 @@ main(int argc, char *argv[])
 
   if(argc <= 1){
     cat(0);
-    exit();
+    procexit();
   }
 
   for(i = 1; i < argc; i++){
     if((fd = open(argv[i], 0)) < 0){
       fprintf(stdout, "cat: cannot open %s\n", argv[i]);
-      exit();
+      procexit();
     }
     cat(fd);
     close(fd);
   }
-  exit();
+  procexit();
 }

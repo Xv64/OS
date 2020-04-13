@@ -10,9 +10,9 @@ main(int argc, char **argv)
 
   if(argc < 1){
     fprintf(stderr, "usage: kill pid...\n");
-    exit();
+    procexit();
   }
   for(i=1; i<argc; i++)
     kill(atoi(argv[i]));
-  exit();
+  procexit();
 }

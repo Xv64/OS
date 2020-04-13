@@ -15,7 +15,7 @@ start:
 
 # for(;;) exit();
 exit:
-  movl $SYS_exit, %eax
+  movl $SYS_procexit, %eax
   int $T_SYSCALL
   jmp exit
 
@@ -28,4 +28,3 @@ init:
 argv:
   .long init
   .long 0
-
