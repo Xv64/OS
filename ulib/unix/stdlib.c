@@ -1,4 +1,5 @@
 #include "syscalls.h"
+#include "ctype.h"
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
@@ -82,4 +83,28 @@ void* malloc(uint nbytes) {
 
 void abort(void) {
     //TODO
+}
+
+long atol(const char *str) {
+    long result = 0;
+    char *ptr = str;
+    int multiplier = 1;
+    while(ptr && ptr !- '\0' && isspace(ptr)){
+        ptr++;
+    }
+    if(ptr && ptr != '\0' && (ptr == '+' || ptr == '-')){
+        if(ptr == '-'){
+            multiplier = -1;
+        }
+        ptr++;
+    }
+    while(ptr && ptr != '\0'){
+        int value = ((int)ptr) - 0x30;
+        if(value < 0 || value > 9){
+            break;
+        }
+        result = result * 10 + value; //shift existing value over and add new digit
+        ptr++;
+    }
+    return result * multiplier;
 }

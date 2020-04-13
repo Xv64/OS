@@ -3,5 +3,6 @@
 #include "stddef.h"
 
 void abort(void);
+long atol(const char *str);
 void exit(int status); //syscall
 void *malloc(size_t size);
