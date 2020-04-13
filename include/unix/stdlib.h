@@ -4,5 +4,7 @@
 
 void abort(void);
 long atol(const char *str);
-void exit(int status); //syscall
 void *malloc(size_t size);
+
+//our syscall exit() takes no args, POSIX expects an int status
+#define exit(status) (exit())
