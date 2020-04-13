@@ -88,24 +88,24 @@ void abort(void) {
 
 long atol(const char *str) {
     long result = 0;
-    char *ptr = str;
+    int i = 0;
     int multiplier = 1;
-    while(ptr && ptr !- '\0' && isspace(ptr)){
-        ptr++;
+    while(str[i] != '\0' && isspace(str[i]) ){
+        i++;
     }
-    if(ptr && ptr != '\0' && (ptr == '+' || ptr == '-')){
-        if(ptr == '-'){
+    if(str[i] != '\0' && (str[i] == '+' || str[i] == '-')){
+        if(str[i] == '-'){
             multiplier = -1;
         }
-        ptr++;
+        i++;
     }
-    while(ptr && ptr != '\0'){
-        int value = ((int)ptr) - 0x30;
+    while(str[i] != '\0'){
+        int value = ((int)str[i]) - 0x30;
         if(value < 0 || value > 9){
             break;
         }
         result = result * 10 + value; //shift existing value over and add new digit
-        ptr++;
+        i++;
     }
     return result * multiplier;
 }
