@@ -1,5 +1,5 @@
 //string.h - POSIX Base Definitions, Issue 6 - page 31
-#include "unix/stdint.h"
+#include "stdint.h"
 
 #define memcpy(dst, src, n) (memmove(dst, src, n))
 
