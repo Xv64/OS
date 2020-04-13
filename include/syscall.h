@@ -22,3 +22,10 @@
 #define SYS_close         21
 #define SYS_reboot        22
 #define SYS_kconsole_info 23
+#define SYS_memset        24
+#define SYS_memmove       25
+#define SYS_safestrcpy    26
+#define SYS_strlen        27
+#define SYS_strncmp       28
+#define SYS_strncpy       29
+#define SYS_memcmp        30

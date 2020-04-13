@@ -116,6 +116,13 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_reboot(void);
 extern int sys_kconsole_info(void);
+extern int sys_memset(void);
+extern int sys_memmove(void);
+extern int sys_safestrcpy(void);
+extern int sys_strlen(void);
+extern int sys_strncmp(void);
+extern int sys_strncpy(void);
+extern int sys_memcmp(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]          sys_fork,
@@ -141,6 +148,13 @@ static int (*syscalls[])(void) = {
     [SYS_close]         sys_close,
     [SYS_reboot]        sys_reboot,
     [SYS_kconsole_info] sys_kconsole_info,
+    [SYS_memset]        sys_memset,
+    [SYS_memmove]       sys_memmove,
+    [SYS_safestrcpy]    sys_safestrcpy,
+    [SYS_strlen]        sys_strlen,
+    [SYS_strncmp]       sys_strncmp,
+    [SYS_strncpy]       sys_strncpy,
+    [SYS_memcmp]        sys_memcmp
 };
 
 void syscall(void){
