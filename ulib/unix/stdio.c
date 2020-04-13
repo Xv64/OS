@@ -1,8 +1,9 @@
 #include "syscalls.h"
-#include "stdio.h"
-#include "fcntl.h"
+#include "unix/stdio.h"
+#include "unix/fcntl.h"
 
-int  fgetc(FILE *stream) {
+
+int fgetc(FILE *stream) {
     if(stream->readable == -1){
         return EOF;
     }
