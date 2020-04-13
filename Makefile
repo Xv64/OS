@@ -108,12 +108,12 @@ POSIXLIB = uobj/unix/ctype.o\
 		   uobj/unix/poll.o\
 		   uobj/unix/stdlib.o\
 
-uobj/posix.o: $(POSIXLIB) usys.o
+uobj/posix.o: $(POSIXLIB) ulib/usys.o
 	ar rcs uobj/posix.o uobj/unix/*.o uobj/usys.o
 
 uobj/%.o: ulib/%.S
 	@mkdir -p uobj
-	$(CC) $(ASFLAGS) -c -o $@ $<
+	$(CC) $(ASFLAGS)  -c -o $@ $<
 
 out/bootblock: kernel/bootasm.S kernel/bootmain.c
 	@mkdir -p out
@@ -185,7 +185,7 @@ SUBPROGS := $(wildcard user/*/.)
 
 FORCE:
 
-$(SUBPROGS): FORCE
+$(SUBPROGS): uobj/posix.o
 	$(MAKE) -C $@
 
 UPROGS=\
