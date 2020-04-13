@@ -1,5 +1,6 @@
 #include "syscalls.h"
-#include "ctype.h"
+#include "unix/ctype.h"
+#include "unix/stdint.h"
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
@@ -9,7 +10,7 @@ typedef long Align;
 union header {
 	struct {
 		union header *ptr;
-		uint size;
+		uint32_t size;
 	} s;
 	Align x;
 };
@@ -39,7 +40,7 @@ void free(void *ap) {
 	freep = p;
 }
 
-static Header* morecore(uint nu) {
+static Header* morecore(uint32_t nu) {
 	char *p;
 	Header *hp;
 
@@ -54,9 +55,9 @@ static Header* morecore(uint nu) {
 	return freep;
 }
 
-void* malloc(uint nbytes) {
+void* malloc(uint32_t nbytes) {
 	Header *p, *prevp;
-	uint nunits;
+	uint32_t nunits;
 
 	nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
 	if((prevp = freep) == 0) {
