@@ -1,5 +1,6 @@
 #include "syscalls.h"
-#include "unix/stdio.h"
+#include "stdio.h"
+#include "fcntl.h"
 
 int  fgetc(FILE *stream) {
     if(stream->readable == -1){
@@ -178,4 +179,16 @@ int snprintf(char *s, unsigned int n, const char *fmt, ...) {
 	int result = vprintf(PRINT_BUFFER, 0, s, n, fmt, args);
 	va_end(args);
 	return result;
+}
+
+FILE *fopen(const char *restrict filename, const char *restrict mode) {
+    int omode = O_RDWR; //HACK
+    if(mode == 0){
+        omode = O_RDONLY;
+    }
+    int fd = open(filename, omode);
+    FILE *result = malloc(sizeof(FILE));
+    result->fd = fd;
+
+    return result;
 }
