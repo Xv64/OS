@@ -13,10 +13,7 @@ typedef struct {
     int readable;
 } FILE;
 
-//implemented in ulib/printf.c:
+int  fgetc(FILE *stream);
 void fprintf(int fd, const char *fmt, ...);
 void printf(const char *fmt, ...);
 int  snprintf(char *s, size_t n, const char *fmt, ...);
-
-//implemented in ulib/posix.c
-int  fgetc(FILE *stream);
