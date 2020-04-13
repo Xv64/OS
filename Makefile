@@ -105,10 +105,11 @@ uobj/unix/%.o: ulib/unix/%.c
 POSIXLIB = uobj/unix/ctype.o\
 		   uobj/unix/stdio.o\
 		   uobj/unix/string.o\
-		   uobj/unix/poll.o
+		   uobj/unix/poll.o\
+		   uobj/unix/stdlib.o\
 
-uobj/posix.o: $(POSIXLIB)
-	ar rcs uobj/posix.o uobj/unix/*.o
+uobj/posix.o: $(POSIXLIB) usys.o
+	ar rcs uobj/posix.o uobj/unix/*.o uobj/usys.o
 
 uobj/%.o: ulib/%.S
 	@mkdir -p uobj
