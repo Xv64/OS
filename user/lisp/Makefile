@@ -9,7 +9,7 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 # lisp:
 # 	$(CC) $(CFLAGS) lisp.c -o lisp.o
 #
-# 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $(BINPATH)$@ *.o $(BINPATH)posix.o $(BINPATH)ulib.o $(BINPATH)printf.o $(BINPATH)usys.o $(BINPATH)umalloc.o
+# 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $(BINPATH)$@ *.o $(BINPATH)posix.o
 #
 # 	cp lisp.o $(FSPATH)/bin/lisp
 
