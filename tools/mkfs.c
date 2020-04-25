@@ -20,7 +20,7 @@
 int nblocks = (995-LOGSIZE) + FREESPACE;
 int nlog = LOGSIZE;
 int ninodes = 200;
-int size = 1024 + FREESPACE;
+int size = 1024 + FREESPACE + 25;
 //size MUST EQUAL nblocks + usedblocks + nlog
 
 int fsfd;
@@ -94,6 +94,7 @@ int main(int argc, char *argv[]) {
 	printf("used %d (bit %d ninode %zu) free %u log %u total %d\n", usedblocks,
 	       bitblocks, ninodes/IPB + 1, freeblock, nlog, nblocks+usedblocks+nlog);
 
+	printf("size: %d\n", size);
 	assert(nblocks + usedblocks + nlog == size);
 
 	for(i = 0; i < nblocks + usedblocks + nlog; i++)
