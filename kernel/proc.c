@@ -270,6 +270,7 @@ void scheduler(void){
             proc = p;
             switchuvm(p);
             p->state = RUNNING;
+            cpu->proc = p;
             swtch(&cpu->scheduler, proc->context);
             switchkvm();
 

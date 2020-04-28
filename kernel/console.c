@@ -165,6 +165,7 @@ void panic(char* s){
     cons.locking = 0;
     cprintf("\n\nPANIC on cpu %d\n ", cpu->id);
     cprintf(s);
+    cprintf("\nPROC: %s\n", cpu->proc->name);
     cprintf("\nSTACK:\n");
     getcallerpcs(&s, pcs);
     for (int i = 0; i < 10 && pcs[i] != 0x0; i++){

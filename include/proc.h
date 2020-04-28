@@ -13,12 +13,8 @@ struct cpu {
   int intena;                  // Were interrupts enabled before pushcli?
 
   // Cpu-local storage variables; see below
-#if X64
   void *local;
-#else
-  struct cpu *cpu;
-  struct proc *proc;           // The currently-running process.
-#endif
+  struct proc *proc;
 };
 
 extern struct cpu cpus[NCPU];
