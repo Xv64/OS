@@ -66,6 +66,7 @@ void release(struct spinlock* lk){
 // Record the current call stack in pcs[] by following the %ebp chain.
 void getcallerpcs(void* v, uintp pcs[]){
     uintp* ebp;
+    //https://stackoverflow.com/questions/41912684/what-is-the-purpose-of-the-rbp-register-in-x86-64-assembler
     asm volatile ("mov %%rbp, %0" : "=r" (ebp));
     getstackpcs(ebp, pcs);
 }
