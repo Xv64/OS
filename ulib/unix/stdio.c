@@ -22,6 +22,33 @@ int fgetc(FILE *stream) {
     return (int)buf;
 }
 
+char *fgets(char *restrict buf, int n, FILE *restrict stream) {
+    /*
+        The fgets( ) function shall read bytes from stream into the array pointed to by s, until n−1 bytes
+        are read, or a <newline> is read and transferred to s, or an end-of-file condition is encountered.
+        The string is then terminated with a null byte.
+        -- POSIX Base Definitions, Issue 6 - page 368
+    */
+
+    for(int i = 0; i != (n - 1); i++){
+        int c = fgetc(stream);
+        if(c == EOF){
+            buf[i] = '\0';
+            break;
+        }
+        buf[i] = (char)c;
+        buf[i+1] = '\0'; //this only is safe because we're looping until n-1
+
+        if(c == '\n'){
+            //unlike the test for EOF, we want to
+            //copy the newline to the output buffer
+            //before we conclude.
+            break;
+        }
+    }
+    return buf;
+}
+
 
 static int32_t putc(int fd, char c) {
 	write(fd, &c, 1);
