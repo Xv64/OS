@@ -1,10 +1,10 @@
+#include <stdarg.h>
 #include "syscalls.h"
 #include "unix/stdio.h"
 #include "unix/fcntl.h"
 #include "unix/stdint.h"
 #include "unix/string.h"
 #include "unix/stdlib.h"
-#include <stdarg.h>
 
 
 #define PRINT_SCREEN 1
@@ -238,4 +238,8 @@ FILE *fopen(const char *restrict filename, const char *restrict mode) {
     result->fd = fd;
 
     return result;
+}
+
+int vfprintf(FILE *stream, const char *restrict fmt, va_list args) {
+    return vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
 }

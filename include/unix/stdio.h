@@ -20,3 +20,4 @@ FILE *fopen(const char *restrict filename, const char *restrict mode);
 void  fprintf(int fd, const char *fmt, ...);
 void  printf(const char *fmt, ...);
 int   snprintf(char *s, size_t n, const char *fmt, ...);
+int   vfprintf(FILE *stream, const char *restrict format, va_list ap);
