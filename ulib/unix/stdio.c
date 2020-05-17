@@ -10,6 +10,17 @@
 #define PRINT_SCREEN 1
 #define PRINT_BUFFER 2
 
+int feof(FILE *stream) {
+    /*
+        The feof( ) function shall test the end-of-file indicator for the stream pointed to by stream.
+        -- POSIX Base Definitions, Issue 6 - page 350
+    */
+    if(stream->readable == -1){
+        return EOF;
+    }
+    return 0;
+}
+
 int fgetc(FILE *stream) {
     if(stream->readable == -1){
         return EOF;

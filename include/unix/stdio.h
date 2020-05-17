@@ -13,6 +13,7 @@ typedef struct {
     int readable;
 } FILE;
 
+int   feof(FILE *);
 int   fgetc(FILE *stream);
 char *fgets(char *restrict, int, FILE *restrict);
 FILE *fopen(const char *restrict filename, const char *restrict mode);
