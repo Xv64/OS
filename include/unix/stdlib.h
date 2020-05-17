@@ -6,3 +6,4 @@ void abort(void);
 long atol(const char *str);
 void exit(int status);
 void *malloc(size_t size);
+void free(void *ptr);
