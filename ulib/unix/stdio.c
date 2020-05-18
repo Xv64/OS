@@ -10,6 +10,14 @@
 #define PRINT_SCREEN 1
 #define PRINT_BUFFER 2
 
+static FILE stdin_const  = {0, 0};
+static FILE stdout_const = {1, 0};
+static FILE stderr_const = {2, 0};
+
+FILE *_xv64_stdin  = &stdin_const;
+FILE *_xv64_stdout = &stdout_const;
+FILE *_xv64_stderr = &stderr_const;
+
 int feof(FILE *stream) {
     /*
         The feof( ) function shall test the end-of-file indicator for the stream pointed to by stream.
@@ -205,10 +213,10 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 	return len;
 }
 
-void fprintf(int32_t fd, const char *fmt, ...){
+void fprintf(FILE *stream, const char *fmt, ...){
 	va_list args;
 	va_start(args, fmt);
-	vprintf(PRINT_SCREEN, fd, 0, 0, fmt, args);
+	vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
 	va_end(args);
 }
 
