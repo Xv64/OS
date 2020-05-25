@@ -7,3 +7,4 @@ long atol(const char *str);
 void exit(int status);
 void *malloc(size_t size);
 void free(void *ptr);
+long strtol(const char *restrict str, char **restrict endptr, int base);

@@ -1,6 +1,8 @@
 #include "syscalls.h"
 #include "unix/ctype.h"
 #include "unix/stdint.h"
+#include "unix/limits.h"
+#include "unix/string.h"
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
@@ -112,4 +114,21 @@ long atol(const char *str) {
 
 void exit(int status) {
 	procexit();
+}
+
+long strtol(const char *restrict str, char **restrict endptr, int base) {
+	//POSIX Base Definitions, Issue 6 - page 1456
+	const char *p = str;
+
+	while(isspace( (int)*p )) {
+		p++;
+	}
+	
+	int n = 0;
+	while(isdigit( (int)*p )) {
+      n = n*10 + (int)*p - '0';
+	  p++;
+	}
+	endptr = (char **) &p;
+	return n;
 }
