@@ -21,7 +21,7 @@ int   feof(FILE *);
 int   fgetc(FILE *stream);
 char *fgets(char *restrict, int, FILE *restrict);
 FILE *fopen(const char *restrict filename, const char *restrict mode);
-void  fprintf(FILE *stream, const char *fmt, ...);
+int   fprintf(FILE *stream, const char *fmt, ...);
 void  printf(const char *fmt, ...);
 int   snprintf(char *s, size_t n, const char *fmt, ...);
 int   vfprintf(FILE *stream, const char *restrict format, va_list ap);

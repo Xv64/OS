@@ -213,11 +213,12 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 	return len;
 }
 
-void fprintf(FILE *stream, const char *fmt, ...){
+int fprintf(FILE *stream, const char *fmt, ...){
 	va_list args;
 	va_start(args, fmt);
-	vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
+	int result = vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
 	va_end(args);
+    return result;
 }
 
 void printf(const char *fmt, ...) {
