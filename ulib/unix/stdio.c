@@ -249,6 +249,10 @@ FILE *fopen(const char *restrict filename, const char *restrict mode) {
     return result;
 }
 
+int fclose(FILE *f) {
+    return close(f->fd);
+}
+
 int vfprintf(FILE *stream, const char *restrict fmt, va_list args) {
     return vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
 }
