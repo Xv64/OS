@@ -126,6 +126,11 @@ int32_t strcmp(const char *s1, const char *s2) {
     return strncmp(s1, s2, (uint32_t)(-1));
 }
 
+char* strerror(int errnum) {
+    //POSIX Base Definitions, Issue 6 - page 1422
+    return ""; //HACK
+}
+
 int32_t strncmp(const char* p, const char* q, uint32_t n) {
     while (n > 0 && *p && *p == *q)
         n--, p++, q++;

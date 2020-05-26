@@ -14,6 +14,7 @@ char*   strchr(const char *s, char c);
 char*   strcpy(char *s, char *t);
 int32_t strlen(const char* s);
 int32_t strcmp(const char *s1, const char *s2);
+char*   strerror(int errnum);
 int32_t strncmp(const char* p, const char* q, uint32_t n);
 char*   strncpy(char* s, const char* t, int32_t n);
 char*   strstr(const char *s, char *s2);
