@@ -68,6 +68,16 @@ int sys_read(void){
     return fileread(f, p, n);
 }
 
+int sys_fseek(void){
+    struct file* fd;
+    int offset;
+
+    if (argfd(0, 0, &fd) < 0 || argint(1, &offset) < 0)
+        return -666;
+    return fileseek(fd, offset);
+}
+
+
 int sys_write(void){
     struct file* f;
     int n;

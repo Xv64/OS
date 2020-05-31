@@ -101,6 +101,19 @@ int fileread(struct file* f, char* addr, int n){
     panic("fileread");
 }
 
+int fileseek(struct file *f, int offset){
+    if (f->readable == 0)
+        return -1;
+    if (f->type == FD_PIPE)
+        return -2;
+
+    if (f->type == FD_INODE) {
+        f->off += offset;
+        return f->off;
+    }
+    panic("fileseek");
+}
+
 
 // Write to file f.
 int filewrite(struct file* f, char* addr, int n){
