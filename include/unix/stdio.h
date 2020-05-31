@@ -4,6 +4,11 @@
 
 #define	EOF	(-1)
 
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
+
 typedef struct {
     int fd;
     int readable;
@@ -22,6 +27,7 @@ int   fgetc(FILE *stream);
 char *fgets(char *restrict, int, FILE *restrict);
 FILE *fopen(const char *restrict filename, const char *restrict mode);
 int   fclose(FILE *);
+int   fseek(FILE *stream, long offset, int whence);
 int   fprintf(FILE *stream, const char *fmt, ...);
 void  printf(const char *fmt, ...);
 int   snprintf(char *s, size_t n, const char *fmt, ...);

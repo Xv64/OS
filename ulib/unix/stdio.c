@@ -253,6 +253,18 @@ int fclose(FILE *f) {
     return close(f->fd);
 }
 
+int fseek(FILE *stream, long offset, int whence) {
+    //POSIX Base Definitions, Issue 6 - page 442
+    if(whence == SEEK_CUR){
+        int result = seek(stream->fd, offset);
+        if(result < 0){
+            return -1;
+        }
+        return 0;
+    }
+    return -1; //not supported at the moment
+}
+
 int vfprintf(FILE *stream, const char *restrict fmt, va_list args) {
     return vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
 }
