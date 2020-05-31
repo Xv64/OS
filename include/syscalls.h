@@ -23,3 +23,4 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 void reboot(void);
+int seek(int, int);

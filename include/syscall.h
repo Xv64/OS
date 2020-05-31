@@ -22,4 +22,4 @@
 #define SYS_close         21
 #define SYS_reboot        22
 #define SYS_kconsole_info 23
-#define SYS_fseek         24
+#define SYS_seek          24

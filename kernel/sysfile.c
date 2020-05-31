@@ -68,7 +68,7 @@ int sys_read(void){
     return fileread(f, p, n);
 }
 
-int sys_fseek(void){
+int sys_seek(void){
     struct file* fd;
     int offset;
 

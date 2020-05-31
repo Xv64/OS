@@ -116,7 +116,7 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_reboot(void);
 extern int sys_kconsole_info(void);
-extern int sys_fseek(void);
+extern int sys_seek(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]          sys_fork,
@@ -142,7 +142,7 @@ static int (*syscalls[])(void) = {
     [SYS_close]         sys_close,
     [SYS_reboot]        sys_reboot,
     [SYS_kconsole_info] sys_kconsole_info,
-    [SYS_fseek] sys_fseek,
+    [SYS_seek]          sys_seek,
 };
 
 void syscall(void){
