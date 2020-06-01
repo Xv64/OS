@@ -228,6 +228,11 @@ void printf(const char *fmt, ...) {
 	va_end(args);
 }
 
+int puts(const char *s) {
+    printf("%s\n", s);
+    return 0;
+}
+
 int snprintf(char *s, size_t n, const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
