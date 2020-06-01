@@ -26,6 +26,7 @@ int   feof(FILE *);
 int   fgetc(FILE *stream);
 char *fgets(char *restrict, int, FILE *restrict);
 FILE *fopen(const char *restrict filename, const char *restrict mode);
+long  ftell(FILE *stream);
 int   fclose(FILE *);
 int   fseek(FILE *stream, long offset, int whence);
 int   fprintf(FILE *stream, const char *fmt, ...);

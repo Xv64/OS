@@ -249,6 +249,17 @@ FILE *fopen(const char *restrict filename, const char *restrict mode) {
     return result;
 }
 
+long ftell(FILE *stream) {
+    //the XV64 "seek" syscall returns the file offset after seeking,
+    //so if we seek to 0 (e.g. our current location)
+    //then we will have the current file offset
+    int result = seek(stream->fd, 0);
+    if(result < 0){
+        return -1;
+    }
+    return result;
+}
+
 int fclose(FILE *f) {
     return close(f->fd);
 }
