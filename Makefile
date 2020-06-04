@@ -105,6 +105,7 @@ uobj/unix/%.o: ulib/unix/%.c
 POSIXLIB = uobj/unix/ctype.o\
 		   uobj/unix/stdio.o\
 		   uobj/unix/string.o\
+		   uobj/unix/strings.o\
 		   uobj/unix/poll.o\
 		   uobj/unix/stdlib.o\
 
