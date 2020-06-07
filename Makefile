@@ -241,4 +241,4 @@ binaries : fs.img xv6.img
 	cp -r out bin/artifacts/
 
 install: binaries
-	./install.sh
+	sudo ./install.sh
