@@ -345,8 +345,7 @@ static int buffer_validate_addr(struct buffer *buf, struct cmd *cmd)
 	       cmd->b <= buf->nlines;
 }
 
-int main(int argc, char *argv[])
-{
+void main(int argc, char *argv[]) {
 	enum err err = E_NONE, err2, last_err = E_NONE;
 	if (argc > 2)
 		xusage(1, "");
@@ -517,5 +516,5 @@ quit:
 	buffer_free(&buf);
 	if (fname_needs_free)
 		free(fname);
-	return last_err == E_NONE || last_err == E_INPUT ? 0 : 1;
+	exit(last_err == E_NONE || last_err == E_INPUT ? 0 : 1);
 }
