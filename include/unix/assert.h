@@ -10,6 +10,6 @@
 #define _tostr(x) _str(x)
 #define _assert_occurs " [" __FILE__ ":" _tostr(__LINE__) "] "
 #define assert(x) \
-        do { if (!(x)) { fprintf(stderr, "assertion failed" _assert_occurs #x); abort(); } } while (0)
+        do { if (!(x)) { fprintf(stderr, " assertion failed\n" _assert_occurs #x); abort(); } } while (0)
 
 #endif
