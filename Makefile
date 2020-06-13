@@ -195,6 +195,7 @@ UPROGS=\
 	fs/bin/grep\
 	fs/init\
 	fs/bin/kill\
+	fs/bin/halt\
 	fs/bin/ln\
 	fs/bin/ls\
 	fs/bin/mkdir\
