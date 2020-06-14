@@ -1,13 +1,7 @@
-/*
- * ed -- a simplified version of GNU ed
- *
- * This is a school assignment. It may be useful as a learning resource,
- * but it's not production grade software.
- *
- * David Čepelík <d@dcepelik.cz> (c) 2019
- *
- * Distributed under the terms of the MIT License.
- */
+// ed - a line oriented text editor
+// Copyright (c) 2019 David Čepelík <d@dcepelik.cz>
+// MIT License
+// Source: https://github.com/dcepelik/ed
 
 #include <errno.h>
 #include <assert.h>
@@ -37,9 +31,11 @@ static char *read_line(FILE *f)
 		fprintf(stderr, "fgets");
 	}
 	size_t l = strlen(buf);
-	assert(l > 0);
+	if(l <= 0){
+		return NULL;
+	}
 	if (buf[l - 1] != '\n' && !feof(f))
-		fprintf(stderr, "input line longer than %zu bytes", sizeof(buf));
+		fprintf(stderr, "input line longer than %d bytes", sizeof(buf));
 	char *str = malloc(l + 1);
 	if (!str)
 		fprintf(stderr, "malloc");
@@ -231,7 +227,7 @@ static void buffer_print_range(struct buffer *buf, long int a, long int b,
 		if (line_no < a)
 			continue;
 		if (with_line_numbers)
-			printf("%li\t%s", line_no, line->text);
+			printf("%d\t%s", line_no, line->text);
 		else
 			printf("%s", line->text);
 	}
@@ -302,7 +298,7 @@ static enum err buf_write(struct buffer *buf, const char *fname)
 		written += (size_t)fprintf(f, "%s", l->text);
 	fclose(f);
 	buf->changed = 0;
-	printf("%lu\n", written);
+	printf("%d\n", written);
 	return E_NONE;
 }
 
@@ -368,7 +364,7 @@ void main(int argc, char *argv[]) {
 		} else {
 			buffer_init_load(&buf, f);
 			fseek(f, 0, SEEK_END);
-			printf("%lu\n", ftell(f));
+			printf("%d\n", ftell(f));
 			fclose(f);
 		}
 	} else {
