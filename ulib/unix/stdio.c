@@ -34,7 +34,7 @@ int fgetc(FILE *stream) {
         return EOF;
     }
     unsigned char buf = EOF;
-    stream->readable = read(stream->fd, &buf, sizeof(buf));
+    stream->readable = read(stream->fd, &buf, sizeof(buf)) == sizeof(buf) ? 1 : -1;
     if(stream->readable == -1){
         return EOF;
     }
