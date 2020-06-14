@@ -382,6 +382,15 @@ object *builtin_read(object *args) {
 	return lisp_read(stdin);
 }
 
+object *builtin_memread(object *args) {
+	unsigned long addr = atol(TEXT(args->car));
+	unsigned long *mem = (unsigned long *)addr;
+
+	printf("Addr: %p\n", addr);
+	printf("Value: %p\n", *mem);
+	return NULL;
+}
+
 void defun(object *env, const char *name, cfunc fn) {
 	object *key = NULL, *val = NULL;
 	gc_protect(&env, &key, &val, NULL);
@@ -489,6 +498,7 @@ int main(int argc, char* argv[]) {
 	defun(env, "display", &builtin_display);
 	defun(env, "newline", &builtin_newline);
 	defun(env, "read", &builtin_read);
+	defun(env, "memread", &builtin_memread);
 	FILE *in = (argc > 1) ? fopen(argv[1], "r") : stdin;
 	for (;;) {
 		obj = lisp_read(in);
