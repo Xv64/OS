@@ -391,6 +391,11 @@ object *builtin_memread(object *args) {
 	return NULL;
 }
 
+object *builtin_exit(object *args){
+	exit(0);
+	return NULL;
+}
+
 void defun(object *env, const char *name, cfunc fn) {
 	object *key = NULL, *val = NULL;
 	gc_protect(&env, &key, &val, NULL);
@@ -499,6 +504,7 @@ int main(int argc, char* argv[]) {
 	defun(env, "newline", &builtin_newline);
 	defun(env, "read", &builtin_read);
 	defun(env, "memread", &builtin_memread);
+	defun(env, "exit", &builtin_exit);
 	FILE *in = (argc > 1) ? fopen(argv[1], "r") : stdin;
 	for (;;) {
 		obj = lisp_read(in);
