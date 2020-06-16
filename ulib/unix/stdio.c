@@ -104,7 +104,7 @@ static int8_t printint(int xx, int base, int sgn, char *outbuf) {
 }
 
 // This is the core print method, all external functions delegate to this.
-static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, const char *fmt,  va_list ap){
+static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, const char *fmt,  va_list ap){
 	char *s;
 	int c, i, state;
 	int32_t len = 0; //based on mode this will either represent:
@@ -122,7 +122,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 					len += putc(fd, c);
 				}else{
 					if(len < maxlen) {
-						buf[len] = c;
+						obuf[len] = c;
 					}
 					len++;
 				}
@@ -136,7 +136,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 						len += putc(fd, buf[j]);
 					}else {
 						if(len < maxlen) {
-							buf[len] = c;
+							obuf[len] = buf[j];
 						}
 						len++;
 					}
@@ -149,7 +149,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 						len += putc(fd, buf[j]);
 					}else {
 						if(len < maxlen) {
-							buf[len] = c;
+                            obuf[len] = buf[j];
 						}
 						len++;
 					}
@@ -163,7 +163,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 						len += putc(fd, *s);
 					}else{
 						if(len < maxlen) {
-							buf[len] = *s;
+                            obuf[len] = *s;
 						}
 						len++;
 					}
@@ -174,7 +174,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 					len += putc(fd, va_arg(ap, uint32_t));
 				}else{
 					if(len < maxlen) {
-						buf[len] = va_arg(ap, uint32_t);
+                        obuf[len] = va_arg(ap, uint32_t);
 					}
 					len++;
 				}
@@ -183,7 +183,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 					len += putc(fd, c);
 				}else{
 					if(len < maxlen) {
-						buf[len] = c;
+						obuf[len] = c;
 					}
 					len++;
 				}
@@ -194,11 +194,11 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 					len += putc(fd, c);
 				}else{
 					if(len < maxlen) {
-						buf[len] = '%';
+						obuf[len] = '%';
 					}
 					len++;
 					if(len < maxlen) {
-						buf[len] = c;
+						obuf[len] = c;
 					}
 					len++;
 				}
@@ -208,7 +208,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *buf, uint32_t maxlen, con
 	}
 	if(mode == PRINT_BUFFER) {
 		//null terminate our string, but do NOT increment len in the process
-		buf[ len < maxlen ? len + 1 : maxlen ] = '\0';
+		obuf[ len < maxlen ? len + 1 : maxlen ] = '\0';
 	}
 	return len;
 }
