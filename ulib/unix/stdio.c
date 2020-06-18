@@ -103,6 +103,35 @@ static int8_t printint(int xx, int base, int sgn, char *outbuf) {
 	return len;
 }
 
+static int8_t printlong(long xx, int base, int sgn, char *outbuf) {
+	static char digits[] = "0123456789ABCDEF";
+	char buf[16];
+	long i, neg;
+	uint32_t x;
+
+	neg = 0;
+	if(sgn && xx < 0) {
+		neg = 1;
+		x = -xx;
+	} else {
+		x = xx;
+	}
+
+	i = 0;
+	do {
+		buf[i++] = digits[x % base];
+	} while((x /= base) != 0);
+	if(neg)
+		buf[i++] = '-';
+	int32_t len = i;
+
+	while(--i >= 0){
+		outbuf[len - (i + 1)] = buf[i];
+	}
+
+	return len;
+}
+
 // This is the core print method, all external functions delegate to this.
 static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, const char *fmt,  va_list ap){
 	char *s;
@@ -130,7 +159,20 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 		} else if(state == '%') {
 			if(c == 'd') {
 				char buf[16];
-				int8_t segmentLen = printint(va_arg(ap, int), 10, 1, &buf[0]);
+				int8_t segmentLen = printint(va_arg(ap, long), 10, 1, &buf[0]);
+				for(uint8_t j = 0; j != segmentLen; j++){
+					if(mode == PRINT_SCREEN) {
+						len += putc(fd, buf[j]);
+					}else {
+						if(len < maxlen) {
+							obuf[len] = buf[j];
+						}
+						len++;
+					}
+				}
+            }else if(c == 'l') {
+				char buf[16];
+				int8_t segmentLen = printlong(va_arg(ap, int), 10, 1, &buf[0]);
 				for(uint8_t j = 0; j != segmentLen; j++){
 					if(mode == PRINT_SCREEN) {
 						len += putc(fd, buf[j]);

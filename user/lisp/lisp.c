@@ -84,7 +84,7 @@ int match_number(const char *s) {
 
 const char *itos(long n) {
 	char ch[TOKEN_MAX];
-	snprintf(ch, TOKEN_MAX, "%d", n);
+	snprintf(ch, TOKEN_MAX, "%l", n);
 	return intern_string(ch);
 }
 
