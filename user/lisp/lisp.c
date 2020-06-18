@@ -84,7 +84,7 @@ int match_number(const char *s) {
 
 const char *itos(long n) {
 	char ch[TOKEN_MAX];
-	snprintf(ch, TOKEN_MAX, "%ld", n);
+	snprintf(ch, TOKEN_MAX, "%d", n);
 	return intern_string(ch);
 }
 
@@ -386,9 +386,7 @@ object *builtin_memread(object *args) {
 	unsigned long addr = atol(TEXT(args->car));
 	unsigned long *mem = (unsigned long *)addr;
 
-	printf("Addr: %p\n", addr);
-	printf("Value: %p\n", *mem);
-	return NULL;
+	return new_atom(itos(*mem));
 }
 
 object *builtin_exit(object *args){
