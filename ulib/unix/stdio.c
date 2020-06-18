@@ -208,7 +208,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 	}
 	if(mode == PRINT_BUFFER) {
 		//null terminate our string, but do NOT increment len in the process
-		obuf[ len < maxlen ? len + 1 : maxlen ] = '\0';
+		obuf[ len < maxlen ? len : maxlen ] = '\0';
 	}
 	return len;
 }
