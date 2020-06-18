@@ -386,7 +386,9 @@ object *builtin_memread(object *args) {
 	unsigned long addr = atol(TEXT(args->car));
 	unsigned long *mem = (unsigned long *)addr;
 
-	return new_atom(itos(*mem));
+	char ch[TOKEN_MAX];
+	snprintf(ch, TOKEN_MAX, "%p", *mem);
+	return new_atom(intern_string(ch));
 }
 
 object *builtin_exit(object *args){
