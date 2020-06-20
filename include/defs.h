@@ -135,6 +135,7 @@ void            popcli(void);
 
 // syscall.c
 int             argint(int, int*);
+int             arglong(int n, long* lp);
 int             argptr(int, char**, int);
 int             argstr(int, char**);
 int             arguintp(int, uintp*);

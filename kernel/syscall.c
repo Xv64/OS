@@ -63,6 +63,11 @@ int argint(int n, int* ip){
     return 0;
 }
 
+int arglong(int n, long* lp){
+    *lp = fetcharg(n);
+    return 0;
+}
+
 int arguintp(int n, uintp* ip){
     *ip = fetcharg(n);
     return 0;
