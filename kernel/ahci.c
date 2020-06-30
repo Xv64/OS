@@ -68,7 +68,7 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
 
         if(hba_port->sig != SATA_SIG_ATAPI && hba_port->sig != SATA_SIG_SEMB && hba_port->sig != SATA_SIG_PM){
             //we may have found a SATA device, but what is the status of this device?
-            uint64 ssts = amd64_spinread64(&hba_port->ssts, 0);
+            uint64 ssts = hba_port->ssts;
 
             uint8 ipm = (ssts >> 8) & 0x0F;
             uint8 spd = (ssts >> 4) & 0x0F;
@@ -168,13 +168,13 @@ int8 ahci_rebase_port(HBA_PORT *port, int num) {
     port->is = 0; //
     port->ie = 1;
 
-    uint64 addr = ((port->clbu << 32) | port->clb) + KERNBASE;
+    uint64 addr = (( (uint64)port->clbu << 32) | port->clb) + KERNBASE;
     memset((void *) addr, 0, 1024);
 
-    addr = ((port->fbu << 32) | port->fb) + KERNBASE;
+    addr = (( (uint64)port->fbu << 32) | port->fb) + KERNBASE;
     memset((void*) addr, 0, 256);
 
-    addr = ((port->clbu << 32) | port->clb) + KERNBASE;
+    addr = (( (uint64)port->clbu << 32) | port->clb) + KERNBASE;
     HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER *) addr;
 
     for (uint8 i = 0; i < 32; i++) {
