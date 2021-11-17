@@ -16,7 +16,7 @@ fi
 
 NETWORK="-net none"
 BOOT_DISK="-hda ./bin/boot.vdi"
-ROOT_DISK="-drive id=disk,file=./bin/fs.vdi,if=none -device ide-drive,drive=disk,bus=ahci.0"
+ROOT_DISK="-drive id=disk,file=./bin/fs.vdi,if=none -device driver=ide-hd,drive=disk,bus=ahci.0"
 
 if [ -n "$IDE_MODE" ]; then
     ROOT_DISK="-hdd ./bin/fs.vdi"
