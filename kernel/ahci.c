@@ -24,6 +24,8 @@ static const struct {
 	{0, 0, ""} //this is a terminal node - this must be present and the last entry
 };
 
+static HBA_PORT* BLOCK_DEVICES[AHCI_MAX_SLOT];
+
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
 	uint16 vendor = ahci_probe(bus, slot, func, AHCI_VENDOR_OFFSET);
 	uint16 device = ahci_probe(bus, slot, func, AHCI_DEVICE_OFFSET);
@@ -139,6 +141,17 @@ int32 ahci_find_cmdslot(HBA_PORT *port) {
 	return -1;
 }
 
+int sata_read(uint32 dev, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
+	if( dev >= AHCI_MAX_SLOT) {
+		return 0;
+	}
+	HBA_PORT *port = BLOCK_DEVICES[dev];
+	if(!port){
+		return 0;
+	}
+	return ahci_sata_read(port, startl, starth, count, buf);
+}
+
 int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
 
 	port->is = (uint32) -1; // Clear pending interrupt bits
@@ -146,8 +159,6 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	int slot = ahci_find_cmdslot(port);
 	if (slot == -1)
 		return 0;
-
-	cprintf("   clb:%x clbu:%x slot:%d\n", port->clb, port->clbu, slot);
 
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*) P2V(
 	          ( ((uint64)port->clbu) << 32) + port->clb
@@ -234,7 +245,8 @@ void ahci_sata_init(HBA_PORT *port, int num){
         uint16 buf[16];
         int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
         if(success == 1){
-            cprintf("   Init success\n");
+			cprintf("   Init success: /dev/sd%d\n", num);
+			BLOCK_DEVICES[num] = port;
         }else{
             cprintf("   Init failure\n");
         }
