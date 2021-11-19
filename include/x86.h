@@ -204,10 +204,6 @@ static inline void amd64_cpuid(unsigned int ax, unsigned int *p) {
 	              :  "0" (ax));
 }
 
-//PAGEBREAK: 36
-// Layout of the trap frame built on the stack by the
-// hardware and by trapasm.S, and passed to trap().
-#if X64
 // lie about some register names in 64bit mode to avoid
 // clunky ifdefs in proc.c and trap.c.
 struct trapframe {
@@ -236,39 +232,3 @@ struct trapframe {
 	unsigned long esp; // rsp
 	unsigned long ds; // ss
 };
-#else
-struct trapframe {
-	// registers as pushed by pusha
-	unsigned int edi;
-	unsigned int esi;
-	unsigned int ebp;
-	unsigned int oesp; // useless & ignored
-	unsigned int ebx;
-	unsigned int edx;
-	unsigned int ecx;
-	unsigned int eax;
-
-	// rest of trap frame
-	unsigned short gs;
-	unsigned short padding1;
-	unsigned short fs;
-	unsigned short padding2;
-	unsigned short es;
-	unsigned short padding3;
-	unsigned short ds;
-	unsigned short padding4;
-	unsigned int trapno;
-
-	// below here defined by x86 hardware
-	unsigned int err;
-	unsigned int eip;
-	unsigned short cs;
-	unsigned short padding5;
-	unsigned int eflags;
-
-	// below here only when crossing rings, such as from user to kernel
-	unsigned int esp;
-	unsigned short ss;
-	unsigned short padding6;
-};
-#endif
