@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "x86.h"
 #include "kernel/string.h"
+#include "spinlock.h"
 #include "memlayout.h"
 
 //AHCI implementation.
@@ -153,7 +154,6 @@ int sata_read(uint32 dev, uint32 startl, uint32 starth, uint32 count, uint16 *bu
 }
 
 int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
-
 	port->is = (uint32) -1; // Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
 	int slot = ahci_find_cmdslot(port);
@@ -164,19 +164,23 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	          ( ((uint64)port->clbu) << 32) + port->clb
 	      );
 	cmdheader += slot;
-	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint64); // Command FIS size
+	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32); // Command FIS size
 	cmdheader->w = 0; // Read from device
 	cmdheader->prdtl = (uint16)((count-1)>>4) + 1; // PRDT entries count
 
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*) P2V(
 		( ((uint64)cmdheader->ctbau) << 32) + cmdheader->ctba
 	);
+	cprintf("C.2\n");
+	cprintf("cmdtbl: %x, cmdheader: %x, prdtl: %x, ctbau: %x, ctba: %x\n", cmdtbl, cmdheader, cmdheader->prdtl, cmdheader->ctbau, cmdheader->ctba);
+
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
  		(cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
+	cprintf("D\n");
 
 	// 8K bytes (16 sectors) per PRDT
 	int i;
-	for (i=0; i<cmdheader->prdtl-1; i++) {
+	for (i=0; i < cmdheader->prdtl - 1; i++) {
 		cmdtbl->prdt_entry[i].dba = (uint32) *buf;
 		cmdtbl->prdt_entry[i].dbc = 8*1024-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
@@ -194,6 +198,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	cmdfis->fis_type = FIS_TYPE_REG_H2D;
 	cmdfis->c = 1; // Command
 	cmdfis->command = ATA_CMD_READ_DMA_EX;
+
 
 	cmdfis->lba0 = (uint8)startl;
 	cmdfis->lba1 = (uint8)(startl>>8);
