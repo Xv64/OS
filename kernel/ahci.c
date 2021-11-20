@@ -250,7 +250,7 @@ void ahci_sata_init(HBA_PORT *port, int num){
         uint16 buf[16];
         int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
         if(success == 1){
-			cprintf("   Init success: /dev/sd%d\n", num);
+			cprintf("   Init success: /dev/sata%d\n", num);
 			BLOCK_DEVICES[num] = port;
         }else{
             cprintf("   Init failure\n");
