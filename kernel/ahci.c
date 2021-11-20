@@ -25,6 +25,7 @@ static const struct {
 	{0, 0, ""} //this is a terminal node - this must be present and the last entry
 };
 
+static uint32 sataDeviceCount = 0;
 static HBA_PORT* BLOCK_DEVICES[AHCI_MAX_SLOT];
 
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
@@ -142,6 +143,10 @@ int32 ahci_find_cmdslot(HBA_PORT *port) {
 	return -1;
 }
 
+uint32 sata_device_count() {
+	return sataDeviceCount;
+}
+
 int sata_read(uint32 dev, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
 	if( dev >= AHCI_MAX_SLOT) {
 		return 0;
@@ -250,8 +255,9 @@ void ahci_sata_init(HBA_PORT *port, int num){
         uint16 buf[16];
         int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
         if(success == 1){
-			cprintf("   Init success: /dev/sata%d\n", num);
-			BLOCK_DEVICES[num] = port;
+			uint32 devNum = sataDeviceCount++;
+			cprintf("   Init success: /dev/sata%d\n", devNum);
+			BLOCK_DEVICES[devNum] = port;
         }else{
             cprintf("   Init failure\n");
         }
