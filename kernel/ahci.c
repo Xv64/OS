@@ -302,11 +302,11 @@ int8 ahci_rebase_port(HBA_PORT *port, int num) {
 		cmdheader[i].prdtl = 8; // 8 prdt entries per command table
 		                        // 256 bytes per command table, 64+16+48+16*8
 		                        // Command table offset: 40K + 8K*portno + cmdheader_index*256
-		cmdheader[i].ctba = (((uint64) AHCI_BASE
+		cmdheader[i].ctba = (((uint64) ahciBase
 		                      + (uint64) ((40 << 10) / 8) + (uint64) ((i << 8) / 8))
 		                     & 0xffffffff);
 		cmdheader[i].ctbau =
-			((((uint64) AHCI_BASE + (uint64) ((40 << 10) / 8)
+			((((uint64) ahciBase + (uint64) ((40 << 10) / 8)
 			   + (uint64) ((i << 8) / 8)) >> 32) & 0xffffffff);
 	}
 
