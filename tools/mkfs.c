@@ -139,6 +139,7 @@ int main(int argc, char *argv[]) {
 	strcpy(de.name, "..");
 	iappend(rootino, &de, sizeof(de));
 
+	mkdir("dev", rootino);
 	uint binino = mkdir("bin", rootino);
 
 	for(i = 2; i < argc; i++) {
