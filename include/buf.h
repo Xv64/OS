@@ -11,10 +11,3 @@ struct buf {
 #define B_VALID 0x2  // buffer has been read from disk
 #define B_DIRTY 0x4  // buffer needs to be written to disk
 
-#define DEV_TYPE_MASK 0xF0000000
-#define DEV_NUM_MASK  0x0FFFFFFF
-#define DEV_IDE 0
-#define DEV_SATA 1
-
-#define GETDEVTYPE(a) ((a & DEV_TYPE_MASK) >> 28)
-#define GETDEVNUM(a) (a & DEV_NUM_MASK)

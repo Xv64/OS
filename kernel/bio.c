@@ -25,7 +25,6 @@
 #include "param.h"
 #include "spinlock.h"
 #include "buf.h"
-#include "ahci.h"
 
 struct {
     struct spinlock lock;
@@ -94,22 +93,10 @@ static struct buf* bget(uint dev, uint sector){
 // Return a B_BUSY buf with the contents of the indicated disk sector.
 struct buf* bread(uint dev, uint sector){
     struct buf* b;
-    uint8 devType = GETDEVTYPE(dev);
-    uint32 devNum = GETDEVNUM(dev);
 
-    b = bget(devNum, sector);
-    if (!(b->flags & B_VALID)) {
-        if(devType == DEV_IDE){
-            iderw(b);
-        } else if(devType == DEV_SATA){
-            uint16 buf[2048];
-            buf[0] = 42;
-            sata_read(devNum, (sector - 1) * 512, sector * 512, 1, &buf[0]);
-            for(int i =0; i != 512; i++) {
-                b->data[i] = (uchar)buf[i];
-            }
-        }
-    }
+    b = bget(dev, sector);
+    if (!(b->flags & B_VALID))
+        iderw(b);
     return b;
 }
 
