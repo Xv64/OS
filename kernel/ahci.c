@@ -184,16 +184,19 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	cprintf("D\n");
 
 	// 8K bytes (16 sectors) per PRDT
+	uint64 addr = V2P(buf);
 	int i;
 	for (i=0; i < cmdheader->prdtl - 1; i++) {
-		cmdtbl->prdt_entry[i].dba = (uint32) *buf;
+		cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
+		cmdtbl->prdt_entry[i].dbau = ADDRHI(addr);
 		cmdtbl->prdt_entry[i].dbc = 8*1024-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
 		buf += 4*1024;	// 4K words
 		count -= 16;	// 16 sectors
 	}
 	// Last entry
-	cmdtbl->prdt_entry[i].dba = (uint32) *buf;
+	cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
+	cmdtbl->prdt_entry[i].dbau = ADDRHI(addr);
 	cmdtbl->prdt_entry[i].dbc = (count<<9)-1; // 512 bytes per sector
 	cmdtbl->prdt_entry[i].i = 1;
 
