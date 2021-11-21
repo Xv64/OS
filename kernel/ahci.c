@@ -277,13 +277,13 @@ int8 ahci_rebase_port(HBA_PORT *port, int num) {
 		return -1;
 	}
 
-	port->clb = (((uint64) AHCI_BASE & 0xffffffff));
-	port->clbu = 0;
-	port->fb = (((uint64) AHCI_BASE + (uint64) ((32 << 10) / 8))
-	            & 0xffffffff);
-	port->fbu =
-		((((uint64) AHCI_BASE + (uint64) ((32 << 10) / 8))
-		  >> 32) & 0xffffffff);
+	uint64 ahciBase = AHCI_BASE;
+	port->clb = ADDRLO(ahciBase);
+	port->clbu = ADDRHI(ahciBase);
+
+	uint64 fbAddr = ahciBase + (32<<10) + (num<<8);
+	port->fb = ADDRLO(fbAddr);
+	port->fbu = ADDRHI(fbAddr);
 
 	port->serr = 1; //For each implemented port, clear the PxSERR register, by writing 1 to each implemented location
 	port->is = 0; //
