@@ -58,10 +58,32 @@ uint xint(uint x) {
 	return y;
 }
 
+struct dirent de;
+
+uint mkdir(char *dirname, uint parentdir) {
+	uint dirino = ialloc(T_DIR);
+
+	bzero(&de, sizeof(de));
+	de.inum = xshort(dirino);
+	strcpy(de.name, dirname);
+	iappend(parentdir, &de, sizeof(de));
+
+	bzero(&de, sizeof(de));
+	de.inum = xshort(dirino);
+	strcpy(de.name, ".");
+	iappend(dirino, &de, sizeof(de));
+
+	bzero(&de, sizeof(de));
+	de.inum = xshort(parentdir);
+	strcpy(de.name, "..");
+	iappend(dirino, &de, sizeof(de));
+
+	return dirino;
+}
+
 int main(int argc, char *argv[]) {
 	int i, cc, fd;
 	uint rootino, inum, off;
-	struct dirent de;
 	char buf[512];
 	struct dinode din;
 
@@ -117,23 +139,7 @@ int main(int argc, char *argv[]) {
 	strcpy(de.name, "..");
 	iappend(rootino, &de, sizeof(de));
 
-
-	uint binino = ialloc(T_DIR);
-
-	bzero(&de, sizeof(de));
-	de.inum = xshort(binino);
-	strcpy(de.name, "bin");
-	iappend(rootino, &de, sizeof(de));
-
-	bzero(&de, sizeof(de));
-	de.inum = xshort(binino);
-	strcpy(de.name, ".");
-	iappend(binino, &de, sizeof(de));
-
-	bzero(&de, sizeof(de));
-	de.inum = xshort(rootino);
-	strcpy(de.name, "..");
-	iappend(binino, &de, sizeof(de));
+	uint binino = mkdir("bin", rootino);
 
 	for(i = 2; i < argc; i++) {
 		char *name = argv[i];
