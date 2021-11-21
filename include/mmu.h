@@ -1,4 +1,4 @@
-// This file contains definitions for the 
+// This file contains definitions for the
 // x86 memory management unit (MMU).
 
 // Eflags register
@@ -106,7 +106,7 @@ struct segdesc {
 // | Page Directory |   Page Table   | Offset within Page  |
 // |      Index     |      Index     |                     |
 // +----------------+----------------+---------------------+
-//  \--- PDX(va) --/ \--- PTX(va) --/ 
+//  \--- PDX(va) --/ \--- PTX(va) --/
 
 // page directory index
 #define PDX(va)         (((uintp)(va) >> PDXSHIFT) & PXMASK)
@@ -118,7 +118,6 @@ struct segdesc {
 #define PGADDR(d, t, o) ((uintp)((d) << PDXSHIFT | (t) << PTXSHIFT | (o)))
 
 // Page directory and page table constants.
-#if X64
 #define NPDENTRIES      512     // # directory entries per page directory
 #define NPTENTRIES      512     // # PTEs per page table
 #define PGSIZE          4096    // bytes mapped by a page
@@ -128,17 +127,6 @@ struct segdesc {
 #define PDXSHIFT        21      // offset of PDX in a linear address
 
 #define PXMASK          0x1FF
-#else
-#define NPDENTRIES      1024    // # directory entries per page directory
-#define NPTENTRIES      1024    // # PTEs per page table
-#define PGSIZE          4096    // bytes mapped by a page
-
-#define PGSHIFT         12      // log2(PGSIZE)
-#define PTXSHIFT        12      // offset of PTX in a linear address
-#define PDXSHIFT        22      // offset of PDX in a linear address
-
-#define PXMASK          0x3FF
-#endif
 
 #define PGROUNDUP(sz)  (((sz)+((uintp)PGSIZE-1)) & ~((uintp)(PGSIZE-1)))
 #define PGROUNDDOWN(a) (((a)) & ~((uintp)(PGSIZE-1)))
