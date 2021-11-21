@@ -277,7 +277,7 @@ int8 ahci_rebase_port(HBA_PORT *port, int num) {
 		return -1;
 	}
 
-	uint64 ahciBase = AHCI_BASE;
+	uint64 ahciBase = V2P(kmalloc(32));
 	port->clb = ADDRLO(ahciBase);
 	port->clbu = ADDRHI(ahciBase);
 
