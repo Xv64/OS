@@ -166,7 +166,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 		return 0;
 
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*) P2V(
-	          ( ((uint64)port->clbu) << 32) + port->clb
+			  HILO2ADDR(port->clbu, port->clb)
 	      );
 	cmdheader += slot;
 	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32); // Command FIS size
@@ -174,7 +174,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	cmdheader->prdtl = (uint16)((count-1)>>4) + 1; // PRDT entries count
 
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*) P2V(
-		( ((uint64)cmdheader->ctbau) << 32) + cmdheader->ctba
+		HILO2ADDR(cmdheader->ctbau, cmdheader->ctba)
 	);
 	cprintf("C.2\n");
 	cprintf("cmdtbl: %x, cmdheader: %x, prdtl: %x, ctbau: %x, ctba: %x\n", cmdtbl, cmdheader, cmdheader->prdtl, cmdheader->ctbau, cmdheader->ctba);
@@ -184,7 +184,8 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	cprintf("D\n");
 
 	// 8K bytes (16 sectors) per PRDT
-	uint64 addr = V2P(buf);
+	uint64 addr = (uint64)buf;//V2P(buf);
+	cprintf("buf addr: %x\n", addr);
 	int i;
 	for (i=0; i < cmdheader->prdtl - 1; i++) {
 		cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
@@ -199,6 +200,8 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	cmdtbl->prdt_entry[i].dbau = ADDRHI(addr);
 	cmdtbl->prdt_entry[i].dbc = (count<<9)-1; // 512 bytes per sector
 	cmdtbl->prdt_entry[i].i = 1;
+
+	cprintf("E\n");
 
 	// Setup command
 	FIS_REG_H2D *cmdfis = (FIS_REG_H2D*)(&cmdtbl->cfis);

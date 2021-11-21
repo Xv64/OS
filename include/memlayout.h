@@ -22,6 +22,7 @@ static inline void *p2v(uintp a) { return (void *) ((a) + ((uintp)KERNBASE)); }
 
 #define ADDRHI(a) ((a >> 32) & 0xffffffff)
 #define ADDRLO(a) (a & 0xffffffff)
+#define HILO2ADDR(hi, lo) ((((uint64)hi) << 32) + lo)
 
 #define V2P_WO(x) ((x) - KERNBASE)    // same as V2P, but without casts
 #define P2V_WO(x) ((x) + KERNBASE)    // same as V2P, but without casts
