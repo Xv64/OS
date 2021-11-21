@@ -25,6 +25,7 @@
 #include "param.h"
 #include "spinlock.h"
 #include "buf.h"
+#include "ahci.h"
 
 struct {
     struct spinlock lock;
@@ -95,8 +96,22 @@ struct buf* bread(uint dev, uint sector){
     struct buf* b;
 
     b = bget(dev, sector);
-    if (!(b->flags & B_VALID))
-        iderw(b);
+    if (!(b->flags & B_VALID)){
+        uint8 devType = GETDEVTYPE(dev);
+        uint32 devNum = GETDEVNUM(dev);
+
+        if(devType == DEV_IDE) {
+            iderw(b);
+        } else if(devType == DEV_SATA) {
+            uint16 buf[512];
+            sata_read(devNum, (sector - 1) * 512, sector * 512, 1, &buf[0]);
+            for(int i =0; i != 512; i++) {
+                b->data[i] = (uchar)buf[i];
+            }
+        } else {
+            panic("Unsupported device type");
+        }
+    }
     return b;
 }
 
