@@ -84,3 +84,21 @@ char* kalloc(void){
         release(&kmem.lock);
     return (char*)r;
 }
+
+char *kmalloc(uint16 pages){
+    struct run* r;
+
+    if (kmem.use_lock)
+        acquire(&kmem.lock);
+    r = kmem.freelist;
+    if (r){
+        struct run* n = r->next;
+        for(uint8 i = 0; i != pages; i++){
+            kmem.freelist = n;
+            n = n->next;
+        }
+    }
+    if (kmem.use_lock)
+        release(&kmem.lock);
+    return (char*)r;
+}
