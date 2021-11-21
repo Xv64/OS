@@ -35,6 +35,7 @@ static struct spinlock idelock;
 static struct buf* idequeue;
 uint16 ideChannel = SECONDARY_IDE_CHANNEL_BASE;
 
+static int havedisk0;
 static int havedisk1;
 static void idestart(struct buf*);
 
@@ -61,8 +62,10 @@ void ideinit(void){
         picenable(IRQ_IDE2);
         ioapicenable(IRQ_IDE2, ncpu - 1);
     }
-    idewait(0);
-    cprintf("   Init success: /dev/ide0\n");
+    havedisk0 = idewait(0);
+    if(havedisk0){
+        cprintf("   Init success: /dev/ide0\n");
+    }
 
     // Check if disk 1 is present
     amd64_out8(ideChannel + 6, IDE_SLAVE);
