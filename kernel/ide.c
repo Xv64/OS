@@ -52,6 +52,7 @@ static int idewait(int checkerr){
 void ideinit(void){
     int i;
 
+    cprintf("Detecting IDE devices:\n");
     initlock(&idelock, "ide");
     if(ideChannel == PRIMARY_IDE_CHANNEL_BASE){
         picenable(IRQ_IDE1);
@@ -61,12 +62,14 @@ void ideinit(void){
         ioapicenable(IRQ_IDE2, ncpu - 1);
     }
     idewait(0);
+    cprintf("   Init success: /dev/ide0\n");
 
     // Check if disk 1 is present
     amd64_out8(ideChannel + 6, IDE_SLAVE);
     for (i = 0; i < 1000; i++) {
         if (inb(ideChannel + 7) != 0) {
             havedisk1 = 1;
+            cprintf("   Init success: /dev/ide1\n");
             break;
         }
     }
