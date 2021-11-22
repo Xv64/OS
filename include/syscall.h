@@ -23,3 +23,4 @@
 #define SYS_reboot        22
 #define SYS_kconsole_info 23
 #define SYS_seek          24
+#define SYS_getppid       25

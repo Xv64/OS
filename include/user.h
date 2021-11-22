@@ -17,3 +17,5 @@ void  fprintf(int32, const char*, ...);
 // umalloc.c
 void* malloc(uint);
 void  free(void*);
+
+uint32 getppid(void);

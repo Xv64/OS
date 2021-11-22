@@ -122,6 +122,7 @@ extern int sys_uptime(void);
 extern int sys_reboot(void);
 extern int sys_kconsole_info(void);
 extern int sys_seek(void);
+extern int sys_getppid(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]          sys_fork,
@@ -148,6 +149,7 @@ static int (*syscalls[])(void) = {
     [SYS_reboot]        sys_reboot,
     [SYS_kconsole_info] sys_kconsole_info,
     [SYS_seek]          sys_seek,
+    [SYS_getppid]       sys_getppid,
 };
 
 void syscall(void){

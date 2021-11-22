@@ -62,6 +62,10 @@ int sys_sleep(void){
     return 0;
 }
 
+unsigned int sys_getppid(void) {
+    return proc->parent->pid;
+}
+
 // return how many clock tick interrupts have occurred
 // since start.
 int sys_uptime(void){
