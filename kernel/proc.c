@@ -90,6 +90,7 @@ void userinit(void){
 
     safestrcpy(p->name, "initcode", sizeof(p->name));
     p->cwd = namei("/");
+    p->blessed = PROC_BLESSED;
 
     p->state = RUNNABLE;
 }
@@ -263,6 +264,11 @@ void scheduler(void){
         for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
             if (p->state != RUNNABLE)
                 continue;
+
+            if (cpu->id == 0 && p->blessed != PROC_BLESSED){
+              // only blessed tasks can run on CPU#0
+              continue;
+            }
 
             // Switch to chosen process.  It is the process's job
             // to release ptable.lock and then reacquire it

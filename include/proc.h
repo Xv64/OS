@@ -1,5 +1,7 @@
 // Segments in proc->gdt.
 #define NSEGS     7
+#define PROC_BLESSED 1
+#define PROC_DAMNED  0
 
 // Per-CPU state
 struct cpu {
@@ -86,6 +88,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   int lastsyscall;
+  uint8 blessed;
 };
 
 // Process memory is laid out contiguously, low addresses first:
