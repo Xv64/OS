@@ -5,11 +5,7 @@
 #include "user.h"
 #include "fcntl.h"
 
-char *argv[] = { "sh", 0 };
-
-int
-main(void)
-{
+int main(void) {
   int pid, wpid;
 
   if(open("console", O_RDWR) < 0){
@@ -20,6 +16,7 @@ main(void)
   dup(0);  // stderr
 
   for(;;){
+
     fprintf(stdout, "init: starting sh\n");
     pid = fork();
     if(pid < 0){
@@ -27,6 +24,7 @@ main(void)
       procexit();
     }
     if(pid == 0){
+      char *argv[] = { "sh", 0 };
       exec("/bin/sh", argv);
       fprintf(stdout, "init: exec sh failed\n");
       procexit();
