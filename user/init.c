@@ -6,9 +6,9 @@
 #include "fcntl.h"
 
 int spawn(char *task, char *name){
+  fprintf(stdout, "init: starting %s\n", name);
   int pid = fork();
   char *argv[] = { name, 0 };
-  fprintf(stdout, "init: starting %s\n", name);
   if(pid < 0){
     fprintf(stdout, "init: fork failed\n");
     procexit();
