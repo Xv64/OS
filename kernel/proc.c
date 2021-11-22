@@ -422,6 +422,21 @@ int bless(int pid){
     return 0;
 }
 
+int damn(int pid){
+    struct proc* p;
+
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == pid) {
+            p->blessed = PROC_DAMNED;
+            release(&ptable.lock);
+            return 1;
+        }
+    }
+    release(&ptable.lock);
+    return 0;
+}
+
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.

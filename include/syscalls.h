@@ -26,3 +26,4 @@ void reboot(void);
 int seek(int, int);
 unsigned int getppid(void);
 int bless(int);
+int damn(int);

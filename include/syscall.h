@@ -25,3 +25,4 @@
 #define SYS_seek          24
 #define SYS_getppid       25
 #define SYS_bless         26
+#define SYS_damn          27
