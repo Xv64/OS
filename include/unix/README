@@ -1,0 +1,3 @@
+POSIX compatibility layer
+
+Header files in this path are for the purpose of defining a POSIX compatibility layer.
