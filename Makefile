@@ -196,6 +196,7 @@ UPROGS=\
 	fs/init\
 	fs/bin/kworker\
 	fs/bin/kill\
+	fs/bin/bless\
 	fs/bin/halt\
 	fs/bin/ln\
 	fs/bin/ls\
