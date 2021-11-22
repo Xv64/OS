@@ -42,7 +42,6 @@ int pipealloc(struct file** f0, struct file** f1){
     (*f1)->pipe = p;
     return 0;
 
-//PAGEBREAK: 20
  bad:
     if (p)
         kfree((char*)p);
@@ -69,23 +68,22 @@ void pipeclose(struct pipe* p, int writable){
         release(&p->lock);
 }
 
-//PAGEBREAK: 40
 int pipewrite(struct pipe* p, char* addr, int n){
     int i;
 
     acquire(&p->lock);
     for (i = 0; i < n; i++) {
-        while (p->nwrite == p->nread + PIPESIZE) { //DOC: pipewrite-full
+        while (p->nwrite == p->nread + PIPESIZE) { // pipewrite-full
             if (p->readopen == 0 || proc->killed) {
                 release(&p->lock);
                 return -1;
             }
             wakeup(&p->nread);
-            sleep(&p->nwrite, &p->lock); //DOC: pipewrite-sleep
+            sleep(&p->nwrite, &p->lock); // pipewrite-sleep
         }
         p->data[p->nwrite++ % PIPESIZE] = addr[i];
     }
-    wakeup(&p->nread); //DOC: pipewrite-wakeup1
+    wakeup(&p->nread); // pipewrite-wakeup1
     release(&p->lock);
     return n;
 }
@@ -94,19 +92,19 @@ int piperead(struct pipe* p, char* addr, int n){
     int i;
 
     acquire(&p->lock);
-    while (p->nread == p->nwrite && p->writeopen) { //DOC: pipe-empty
+    while (p->nread == p->nwrite && p->writeopen) { // pipe-empty
         if (proc->killed) {
             release(&p->lock);
             return -1;
         }
-        sleep(&p->nread, &p->lock); //DOC: piperead-sleep
+        sleep(&p->nread, &p->lock); // piperead-sleep
     }
-    for (i = 0; i < n; i++) { //DOC: piperead-copy
+    for (i = 0; i < n; i++) { // piperead-copy
         if (p->nread == p->nwrite)
             break;
         addr[i] = p->data[p->nread++ % PIPESIZE];
     }
-    wakeup(&p->nwrite); //DOC: piperead-wakeup
+    wakeup(&p->nwrite); // piperead-wakeup
     release(&p->lock);
     return i;
 }
