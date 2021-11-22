@@ -448,7 +448,7 @@ void procdump(void){
         [SLEEPING]  "sleep ",
         [RUNNABLE]  "runble",
         [RUNNING]   "run   ",
-        [ZOMBIE]    "zombie"
+        [ZOMBIE]    "zombie"  // Another head hangs lowly
     };
     int i;
     struct proc* p;
