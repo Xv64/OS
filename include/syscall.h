@@ -24,3 +24,4 @@
 #define SYS_kconsole_info 23
 #define SYS_seek          24
 #define SYS_getppid       25
+#define SYS_bless         26

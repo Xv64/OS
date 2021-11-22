@@ -66,6 +66,14 @@ unsigned int sys_getppid(void) {
     return proc->parent->pid;
 }
 
+int sys_bless(void){
+    int pid;
+
+    if (argint(0, &pid) < 0)
+        return -1;
+    return bless(pid);
+}
+
 // return how many clock tick interrupts have occurred
 // since start.
 int sys_uptime(void){

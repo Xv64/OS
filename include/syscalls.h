@@ -25,3 +25,4 @@ int uptime(void);
 void reboot(void);
 int seek(int, int);
 unsigned int getppid(void);
+int bless(int);
