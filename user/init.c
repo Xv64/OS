@@ -5,9 +5,23 @@
 #include "user.h"
 #include "fcntl.h"
 
-int main(void) {
-  int pid, wpid;
+int spawn(char *task, char *name){
+  int pid = fork();
+  char *argv[] = { name, 0 };
+  fprintf(stdout, "init: starting %s\n", name);
+  if(pid < 0){
+    fprintf(stdout, "init: fork failed\n");
+    procexit();
+  }
+  if(pid == 0){
+    exec(task, argv);
+    fprintf(stdout, "init: exec %s failed\n", name);
+    procexit();
+  }
+  return pid;
+}
 
+int main(void) {
   if(open("console", O_RDWR) < 0){
     mknod("console", 1, 1);
     open("console", O_RDWR);
@@ -17,19 +31,13 @@ int main(void) {
 
   for(;;){
 
-    fprintf(stdout, "init: starting sh\n");
-    pid = fork();
-    if(pid < 0){
-      fprintf(stdout, "init: fork failed\n");
-      procexit();
+    spawn("/bin/kworker", "kworker");
+    spawn("/bin/sh", "sh");
+
+    while(1){
+      sleep(30);
     }
-    if(pid == 0){
-      char *argv[] = { "sh", 0 };
-      exec("/bin/sh", argv);
-      fprintf(stdout, "init: exec sh failed\n");
-      procexit();
-    }
-    while((wpid=wait()) >= 0 && wpid != pid)
-      fprintf(stdout, "zombie!\n");
+    // while((wpid=wait()) >= 0 && wpid != pid)
+    //   fprintf(stdout, "zombie!\n");
   }
 }

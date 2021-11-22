@@ -194,6 +194,7 @@ UPROGS=\
 	fs/bin/echo\
 	fs/bin/grep\
 	fs/init\
+	fs/bin/kworker\
 	fs/bin/kill\
 	fs/bin/halt\
 	fs/bin/ln\
