@@ -125,6 +125,7 @@ extern int sys_seek(void);
 extern int sys_getppid(void);
 extern int sys_bless(void);
 extern int sys_damn(void);
+extern int sys_isblessed(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]          sys_fork,
@@ -154,6 +155,7 @@ static int (*syscalls[])(void) = {
     [SYS_getppid]       sys_getppid,
     [SYS_bless]         sys_bless,
     [SYS_damn]          sys_damn,
+    [SYS_isblessed]     sys_isblessed,
 };
 
 void syscall(void){

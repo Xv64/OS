@@ -82,6 +82,10 @@ int sys_damn(void){
     return damn(pid);
 }
 
+int sys_isblessed(void){
+    return proc->blessed;
+}
+
 // return how many clock tick interrupts have occurred
 // since start.
 int sys_uptime(void){
