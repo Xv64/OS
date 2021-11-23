@@ -27,3 +27,4 @@
 #define SYS_bless         26
 #define SYS_damn          27
 #define SYS_isblessed     28
+#define SYS_bfork         29

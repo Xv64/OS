@@ -116,7 +116,7 @@ int growproc(int n){
 // Create a new process copying p as the parent.
 // Sets up stack to return as if from system call.
 // Caller must set state of returned proc to RUNNABLE.
-int fork(void){
+int _fork(int blessed){
     int i, pid;
     struct proc* np;
 
@@ -150,9 +150,22 @@ int fork(void){
     // lock to force the compiler to emit the np->state write last.
     acquire(&ptable.lock);
     np->state = RUNNABLE;
+    np->blessed = blessed;
     release(&ptable.lock);
 
     return pid;
+}
+
+int fork(){
+    return _fork(PROC_DAMNED);
+}
+
+int bfork(){
+    if(proc->blessed != PROC_BLESSED){
+        // only blessed procs can bfork
+        return 0;
+    }
+    return _fork(PROC_BLESSED);
 }
 
 // Exit the current process.  Does not return.

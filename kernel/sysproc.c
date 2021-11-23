@@ -86,6 +86,11 @@ int sys_isblessed(void){
     return proc->blessed;
 }
 
+int sys_bfork(void){
+    return bfork();
+}
+
+
 // return how many clock tick interrupts have occurred
 // since start.
 int sys_uptime(void){

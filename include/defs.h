@@ -109,6 +109,7 @@ int             pipewrite(struct pipe*, char*, int);
 struct proc*    copyproc(struct proc*);
 void            exit(void);
 int             fork(void);
+int             bfork(void);
 int             growproc(int);
 int             kill(int);
 int             bless(int);
