@@ -27,13 +27,43 @@ void _deallocpipe(struct proc* p);
 static void wakeup1(void* chan);
 
 int procloopread(struct inode* ip, char* buf, int n){
-  cprintf("Reading: (minor=%d)\n", ip->minor, buf);
+    //cprintf("Reading: minor=%d, from proc = %d\n", ip->minor, proc->pid);
+    struct proc *tp;
+    struct proc *p;
+
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == ip->minor) {
+            tp = p;
+            break;
+        }
+    }
+    release(&ptable.lock);
+
+    if(tp) {
+      return fileread(tp->rpipe, buf, n);
+    }
     return 0;
 }
 
 int procloopwrite(struct inode* ip, char* buf, int n){
-    cprintf("Writing: (minor=%d, from proc = %d\n", ip->minor, proc->pid);
-    return n;
+    //cprintf("Writing: minor=%d, from proc = %d\n", ip->minor, proc->pid);
+    struct proc *tp;
+    struct proc *p;
+
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == ip->minor) {
+            tp = p;
+            break;
+        }
+    }
+    release(&ptable.lock);
+
+    if(tp) {
+      return filewrite(tp->wpipe, buf, n);
+    }
+    return 0;
 }
 
 void pinit(void){
