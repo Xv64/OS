@@ -22,9 +22,9 @@ int spawn(char *task, char *name, int blessed){
 }
 
 int main(void) {
-  if(open("console", O_RDWR) < 0){
-    mknod("console", 1, 1);
-    open("console", O_RDWR);
+  if(open("/dev/tty0", O_RDWR) < 0){
+    mknod("/dev/tty0", 1, 1);
+    open("/dev/tty0", O_RDWR);
   }
   dup(0);  // stdout
   dup(0);  // stderr
