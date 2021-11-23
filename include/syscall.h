@@ -28,3 +28,4 @@
 #define SYS_damn          27
 #define SYS_isblessed     28
 #define SYS_bfork         29
+#define SYS_mkvdev        30

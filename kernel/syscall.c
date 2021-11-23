@@ -127,6 +127,7 @@ extern int sys_bless(void);
 extern int sys_damn(void);
 extern int sys_isblessed(void);
 extern int sys_bfork(void);
+extern int sys_mkvdev(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork]          sys_fork,
@@ -158,6 +159,7 @@ static int (*syscalls[])(void) = {
     [SYS_damn]          sys_damn,
     [SYS_isblessed]     sys_isblessed,
     [SYS_bfork]         sys_bfork,
+    [SYS_mkvdev]        sys_mkvdev,
 };
 
 void syscall(void){

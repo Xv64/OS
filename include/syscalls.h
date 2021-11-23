@@ -29,3 +29,4 @@ int bless(int);
 int damn(int);
 int isblessed(void);
 int bfork(void);
+int mkvdev(char*);

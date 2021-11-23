@@ -350,6 +350,26 @@ int sys_mknod(void){
     return 0;
 }
 
+int sys_mkvdev(void) {
+  struct inode* ip;
+  char* path;
+  int len;
+
+  if(proc->blessed != PROC_BLESSED){
+      // only blessed procs can create virtual devices (e.g. process loopback devices)
+      return -1;
+  }
+  begin_op();
+  if ((len = argstr(0, &path)) < 0 ||
+      (ip = create(path, T_DEV, LOOP0, proc->pid)) == 0) {
+      end_op();
+      return -1;
+  }
+  iunlockput(ip);
+  end_op();
+  return 0;
+}
+
 int sys_chdir(void){
     char* path;
     struct inode* ip;
