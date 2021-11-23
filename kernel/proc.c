@@ -430,6 +430,11 @@ int bless(int pid){
 int damn(int pid){
     struct proc* p;
 
+    if(proc->blessed != PROC_BLESSED){
+        // only blessed procs can damn other procs
+        return 0;
+    }
+
     acquire(&ptable.lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
