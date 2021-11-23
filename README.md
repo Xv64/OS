@@ -26,15 +26,7 @@ Additional QEMU arguments can be supplied with the `QEMU_OPTS` environmental var
 
 `env QEMU_OPTS=-nographic ./run.sh`
 
-###### 2. VMWare
-
-A VMWare image is built during compile time, and can be located in the `bin` folder. This image is not well tested, so the machine's configuration may need to be tweaked on an as-need basis.
-
-###### 3. Virtual Box
-
-Virtual Box compatible VDI (virtual hard drives) are built during compilation and are located in the `bin` folder. If you desire to use Virtual Box you will want to create a new VM in Virtual Box and reference these drives. Such instruction is beyond the scope of this document.
-
-###### 4. Real hardware
+###### 2. Real hardware
 
 Xv64 supports executed directly on REAL hardware. If you desire to go this route please see the system requirements below and read the [INSTALL.md](INSTALL.md) document for details.
 
