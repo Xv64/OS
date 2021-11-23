@@ -37,6 +37,7 @@ extern struct devsw devsw[];
 
 #define TTY0    1
 #define TTY1    2
+#define LOOP0   3
 
 struct pollfd {
     int   fd;         /* file descriptor */

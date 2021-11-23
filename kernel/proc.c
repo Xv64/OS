@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "kernel/string.h"
+#include "fs.h"
+#include "file.h"
 
 struct {
     struct spinlock lock;
@@ -24,8 +26,24 @@ void _deallocpipe(struct proc* p);
 
 static void wakeup1(void* chan);
 
+int procloopread(struct inode* ip, char* buf, int n){
+  cprintf("Reading: (minor=%d)\n", ip->minor, buf);
+    return 0;
+}
+
+int procloopwrite(struct inode* ip, char* buf, int n){
+    cprintf("Writing: (minor=%d, from proc = %d\n", ip->minor, proc->pid);
+    return n;
+}
+
 void pinit(void){
     initlock(&ptable.lock, "ptable");
+}
+
+void proclookinit() {
+    cprintf("init: process loop device\n");
+    devsw[LOOP0].write = procloopwrite;
+    devsw[LOOP0].read = procloopread;
 }
 
 // Look in the process table for an UNUSED proc.
@@ -68,7 +86,6 @@ static struct proc* allocproc(void){
     p->context = (struct context*)sp;
     memset(p->context, 0, sizeof *p->context);
     p->context->eip = (uintp)forkret;
-
     return p;
 }
 
