@@ -18,6 +18,7 @@ static struct proc* initproc;
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
+int _fork(int blessed);
 
 static void wakeup1(void* chan);
 
@@ -25,7 +26,6 @@ void pinit(void){
     initlock(&ptable.lock, "ptable");
 }
 
-//PAGEBREAK: 32
 // Look in the process table for an UNUSED proc.
 // If found, change state to EMBRYO and initialize
 // state required to run in the kernel.
