@@ -2,8 +2,8 @@
 #include "user.h"
 
 void main(void){
-  uint32 ppid = getppid();
-  if (ppid != 1) {
+  if (!isblessed()) {
+      fprintf(stdout, "Not blessed, exiting\n");
     procexit();
   }
   while(1){

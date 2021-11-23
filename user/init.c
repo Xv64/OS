@@ -5,9 +5,9 @@
 #include "user.h"
 #include "fcntl.h"
 
-int spawn(char *task, char *name){
+int spawn(char *task, char *name, int blessed){
   fprintf(stdout, "init: starting %s\n", name);
-  int pid = fork();
+  int pid = blessed ? bfork() : fork();
   char *argv[] = { name, 0 };
   if(pid < 0){
     fprintf(stdout, "init: fork failed\n");
@@ -31,8 +31,8 @@ int main(void) {
 
   for(;;){
 
-    spawn("/bin/kworker", "kworker");
-    spawn("/bin/sh", "sh");
+    spawn("/bin/kworker", "kworker", 1);
+    spawn("/bin/sh", "sh", 0);
 
     while(1){
       sleep(30);
