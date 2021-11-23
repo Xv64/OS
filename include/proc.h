@@ -89,6 +89,11 @@ struct proc {
   char name[16];               // Process name (debugging)
   int lastsyscall;
   uint8 blessed;
+
+  // rpipe & wpipe are only used by blessed processes
+  // both are named from the perspective of the kernel
+  struct file *rpipe;   // read
+  struct file *wpipe;   // write
 };
 
 // Process memory is laid out contiguously, low addresses first:

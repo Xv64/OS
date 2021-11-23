@@ -19,6 +19,8 @@ int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
 int _fork(int blessed);
+void _allocpipe(struct proc* p);
+void _deallocpipe(struct proc* p);
 
 static void wakeup1(void* chan);
 
@@ -91,6 +93,7 @@ void userinit(void){
     safestrcpy(p->name, "initcode", sizeof(p->name));
     p->cwd = namei("/");
     p->blessed = PROC_BLESSED;
+    _allocpipe(p);
 
     p->state = RUNNABLE;
 }
@@ -151,6 +154,7 @@ int _fork(int blessed){
     acquire(&ptable.lock);
     np->state = RUNNABLE;
     np->blessed = blessed;
+    _allocpipe(np);
     release(&ptable.lock);
 
     return pid;
@@ -432,6 +436,7 @@ int bless(int pid){
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->blessed = PROC_BLESSED;
+            _allocpipe(p);
             release(&ptable.lock);
             return 1;
         }
@@ -452,6 +457,7 @@ int damn(int pid){
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->blessed = PROC_DAMNED;
+            _deallocpipe(p);
             release(&ptable.lock);
             return 1;
         }
@@ -493,4 +499,15 @@ void procdump(void){
         }
         cprintf("\n");
     }
+}
+
+void _allocpipe(struct proc* p){
+    if(p->rpipe == 0 || p->wpipe == 0){
+        pipealloc(&(p->rpipe), &(p->wpipe));
+    }
+}
+
+void _deallocpipe(struct proc* p){
+    p->rpipe = 0;
+    p->wpipe = 0;
 }
