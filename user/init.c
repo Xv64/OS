@@ -32,6 +32,7 @@ int main(void) {
   for(;;){
 
     spawn("/kexts/kzero", "kzero", 1);
+    spawn("/kexts/krandom", "krandom", 1);
     spawn("/bin/sh", "sh", 0);
 
     while(1){
