@@ -90,6 +90,10 @@ int sys_bfork(void){
     return bfork();
 }
 
+int sys_pstate(int pid) {
+    return pstate(pid);
+}
+
 
 // return how many clock tick interrupts have occurred
 // since start.
