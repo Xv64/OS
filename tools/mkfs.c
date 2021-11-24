@@ -141,6 +141,7 @@ int main(int argc, char *argv[]) {
 
 	mkdir("dev", rootino);
 	uint binino = mkdir("bin", rootino);
+	uint kextino = mkdir("kexts", rootino);
 
 	for(i = 2; i < argc; i++) {
 		char *name = argv[i];
@@ -175,7 +176,9 @@ int main(int argc, char *argv[]) {
 
 		if(strcmp(localpath, "/") == 0){
 			path = rootino;
-		}//TODO: more dynamic path inode creation/lookup
+		} else if(strcmp(localpath, "/kexts/") == 0){
+			path = kextino;
+		} //TODO: more dynamic path inode creation/lookup
 
 		inum = ialloc(T_FILE);
 

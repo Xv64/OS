@@ -187,6 +187,7 @@ SUBPROGS := $(wildcard user/*/.)
 FORCE:
 
 $(SUBPROGS): uobj/posix.o $(ULIB)
+	@mkdir -p fs/kexts
 	$(MAKE) -C $@
 
 UPROGS=\
