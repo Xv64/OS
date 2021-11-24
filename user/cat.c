@@ -1,8 +1,9 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
+#include "fcntl.h"
 
-char buf[512];
+char buf[32];
 
 void
 cat(int fd)
@@ -28,7 +29,7 @@ main(int argc, char *argv[])
   }
 
   for(i = 1; i < argc; i++){
-    if((fd = open(argv[i], 0)) < 0){
+    if((fd = open(argv[i], O_DRTYREAD)) < 0){
       fprintf(stdout, "cat: cannot open %s\n", argv[i]);
       procexit();
     }
