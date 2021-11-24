@@ -90,10 +90,12 @@ int fileread(struct file* f, char* addr, int n){
     if (f->type == FD_PIPE)
         return piperead(f->pipe, addr, n);
     if (f->type == FD_INODE) {
-        ilock(f->ip);
+        if(!f->dirtyread)
+            ilock(f->ip);
         if ((r = readi(f->ip, addr, f->off, n)) > 0)
             f->off += r;
-        iunlock(f->ip);
+        if(!f->dirtyread)
+            iunlock(f->ip);
         return r;
     }
     panic("fileread");
