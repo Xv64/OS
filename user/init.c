@@ -31,7 +31,7 @@ int main(void) {
 
   for(;;){
 
-    spawn("/bin/kworker", "kworker", 1);
+    spawn("/bin/kzero", "kzero", 1);
     spawn("/bin/sh", "sh", 0);
 
     while(1){
