@@ -186,7 +186,7 @@ SUBPROGS := $(wildcard user/*/.)
 
 FORCE:
 
-$(SUBPROGS): uobj/posix.o
+$(SUBPROGS): uobj/posix.o $(ULIB)
 	$(MAKE) -C $@
 
 UPROGS=\
@@ -194,7 +194,6 @@ UPROGS=\
 	fs/bin/echo\
 	fs/bin/grep\
 	fs/init\
-	fs/bin/kzero\
 	fs/bin/kill\
 	fs/bin/bless\
 	fs/bin/halt\
