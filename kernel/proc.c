@@ -479,7 +479,7 @@ enum procstate pstate(int pid) {
             return p->state;
         }
     }
-    return -1;
+    return UNUSED;
 }
 
 int bless(int pid){
