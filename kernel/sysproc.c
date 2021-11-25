@@ -98,6 +98,17 @@ int sys_pstate(void) {
     return pstate(pid);
 }
 
+int sys_pname(void) {
+    char* buf;
+    int pid;
+    int n;
+
+    if (argint(0, &pid) < 0 || argstr(1, &buf) < 0 || argint(2, &n) < 0) {
+        return -1;
+    }
+    return pname(pid, buf, n);
+}
+
 
 // return how many clock tick interrupts have occurred
 // since start.

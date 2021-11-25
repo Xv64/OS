@@ -30,3 +30,4 @@
 #define SYS_bfork         29
 #define SYS_mkvdev        30
 #define SYS_pstate        31
+#define SYS_pname         32

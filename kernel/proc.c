@@ -482,6 +482,19 @@ enum procstate pstate(int pid) {
     return UNUSED;
 }
 
+int pname(int pid, char *buf, int n) {
+    struct proc* p;
+
+    int minsize = n < 16 ? n : 16;
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        if (p->pid == pid) {
+            safestrcpy(buf, &(p->name[0]), minsize);
+            return 0;
+        }
+    }
+    return -1;
+}
+
 int bless(int pid){
     struct proc* p;
 

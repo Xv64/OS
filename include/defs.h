@@ -125,6 +125,7 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 enum procstate  pstate(int);
+int             pname(int, char*, int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
