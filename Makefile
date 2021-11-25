@@ -191,6 +191,7 @@ $(SUBPROGS): uobj/posix.o $(ULIB)
 	$(MAKE) -C $@
 
 UPROGS=\
+	fs/bin/ps\
 	fs/bin/cat\
 	fs/bin/echo\
 	fs/bin/grep\
