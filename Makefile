@@ -5,7 +5,7 @@ X64 ?= yes
 BITS = 64
 XOBJS = kobj/vm64.o
 XFLAGS = -Werror -m64 -DX64 -mcmodel=kernel -mtls-direct-seg-refs -mno-red-zone
-LDFLAGS = -m elf_x86_64 -nodefaultlibs
+LDFLAGS = -m elf_x86_64
 QEMU ?= qemu-system-x86_64
 
 OPT ?= -O0
@@ -53,11 +53,13 @@ FSIMAGE := fs.img
 endif
 
 # Cross-compiling (e.g., on Mac OS X)
-# TOOLPREFIX = i386-jos-elf
+TOOLPREFIX = /opt/cross/bin/x86_64-elf-
 
 # Using native tools (e.g., on X86 Linux)
 #TOOLPREFIX =
 
+# /usr/bin/x86_64-linux-gnu-gcc
+#x /usr/bin/86_64-linux-gnu-gcc-8
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
