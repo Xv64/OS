@@ -90,7 +90,11 @@ int sys_bfork(void){
     return bfork();
 }
 
-int sys_pstate(int pid) {
+int sys_pstate(void) {
+    int pid;
+
+    if (argint(0, &pid) < 0)
+        return -1;
     return pstate(pid);
 }
 
