@@ -457,7 +457,7 @@ int kill(int pid){
     struct proc* p;
 
     acquire(&ptable.lock);
-    for (p = ptable.proc; p < &ptable.proc[NPROC] && p->pid > 0; p++) {
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->killed = 1;
             // Wake process from sleep if necessary.
@@ -474,7 +474,7 @@ int kill(int pid){
 enum procstate pstate(int pid) {
     struct proc* p;
 
-    for (p = ptable.proc; p < &ptable.proc[NPROC] && p->pid > 0; p++) {
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             return p->state;
         }
@@ -491,7 +491,7 @@ int bless(int pid){
     }
 
     acquire(&ptable.lock);
-    for (p = ptable.proc; p < &ptable.proc[NPROC] && p->pid > 0; p++) {
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->blessed = PROC_BLESSED;
             _allocpipe(p);
@@ -512,7 +512,7 @@ int damn(int pid){
     }
 
     acquire(&ptable.lock);
-    for (p = ptable.proc; p < &ptable.proc[NPROC] && p->pid > 0; p++) {
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
         if (p->pid == pid) {
             p->blessed = PROC_DAMNED;
             _deallocpipe(p);
