@@ -252,6 +252,94 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	return 1;
 }
 
+
+int sata_write(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
+	if( dev >= AHCI_MAX_SLOT) {
+		return 0;
+	}
+	HBA_PORT *port = BLOCK_DEVICES[dev];
+	if(!port) {
+		return 0;
+	}
+	uint32 lbal = (uint32)lba;
+	uint32 lbah = (uint32)(lba >> 32);
+	return ahci_sata_write(port, lbal, lbah, count, buf);
+}
+
+
+int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
+    port->is = (uint32) -1;
+
+    int slot = ahci_find_cmdslot(port);
+	if (slot == -1)
+		return 0;
+
+	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*) P2V(
+		HILO2ADDR(port->clbu, port->clb)
+		);
+
+    cmdheader += slot;
+
+    cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32); // Command FIS size
+    cmdheader->w = 1; // Write to device
+    cmdheader->c = 1;
+    cmdheader->prdtl = 1;    // PRDT entries count
+
+	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*) P2V(
+		HILO2ADDR(cmdheader->ctbau, cmdheader->ctba)
+		);
+	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
+	       (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
+
+	uint64 addr = V2P(buf);
+	cmdtbl->prdt_entry[0].dba = ADDRLO(addr);
+	cmdtbl->prdt_entry[0].dbau = ADDRHI(addr);
+	cmdtbl->prdt_entry[0].dbc = (count<<9)-1; // 512 bytes per sector
+	cmdtbl->prdt_entry[0].i = 0;
+
+    // Setup command
+    FIS_REG_H2D *cmdfis = (FIS_REG_H2D*)(&cmdtbl->cfis);
+
+    cmdfis->fis_type = FIS_TYPE_REG_H2D;
+    cmdfis->c = 1;  // Command
+    cmdfis->command = ATA_CMD_WRITE_DMA_EXT;
+
+    cmdfis->lba0 = (uint8)startl;
+    cmdfis->lba1 = (uint8)(startl>>8);
+    cmdfis->lba2 = (uint8)(startl>>16);
+    cmdfis->device = 1<<6;  // LBA mode
+
+    cmdfis->lba3 = (uint8)(startl>>24);
+    cmdfis->lba4 = (uint8)starth;
+    cmdfis->lba5 = (uint8)(starth>>8);
+
+    cmdfis->countl = 2;
+    cmdfis->counth = 0;
+
+    port->ci = 1<<slot; // Issue command
+
+	// Wait for completion
+	while (1) {
+		// In some longer duration reads, it may be helpful to spin on the DPS bit
+		// in the PxIS port field as well (1 << 5)
+		if ((port->ci & (1<<slot)) == 0)
+			break;
+		if (port->is & HBA_PxIS_TFES) { // Task file error
+			cprintf("Read disk error\n");
+			return 0;
+		}
+	}
+
+	// Check again
+	if (port->is & HBA_PxIS_TFES) {
+		cprintf("Read disk error\n");
+		return 0;
+	}
+
+	return 1;
+}
+
+
 void ahci_sata_init(HBA_PORT *port, int num){
 	if(ahci_rebase_port(port,num) > 0) {
 		uint16 buf[512];
