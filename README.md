@@ -10,9 +10,19 @@ Inspired by Dennis Ritchie's and Ken Thompson's Unix Version 6 and forked from
 xv6 (rev. 8) by the Massachusetts Institute of Technology, with 64-bit porting
 merged from work done by Brian Swetland.
 
-## Getting Started
+## Getting Started / TL;DR
 
-Ensure that you have Docker† installed and execute `./build.sh` to compile the OS. Once compiled you can run it locally by either:
+To get started hacking away on Xv64, you'll need a few requirements:
+
+1. qemu
+2. Docker†
+
+
+Once you have those installed, execute:
+
+`env QEMU_OPTS=-nographic ./run.sh -r -l`
+
+This will build the OS from source, and run it within qemu on your system.
 
 ###### 1. QEMU
 
