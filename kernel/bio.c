@@ -126,13 +126,22 @@ void bwrite(struct buf* b){
 		panic("bwrite");
 	b->flags |= B_DIRTY;
 	uint8 devType = GETDEVTYPE(b->dev);
-	//uint32 devNum = GETDEVNUM(b->dev);
+	uint32 devNum = GETDEVNUM(b->dev);
 
 	if(devType == DEV_IDE) {
 		iderw(b);
 	} else {
-		//sata_write(devNum, ...)
-		panic("SATA writing is not implemented yet\n");
+		uint16 buf[SECTOR_SIZE / 2];
+		uint16 sector = 0;
+		for(uint16 i =0; i != SECTOR_SIZE / 2; i++) {
+			uint16 lo = b->data[sector++];
+			uint16 hi = b->data[sector++];
+			buf[i] = (hi << 8) + lo;
+		}
+		int success = sata_write(devNum, sector, 1, &buf[0]);
+		if(!success){
+			panic("Error writing SATA\n");
+		}
 	}
 }
 
