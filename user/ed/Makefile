@@ -18,10 +18,10 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 #ULIB = $(BINPATH)ulib.o $(BINPATH)usys.o $(BINPATH)printf.o $(BINPATH)umalloc.o $(BINPATH)string.o
 ULIB = $(BINPATH)posix.o
 
-ed: $(ULIB)
-	$(CC) $(CFLAGS) -c -o ed.o ed.c
+# ed: $(ULIB)
+# 	$(CC) $(CFLAGS) -c -o ed.o ed.c
+# 
+# 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $(FSPATH)/bin/$@ ed.o $^
 
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $(FSPATH)/bin/$@ ed.o $^
-
-# ed:
-# 	echo ""
+ed:
+	echo ""
