@@ -24,7 +24,7 @@ void main(void){
 	uint64 last = 1;
 	uint64 seed = 1982;
 
-	sleep(10);
+	uint8 delay = 30;
 	while(1) {
 		uint64 rnd = (last % seed) + 1;
 		last = (a * last + c) % m;
@@ -40,5 +40,8 @@ void main(void){
 		str[7] = (char)(rnd >> 56);
 
 		write(fd, &str, 8);
+		if(delay > 0){
+			sleep(delay--);
+		}
 	}
 }
