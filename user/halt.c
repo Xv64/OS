@@ -4,6 +4,6 @@
 #include "string.h"
 
 int main(int argc, char **argv) {
-  kill(1);
-  procexit();
+	kill(1);
+	procexit();
 }

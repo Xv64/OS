@@ -85,31 +85,31 @@ void* malloc(uint32_t nbytes) {
 }
 
 void abort(void) {
-    //TODO
+	//TODO
 }
 
 long atol(const char *str) {
-    long result = 0;
-    int i = 0;
-    int multiplier = 1;
-    while(str[i] != '\0' && isspace(str[i]) ){
-        i++;
-    }
-    if(str[i] != '\0' && (str[i] == '+' || str[i] == '-')){
-        if(str[i] == '-'){
-            multiplier = -1;
-        }
-        i++;
-    }
-    while(str[i] != '\0'){
-        int value = ((int)str[i]) - 0x30;
-        if(value < 0 || value > 9){
-            break;
-        }
-        result = result * 10 + value; //shift existing value over and add new digit
-        i++;
-    }
-    return result * multiplier;
+	long result = 0;
+	int i = 0;
+	int multiplier = 1;
+	while(str[i] != '\0' && isspace(str[i]) ) {
+		i++;
+	}
+	if(str[i] != '\0' && (str[i] == '+' || str[i] == '-')) {
+		if(str[i] == '-') {
+			multiplier = -1;
+		}
+		i++;
+	}
+	while(str[i] != '\0') {
+		int value = ((int)str[i]) - 0x30;
+		if(value < 0 || value > 9) {
+			break;
+		}
+		result = result * 10 + value; //shift existing value over and add new digit
+		i++;
+	}
+	return result * multiplier;
 }
 
 void exit(int status) {
@@ -123,11 +123,11 @@ long strtol(const char *restrict str, char **restrict endptr, int base) {
 	while(isspace( (int)*p )) {
 		p++;
 	}
-	
+
 	int n = 0;
 	while(isdigit( (int)*p )) {
-      n = n*10 + (int)*p - '0';
-	  p++;
+		n = n*10 + (int)*p - '0';
+		p++;
 	}
 	endptr = (char **) &p;
 	return n;

@@ -152,7 +152,7 @@ int sata_read(uint32 dev, uint32 startl, uint32 starth, uint32 count, uint16 *bu
 		return 0;
 	}
 	HBA_PORT *port = BLOCK_DEVICES[dev];
-	if(!port){
+	if(!port) {
 		return 0;
 	}
 	return ahci_sata_read(port, startl, starth, count, buf);
@@ -166,8 +166,8 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 		return 0;
 
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*) P2V(
-			  HILO2ADDR(port->clbu, port->clb)
-	      );
+		HILO2ADDR(port->clbu, port->clb)
+		);
 	cmdheader += slot;
 	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32); // Command FIS size
 	cmdheader->w = 0; // Read from device
@@ -175,12 +175,12 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*) P2V(
 		HILO2ADDR(cmdheader->ctbau, cmdheader->ctba)
-	);
+		);
 	cprintf("C.2\n");
 	cprintf("cmdtbl: %x, cmdheader: %x, prdtl: %x, ctbau: %x, ctba: %x\n", cmdtbl, cmdheader, cmdheader->prdtl, cmdheader->ctbau, cmdheader->ctba);
 
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
- 		(cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
+	       (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
 	cprintf("D\n");
 
 	// 8K bytes (16 sectors) per PRDT
@@ -190,10 +190,10 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	for (i=0; i < cmdheader->prdtl - 1; i++) {
 		cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
 		cmdtbl->prdt_entry[i].dbau = ADDRHI(addr);
-		cmdtbl->prdt_entry[i].dbc = 8*1024-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
+		cmdtbl->prdt_entry[i].dbc = 8*1024-1;   // 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
-		buf += 4*1024;	// 4K words
-		count -= 16;	// 16 sectors
+		buf += 4*1024;  // 4K words
+		count -= 16;    // 16 sectors
 	}
 	// Last entry
 	cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
@@ -256,18 +256,18 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 }
 
 void ahci_sata_init(HBA_PORT *port, int num){
-   if(ahci_rebase_port(port,num) > 0) {
-      //TODO: rest of init
-        uint16 buf[16];
-        int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
-        if(success == 1){
+	if(ahci_rebase_port(port,num) > 0) {
+		//TODO: rest of init
+		uint16 buf[16];
+		int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
+		if(success == 1) {
 			uint32 devNum = sataDeviceCount++;
 			cprintf("   Init success: /dev/sata%d\n", devNum);
 			BLOCK_DEVICES[devNum] = port;
-        }else{
-            cprintf("   Init failure\n");
-        }
-   }
+		}else{
+			cprintf("   Init failure\n");
+		}
+	}
 }
 
 int8 ahci_rebase_port(HBA_PORT *port, int num) {

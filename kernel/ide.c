@@ -41,124 +41,124 @@ static void idestart(struct buf*);
 
 // Wait for IDE disk to become ready.
 static int idewait(int checkerr){
-    int r;
+	int r;
 
-    while (((r = inb(PRIMARY_IDE_CHANNEL_BASE + 7)) & (IDE_BSY | IDE_DRDY)) != IDE_DRDY)
-        ;
-    if (checkerr && (r & (IDE_DF | IDE_ERR)) != 0)
-        return -1;
-    return 0;
+	while (((r = inb(PRIMARY_IDE_CHANNEL_BASE + 7)) & (IDE_BSY | IDE_DRDY)) != IDE_DRDY)
+		;
+	if (checkerr && (r & (IDE_DF | IDE_ERR)) != 0)
+		return -1;
+	return 0;
 }
 
 void ideinit(void){
-    int i;
+	int i;
 
-    cprintf("Detecting IDE devices:\n");
-    initlock(&idelock, "ide");
-    if(ideChannel == PRIMARY_IDE_CHANNEL_BASE){
-        picenable(IRQ_IDE1);
-        ioapicenable(IRQ_IDE1, ncpu - 1);
-    }else{
-        picenable(IRQ_IDE2);
-        ioapicenable(IRQ_IDE2, ncpu - 1);
-    }
-    havedisk0 = idewait(0);
-    if(havedisk0){
-        cprintf("   Init success: /dev/ide0\n");
-    }
+	cprintf("Detecting IDE devices:\n");
+	initlock(&idelock, "ide");
+	if(ideChannel == PRIMARY_IDE_CHANNEL_BASE) {
+		picenable(IRQ_IDE1);
+		ioapicenable(IRQ_IDE1, ncpu - 1);
+	}else{
+		picenable(IRQ_IDE2);
+		ioapicenable(IRQ_IDE2, ncpu - 1);
+	}
+	havedisk0 = idewait(0);
+	if(havedisk0) {
+		cprintf("   Init success: /dev/ide0\n");
+	}
 
-    // Check if disk 1 is present
-    amd64_out8(ideChannel + 6, IDE_SLAVE);
-    for (i = 0; i < 1000; i++) {
-        if (inb(ideChannel + 7) != 0) {
-            havedisk1 = 1;
-            cprintf("   Init success: /dev/ide1\n");
-            break;
-        }
-    }
+	// Check if disk 1 is present
+	amd64_out8(ideChannel + 6, IDE_SLAVE);
+	for (i = 0; i < 1000; i++) {
+		if (inb(ideChannel + 7) != 0) {
+			havedisk1 = 1;
+			cprintf("   Init success: /dev/ide1\n");
+			break;
+		}
+	}
 
-    // Switch back to disk 0.
-    amd64_out8(ideChannel + 6, IDE_MASTER);
+	// Switch back to disk 0.
+	amd64_out8(ideChannel + 6, IDE_MASTER);
 }
 
 // Start the request for b.  Caller must hold idelock.
 static void idestart(struct buf* b){
-    if (b == 0)
-        panic("idestart");
+	if (b == 0)
+		panic("idestart");
 
-    idewait(0);
-    amd64_out8((ideChannel == PRIMARY_IDE_CHANNEL_BASE ? PRIMARY_IDE_INTERRUPT : SECONDARY_IDE_INTERRUPT), 0); // generate interrupt
-    amd64_out8(ideChannel + 2, 1); // number of sectors
-    amd64_out8(ideChannel + 3, b->sector & 0xff);
-    amd64_out8(ideChannel + 4, (b->sector >> 8) & 0xff);
-    amd64_out8(ideChannel + 5, (b->sector >> 16) & 0xff);
-    amd64_out8(ideChannel + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
-    if (b->flags & B_DIRTY) {
-        amd64_out8(ideChannel + 7, IDE_CMD_WRITE);
-        outsl(ideChannel, b->data, 512 / 4);
-    } else {
-        amd64_out8(ideChannel + 7, IDE_CMD_READ);
-    }
+	idewait(0);
+	amd64_out8((ideChannel == PRIMARY_IDE_CHANNEL_BASE ? PRIMARY_IDE_INTERRUPT : SECONDARY_IDE_INTERRUPT), 0); // generate interrupt
+	amd64_out8(ideChannel + 2, 1); // number of sectors
+	amd64_out8(ideChannel + 3, b->sector & 0xff);
+	amd64_out8(ideChannel + 4, (b->sector >> 8) & 0xff);
+	amd64_out8(ideChannel + 5, (b->sector >> 16) & 0xff);
+	amd64_out8(ideChannel + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
+	if (b->flags & B_DIRTY) {
+		amd64_out8(ideChannel + 7, IDE_CMD_WRITE);
+		outsl(ideChannel, b->data, 512 / 4);
+	} else {
+		amd64_out8(ideChannel + 7, IDE_CMD_READ);
+	}
 }
 
 // Interrupt handler.
 void ideintr(void){
-    struct buf* b;
+	struct buf* b;
 
-    // First queued buffer is the active request.
-    acquire(&idelock);
-    if ((b = idequeue) == 0) {
-        release(&idelock);
-        // cprintf("spurious IDE interrupt\n");
-        return;
-    }
-    idequeue = b->qnext;
+	// First queued buffer is the active request.
+	acquire(&idelock);
+	if ((b = idequeue) == 0) {
+		release(&idelock);
+		// cprintf("spurious IDE interrupt\n");
+		return;
+	}
+	idequeue = b->qnext;
 
-    // Read data if needed.
-    if (!(b->flags & B_DIRTY) && idewait(1) >= 0)
-        insl(ideChannel, b->data, 512 / 4);
+	// Read data if needed.
+	if (!(b->flags & B_DIRTY) && idewait(1) >= 0)
+		insl(ideChannel, b->data, 512 / 4);
 
-    // Wake process waiting for this buf.
-    b->flags |= B_VALID;
-    b->flags &= ~B_DIRTY;
-    wakeup(b);
+	// Wake process waiting for this buf.
+	b->flags |= B_VALID;
+	b->flags &= ~B_DIRTY;
+	wakeup(b);
 
-    // Start disk on next buf in queue.
-    if (idequeue != 0)
-        idestart(idequeue);
+	// Start disk on next buf in queue.
+	if (idequeue != 0)
+		idestart(idequeue);
 
-    release(&idelock);
+	release(&idelock);
 }
 
 // Sync buf with disk.
 // If B_DIRTY is set, write buf to disk, clear B_DIRTY, set B_VALID.
 // Else if B_VALID is not set, read buf from disk, set B_VALID.
 void iderw(struct buf* b){
-    struct buf** pp;
+	struct buf** pp;
 
-    if (!(b->flags & B_BUSY))
-        panic("iderw: buf not busy");
-    if ((b->flags & (B_VALID | B_DIRTY)) == B_VALID)
-        panic("iderw: nothing to do");
-    if (b->dev != 0 && !havedisk1)
-        panic("iderw: ide disk 1 not present");
+	if (!(b->flags & B_BUSY))
+		panic("iderw: buf not busy");
+	if ((b->flags & (B_VALID | B_DIRTY)) == B_VALID)
+		panic("iderw: nothing to do");
+	if (b->dev != 0 && !havedisk1)
+		panic("iderw: ide disk 1 not present");
 
-    acquire(&idelock); //DOC:acquire-lock
+	acquire(&idelock); //DOC:acquire-lock
 
-    // Append b to idequeue.
-    b->qnext = 0;
-    for (pp = &idequeue; *pp; pp = &(*pp)->qnext) //DOC:insert-queue
-        ;
-    *pp = b;
+	// Append b to idequeue.
+	b->qnext = 0;
+	for (pp = &idequeue; *pp; pp = &(*pp)->qnext) //DOC:insert-queue
+		;
+	*pp = b;
 
-    // Start disk if necessary.
-    if (idequeue == b)
-        idestart(b);
+	// Start disk if necessary.
+	if (idequeue == b)
+		idestart(b);
 
-    // Wait for request to finish.
-    while ((b->flags & (B_VALID | B_DIRTY)) != B_VALID) {
-        sleep(b, &idelock);
-    }
+	// Wait for request to finish.
+	while ((b->flags & (B_VALID | B_DIRTY)) != B_VALID) {
+		sleep(b, &idelock);
+	}
 
-    release(&idelock);
+	release(&idelock);
 }

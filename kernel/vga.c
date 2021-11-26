@@ -37,49 +37,49 @@
 
 
 static void vga_write_regset(uchar *mode, uint len, uint addr_reg, uint data_reg) {
-    int i;
-    for (i = 0; i < len; i++) {
-        amd64_out8(addr_reg, i);
-        amd64_out8(data_reg, mode[i]);
-    }
+	int i;
+	for (i = 0; i < len; i++) {
+		amd64_out8(addr_reg, i);
+		amd64_out8(data_reg, mode[i]);
+	}
 }
 
 void vga_write_regs(uchar *mode) {
-    // Write misc, seq, crtc, graphics controller,
-    // attribute regs.
+	// Write misc, seq, crtc, graphics controller,
+	// attribute regs.
 
-    // Write miscellaneous regs
-    amd64_out8(VGA_MISC_REG, mode[0]);
-    mode++;
+	// Write miscellaneous regs
+	amd64_out8(VGA_MISC_REG, mode[0]);
+	mode++;
 
-    // Write sequencer regs
-    vga_write_regset(mode, VGA_SEQ_LEN, VGA_SEQUENCER_ADDR_REG, VGA_SEQUENCER_DATA_REG);
-    mode += VGA_SEQ_LEN;
+	// Write sequencer regs
+	vga_write_regset(mode, VGA_SEQ_LEN, VGA_SEQUENCER_ADDR_REG, VGA_SEQUENCER_DATA_REG);
+	mode += VGA_SEQ_LEN;
 
-    // Unlock & write CRTC regs
-    // Enables vertical retracing:
-    amd64_out8(VGA_CRTC_ADDR_REG, 0x03);
-    amd64_out8(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) | 0x80);
-    // disables CRTC Registers Protect Enable, so 0x00h-0x07h are writable.
-    amd64_out8(VGA_CRTC_ADDR_REG, 0x11);
-    amd64_out8(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) & ~0x80);
-    // modify mode contents to reflect our unlocking changes
-    mode[0x03] |= 0x80;
-    mode[0x11] &= ~0x80;
-    vga_write_regset(mode, VGA_CRTC_LEN, VGA_CRTC_ADDR_REG, VGA_CRTC_DATA_REG);
-    mode += VGA_CRTC_LEN;
+	// Unlock & write CRTC regs
+	// Enables vertical retracing:
+	amd64_out8(VGA_CRTC_ADDR_REG, 0x03);
+	amd64_out8(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) | 0x80);
+	// disables CRTC Registers Protect Enable, so 0x00h-0x07h are writable.
+	amd64_out8(VGA_CRTC_ADDR_REG, 0x11);
+	amd64_out8(VGA_CRTC_DATA_REG, inb(VGA_CRTC_DATA_REG) & ~0x80);
+	// modify mode contents to reflect our unlocking changes
+	mode[0x03] |= 0x80;
+	mode[0x11] &= ~0x80;
+	vga_write_regset(mode, VGA_CRTC_LEN, VGA_CRTC_ADDR_REG, VGA_CRTC_DATA_REG);
+	mode += VGA_CRTC_LEN;
 
-    // Write graphics controller regs
-    vga_write_regset(mode, VGA_GRAPHICS_LEN, VGA_GRAPHICS_ADDR_REG, VGA_GRAPHICS_DATA_REG);
-    mode += VGA_GRAPHICS_LEN;
+	// Write graphics controller regs
+	vga_write_regset(mode, VGA_GRAPHICS_LEN, VGA_GRAPHICS_ADDR_REG, VGA_GRAPHICS_DATA_REG);
+	mode += VGA_GRAPHICS_LEN;
 
-    // Write attribute controller regs
-    vga_write_regset(mode, VGA_ATTR_LEN, VGA_ATTR_ADDR_REG, VGA_ATTR_DATA_REG);
-    mode += VGA_ATTR_LEN;
+	// Write attribute controller regs
+	vga_write_regset(mode, VGA_ATTR_LEN, VGA_ATTR_ADDR_REG, VGA_ATTR_DATA_REG);
+	mode += VGA_ATTR_LEN;
 
-    // Supposed to enable VGA display, no idea how or why.
-    // Can't find the docs for why we need to set the VGA attribute
-    // index register to 0x20?
-    inb(VGA_INSTAT_READ);
-    amd64_out8(VGA_ATTR_ADDR_REG, 0x20);
+	// Supposed to enable VGA display, no idea how or why.
+	// Can't find the docs for why we need to set the VGA attribute
+	// index register to 0x20?
+	inb(VGA_INSTAT_READ);
+	amd64_out8(VGA_ATTR_ADDR_REG, 0x20);
 }

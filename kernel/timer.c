@@ -22,9 +22,9 @@
 #define TIMER_16BIT     0x30    // r/w counter 16 bits, LSB first
 
 void timerinit(void){
-    // Interrupt 100 times/sec.
-    amd64_out8(TIMER_MODE, TIMER_SEL0 | TIMER_RATEGEN | TIMER_16BIT);
-    amd64_out8(IO_TIMER1, TIMER_DIV(100) % 256);
-    amd64_out8(IO_TIMER1, TIMER_DIV(100) / 256);
-    picenable(IRQ_TIMER);
+	// Interrupt 100 times/sec.
+	amd64_out8(TIMER_MODE, TIMER_SEL0 | TIMER_RATEGEN | TIMER_16BIT);
+	amd64_out8(IO_TIMER1, TIMER_DIV(100) % 256);
+	amd64_out8(IO_TIMER1, TIMER_DIV(100) / 256);
+	picenable(IRQ_TIMER);
 }

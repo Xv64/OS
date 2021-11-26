@@ -31,8 +31,8 @@ typedef struct object_t {
 #define MAXFRAMES 50
 
 const char *TQUOTE = NULL, *TLAMBDA = NULL, *TCOND = NULL, *TDEFINE = NULL;
-char        token_text[TOKEN_MAX];
-int         token_peek = 0;
+char token_text[TOKEN_MAX];
+int token_peek = 0;
 object     *atom_t = NULL;
 object *heap, *tospace, *fromspace, *allocptr, *scanptr;
 object ** roots[MAXROOTS];
@@ -51,10 +51,10 @@ void    lisp_print(object *obj);
 object *lisp_eval(object *obj, object *env);
 
 size_t djbhash(const unsigned char *str) {
-    size_t hash = 5381;
-    for (int c = *str++; c; c = *str++)
-        hash = (hash << 5) + hash + c;
-    return hash;
+	size_t hash = 5381;
+	for (int c = *str++; c; c = *str++)
+		hash = (hash << 5) + hash + c;
+	return hash;
 }
 
 const char *intern_string(const char *str) {
@@ -111,11 +111,11 @@ const char *read_token(FILE *in) {
 		token_text[n++] = token_peek;
 		token_peek = fgetc(in);
 	} else while (ATOMCHAR(token_peek)) {
-		if (n == TOKEN_MAX)
-			abort();
-		token_text[n++] = token_peek;
-		token_peek = fgetc(in);
-	}
+			if (n == TOKEN_MAX)
+				abort();
+			token_text[n++] = token_peek;
+			token_peek = fgetc(in);
+		}
 	if (token_peek == EOF)
 		exit(0);
 	token_text[n] = '\0';
@@ -124,7 +124,7 @@ const char *read_token(FILE *in) {
 
 object *lisp_read_obj(const char *tok, FILE *in) {
 	return (tok[0] != '(') ? new_atom(tok) :
-		lisp_read_list(read_token(in), in);
+	       lisp_read_list(read_token(in), in);
 }
 
 object *lisp_read_list(const char *tok, FILE *in) {

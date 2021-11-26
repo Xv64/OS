@@ -38,7 +38,7 @@ static int8 printint(int xx, int base, int sgn, char *outbuf) {
 		buf[i++] = '-';
 	int32 len = i;
 
-	while(--i >= 0){
+	while(--i >= 0) {
 		outbuf[len - (i + 1)] = buf[i];
 	}
 
@@ -73,7 +73,7 @@ static int32 vprintf(uint8 mode, int32 fd, char *buf, uint32 maxlen, const char 
 			if(c == 'd') {
 				char buf[16];
 				int8 segmentLen = printint(va_arg(ap, int), 10, 1, &buf[0]);
-				for(uint8 j = 0; j != segmentLen; j++){
+				for(uint8 j = 0; j != segmentLen; j++) {
 					if(mode == PRINT_SCREEN) {
 						len += putc(fd, buf[j]);
 					}else {
@@ -86,7 +86,7 @@ static int32 vprintf(uint8 mode, int32 fd, char *buf, uint32 maxlen, const char 
 			} else if(c == 'x' || c == 'p') {
 				char buf[16];
 				int8 segmentLen = printint(va_arg(ap, int), 16, 0, &buf[0]);
-				for(uint8 j = 0; j != segmentLen; j++){
+				for(uint8 j = 0; j != segmentLen; j++) {
 					if(mode == PRINT_SCREEN) {
 						len += putc(fd, buf[j]);
 					}else {

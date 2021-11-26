@@ -31,7 +31,7 @@ static char *read_line(FILE *f)
 		fprintf(stderr, "fgets");
 	}
 	size_t l = strlen(buf);
-	if(l <= 0){
+	if(l <= 0) {
 		return NULL;
 	}
 	if (buf[l - 1] != '\n' && !feof(f))
@@ -217,7 +217,7 @@ out_err:
 }
 
 static void buffer_print_range(struct buffer *buf, long int a, long int b,
-			       int with_line_numbers)
+                               int with_line_numbers)
 {
 	struct line *line;
 	long int line_no = 1;
@@ -500,7 +500,7 @@ void main(int argc, char *argv[]) {
 		prev_was_q = (cmd.cmd == 'q');
 		if (err == E_NONE && err2 != E_NONE)
 			err = err2; // Just a hack to satisfy the assignment.
-	skip_cmd:
+skip_cmd:
 		if (err != E_NONE) {
 			puts("?");
 			if (buf.print_errors)

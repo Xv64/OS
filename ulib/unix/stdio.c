@@ -19,53 +19,53 @@ FILE *_xv64_stdout = &stdout_const;
 FILE *_xv64_stderr = &stderr_const;
 
 int feof(FILE *stream) {
-    /*
-        The feof( ) function shall test the end-of-file indicator for the stream pointed to by stream.
-        -- POSIX Base Definitions, Issue 6 - page 350
-    */
-    if(stream->readable == -1){
-        return EOF;
-    }
-    return 0;
+	/*
+	    The feof( ) function shall test the end-of-file indicator for the stream pointed to by stream.
+	    -- POSIX Base Definitions, Issue 6 - page 350
+	 */
+	if(stream->readable == -1) {
+		return EOF;
+	}
+	return 0;
 }
 
 int fgetc(FILE *stream) {
-    if(stream->readable == -1){
-        return EOF;
-    }
-    unsigned char buf = EOF;
-    stream->readable = read(stream->fd, &buf, sizeof(buf)) == sizeof(buf) ? 1 : -1;
-    if(stream->readable == -1){
-        return EOF;
-    }
-    return (int)buf;
+	if(stream->readable == -1) {
+		return EOF;
+	}
+	unsigned char buf = EOF;
+	stream->readable = read(stream->fd, &buf, sizeof(buf)) == sizeof(buf) ? 1 : -1;
+	if(stream->readable == -1) {
+		return EOF;
+	}
+	return (int)buf;
 }
 
 char *fgets(char *restrict buf, int n, FILE *restrict stream) {
-    /*
-        The fgets( ) function shall read bytes from stream into the array pointed to by s, until n−1 bytes
-        are read, or a <newline> is read and transferred to s, or an end-of-file condition is encountered.
-        The string is then terminated with a null byte.
-        -- POSIX Base Definitions, Issue 6 - page 368
-    */
+	/*
+	    The fgets( ) function shall read bytes from stream into the array pointed to by s, until n−1 bytes
+	    are read, or a <newline> is read and transferred to s, or an end-of-file condition is encountered.
+	    The string is then terminated with a null byte.
+	    -- POSIX Base Definitions, Issue 6 - page 368
+	 */
 
-    for(int i = 0; i != (n - 1); i++){
-        int c = fgetc(stream);
-        if(c == EOF){
-            buf[i] = '\0';
-            break;
-        }
-        buf[i] = (char)c;
-        buf[i+1] = '\0'; //this only is safe because we're looping until n-1
+	for(int i = 0; i != (n - 1); i++) {
+		int c = fgetc(stream);
+		if(c == EOF) {
+			buf[i] = '\0';
+			break;
+		}
+		buf[i] = (char)c;
+		buf[i+1] = '\0'; //this only is safe because we're looping until n-1
 
-        if(c == '\n'){
-            //unlike the test for EOF, we want to
-            //copy the newline to the output buffer
-            //before we conclude.
-            break;
-        }
-    }
-    return buf;
+		if(c == '\n') {
+			//unlike the test for EOF, we want to
+			//copy the newline to the output buffer
+			//before we conclude.
+			break;
+		}
+	}
+	return buf;
 }
 
 
@@ -96,7 +96,7 @@ static int8_t printint(int xx, int base, int sgn, char *outbuf) {
 		buf[i++] = '-';
 	int32_t len = i;
 
-	while(--i >= 0){
+	while(--i >= 0) {
 		outbuf[len - (i + 1)] = buf[i];
 	}
 
@@ -125,7 +125,7 @@ static int8_t printlong(long xx, int base, int sgn, char *outbuf) {
 		buf[i++] = '-';
 	int32_t len = i;
 
-	while(--i >= 0){
+	while(--i >= 0) {
 		outbuf[len - (i + 1)] = buf[i];
 	}
 
@@ -137,8 +137,8 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 	char *s;
 	int c, i, state;
 	int32_t len = 0; //based on mode this will either represent:
-	               //     when mode == PRINT_SCREEN: the total number of characters printed
-	               //     when mode == PRINT_BUFFER: the total number of characters that *could* have been written
+	                 //     when mode == PRINT_SCREEN: the total number of characters printed
+	                 //     when mode == PRINT_BUFFER: the total number of characters that *could* have been written
 
 	state = 0;
 	for(i = 0; fmt[i]; i++) {
@@ -160,7 +160,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 			if(c == 'd') {
 				char buf[16];
 				int8_t segmentLen = printint(va_arg(ap, long), 10, 1, &buf[0]);
-				for(uint8_t j = 0; j != segmentLen; j++){
+				for(uint8_t j = 0; j != segmentLen; j++) {
 					if(mode == PRINT_SCREEN) {
 						len += putc(fd, buf[j]);
 					}else {
@@ -170,10 +170,10 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 						len++;
 					}
 				}
-            }else if(c == 'l') {
+			}else if(c == 'l') {
 				char buf[16];
 				int8_t segmentLen = printlong(va_arg(ap, int), 10, 1, &buf[0]);
-				for(uint8_t j = 0; j != segmentLen; j++){
+				for(uint8_t j = 0; j != segmentLen; j++) {
 					if(mode == PRINT_SCREEN) {
 						len += putc(fd, buf[j]);
 					}else {
@@ -186,12 +186,12 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 			} else if(c == 'x' || c == 'p') {
 				char buf[16];
 				int8_t segmentLen = printint(va_arg(ap, int), 16, 0, &buf[0]);
-				for(uint8_t j = 0; j != segmentLen; j++){
+				for(uint8_t j = 0; j != segmentLen; j++) {
 					if(mode == PRINT_SCREEN) {
 						len += putc(fd, buf[j]);
 					}else {
 						if(len < maxlen) {
-                            obuf[len] = buf[j];
+							obuf[len] = buf[j];
 						}
 						len++;
 					}
@@ -205,7 +205,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 						len += putc(fd, *s);
 					}else{
 						if(len < maxlen) {
-                            obuf[len] = *s;
+							obuf[len] = *s;
 						}
 						len++;
 					}
@@ -216,7 +216,7 @@ static int32_t vprintf(uint8_t mode, int32_t fd, char *obuf, uint32_t maxlen, co
 					len += putc(fd, va_arg(ap, uint32_t));
 				}else{
 					if(len < maxlen) {
-                        obuf[len] = va_arg(ap, uint32_t);
+						obuf[len] = va_arg(ap, uint32_t);
 					}
 					len++;
 				}
@@ -260,7 +260,7 @@ int fprintf(FILE *stream, const char *fmt, ...){
 	va_start(args, fmt);
 	int result = vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
 	va_end(args);
-    return result;
+	return result;
 }
 
 void printf(const char *fmt, ...) {
@@ -271,8 +271,8 @@ void printf(const char *fmt, ...) {
 }
 
 int puts(const char *s) {
-    printf("%s\n", s);
-    return 0;
+	printf("%s\n", s);
+	return 0;
 }
 
 int snprintf(char *s, size_t n, const char *fmt, ...) {
@@ -284,45 +284,45 @@ int snprintf(char *s, size_t n, const char *fmt, ...) {
 }
 
 FILE *fopen(const char *restrict filename, const char *restrict mode) {
-    int omode = O_RDWR; //HACK
-    if(mode == 0){
-        omode = O_RDONLY;
-    }
-    char fname[2048]; //HACK
-    int fd = open(strncpy(&fname[0], filename, 2048), omode);
-    FILE *result = malloc(sizeof(FILE));
-    result->fd = fd;
+	int omode = O_RDWR; //HACK
+	if(mode == 0) {
+		omode = O_RDONLY;
+	}
+	char fname[2048]; //HACK
+	int fd = open(strncpy(&fname[0], filename, 2048), omode);
+	FILE *result = malloc(sizeof(FILE));
+	result->fd = fd;
 
-    return result;
+	return result;
 }
 
 long ftell(FILE *stream) {
-    //the Xv64 "seek" syscall returns the file offset after seeking,
-    //so if we seek to 0 (e.g. our current location)
-    //then we will have the current file offset
-    int result = seek(stream->fd, 0);
-    if(result < 0){
-        return -1;
-    }
-    return result;
+	//the Xv64 "seek" syscall returns the file offset after seeking,
+	//so if we seek to 0 (e.g. our current location)
+	//then we will have the current file offset
+	int result = seek(stream->fd, 0);
+	if(result < 0) {
+		return -1;
+	}
+	return result;
 }
 
 int fclose(FILE *f) {
-    return close(f->fd);
+	return close(f->fd);
 }
 
 int fseek(FILE *stream, long offset, int whence) {
-    //POSIX Base Definitions, Issue 6 - page 442
-    if(whence == SEEK_CUR){
-        int result = seek(stream->fd, offset);
-        if(result < 0){
-            return -1;
-        }
-        return 0;
-    }
-    return -1; //not supported at the moment
+	//POSIX Base Definitions, Issue 6 - page 442
+	if(whence == SEEK_CUR) {
+		int result = seek(stream->fd, offset);
+		if(result < 0) {
+			return -1;
+		}
+		return 0;
+	}
+	return -1; //not supported at the moment
 }
 
 int vfprintf(FILE *stream, const char *restrict fmt, va_list args) {
-    return vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
+	return vprintf(PRINT_SCREEN, stream->fd, 0, 0, fmt, args);
 }
