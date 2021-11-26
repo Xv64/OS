@@ -93,7 +93,6 @@ loop:
 
 // Return a B_BUSY buf with the contents of the indicated disk sector.
 struct buf* bread(uint dev, uint sector){
-	cprintf("   bread\n");
 	struct buf* b;
 
 	b = bget(dev, sector);
@@ -126,7 +125,15 @@ void bwrite(struct buf* b){
 	if ((b->flags & B_BUSY) == 0)
 		panic("bwrite");
 	b->flags |= B_DIRTY;
-	iderw(b);
+	uint8 devType = GETDEVTYPE(b->dev);
+	//uint32 devNum = GETDEVNUM(b->dev);
+
+	if(devType == DEV_IDE) {
+		iderw(b);
+	} else {
+		//sata_write(devNum, ...)
+		panic("SATA writing is not implemented yet\n");
+	}
 }
 
 // Release a B_BUSY buffer.
