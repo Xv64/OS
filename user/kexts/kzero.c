@@ -14,6 +14,8 @@ void main(void){
         fprintf(stderr, "Error opening /dev/zero\n");
         procexit();
     }
+
+    sleep(10);
     while(1){
         write(fd, "\0\0\0\0\0\0\0\0\0\0", 10);
         sleep(1);

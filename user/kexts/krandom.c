@@ -24,6 +24,7 @@ void main(void){
     uint64 last = 1;
     uint64 seed = 1982;
 
+    sleep(10);
     while(1){
         uint64 rnd = (last % seed) + 1;
         last = (a * last + c) % m;
