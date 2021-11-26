@@ -53,7 +53,7 @@ FSIMAGE := fs.img
 endif
 
 # Cross-compiling (e.g., on Mac OS X)
-TOOLPREFIX = /opt/cross/bin/x86_64-elf-
+# TOOLPREFIX = /opt/cross/bin/x86_64-elf-
 
 # Using native tools (e.g., on X86 Linux)
 #TOOLPREFIX =

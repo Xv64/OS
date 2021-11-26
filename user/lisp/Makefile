@@ -1,5 +1,3 @@
-TOOLPREFIX = /opt/cross/bin/x86_64-elf-
-
 CC = $(TOOLPREFIX)gcc
 BINPATH = ../../uobj/
 FSPATH  = ../../fs
