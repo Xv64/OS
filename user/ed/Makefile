@@ -22,6 +22,6 @@ ed: $(ULIB)
 	$(CC) $(CFLAGS) -c -o ed.o ed.c
 
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $(FSPATH)/bin/$@ ed.o $^
-# 
+
 # ed:
 # 	echo ""
