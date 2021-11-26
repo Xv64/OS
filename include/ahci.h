@@ -178,7 +178,7 @@ void   ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func);
 void   ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bus, uint16 slot, uint16 func);
 int    ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf);
 uint32 sata_device_count();
-int    sata_read(uint32 dev, uint32 startl, uint32 starth, uint32 count, uint16 *buf);
+int    sata_read(uint32 dev, uint64 lba, uint32 count, uint16 *buf);
 void   ahci_sata_init(HBA_PORT *port, int num);
 
 int8   ahci_rebase_port(HBA_PORT *port, int num);

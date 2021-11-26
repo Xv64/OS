@@ -104,7 +104,10 @@ struct buf* bread(uint dev, uint sector){
 			iderw(b);
 		} else if(devType == DEV_SATA) {
 			uint16 buf[512];
-			sata_read(devNum, (sector - 1) * 512, sector * 512, 1, &buf[0]);
+			int success = sata_read(devNum, sector, 1, &buf[0]);
+			if(!success){
+				panic("Error reading SATA\n");
+			}
 			for(int i =0; i != 512; i++) {
 				b->data[i] = (uchar)buf[i];
 			}

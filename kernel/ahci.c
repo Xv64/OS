@@ -147,7 +147,7 @@ uint32 sata_device_count() {
 	return sataDeviceCount;
 }
 
-int sata_read(uint32 dev, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
+int sata_read(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
 	if( dev >= AHCI_MAX_SLOT) {
 		return 0;
 	}
@@ -155,7 +155,9 @@ int sata_read(uint32 dev, uint32 startl, uint32 starth, uint32 count, uint16 *bu
 	if(!port) {
 		return 0;
 	}
-	return ahci_sata_read(port, startl, starth, count, buf);
+	uint32 lbal = (uint32)lba;
+	uint32 lbah = (uint32)(lba >> 32);
+	return ahci_sata_read(port, lbal, lbah, count, buf);
 }
 
 int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
@@ -176,16 +178,13 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*) P2V(
 		HILO2ADDR(cmdheader->ctbau, cmdheader->ctba)
 		);
-	cprintf("C.2\n");
-	cprintf("cmdtbl: %x, cmdheader: %x, prdtl: %x, ctbau: %x, ctba: %x\n", cmdtbl, cmdheader, cmdheader->prdtl, cmdheader->ctbau, cmdheader->ctba);
+	//cprintf("cmdtbl: %x, cmdheader: %x, prdtl: %x, ctbau: %x, ctba: %x\n", cmdtbl, cmdheader, cmdheader->prdtl, cmdheader->ctbau, cmdheader->ctba);
 
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
 	       (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
-	cprintf("D\n");
 
 	// 8K bytes (16 sectors) per PRDT
-	uint64 addr = (uint64)buf;//V2P(buf);
-	cprintf("buf addr: %x\n", addr);
+	uint64 addr = V2P(buf);
 	int i;
 	for (i=0; i < cmdheader->prdtl - 1; i++) {
 		cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
@@ -200,8 +199,6 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	cmdtbl->prdt_entry[i].dbau = ADDRHI(addr);
 	cmdtbl->prdt_entry[i].dbc = (count<<9)-1; // 512 bytes per sector
 	cmdtbl->prdt_entry[i].i = 1;
-
-	cprintf("E\n");
 
 	// Setup command
 	FIS_REG_H2D *cmdfis = (FIS_REG_H2D*)(&cmdtbl->cfis);
@@ -257,8 +254,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 
 void ahci_sata_init(HBA_PORT *port, int num){
 	if(ahci_rebase_port(port,num) > 0) {
-		//TODO: rest of init
-		uint16 buf[16];
+		uint16 buf[512];
 		int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
 		if(success == 1) {
 			uint32 devNum = sataDeviceCount++;
