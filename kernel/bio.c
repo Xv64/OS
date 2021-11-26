@@ -93,6 +93,7 @@ loop:
 
 // Return a B_BUSY buf with the contents of the indicated disk sector.
 struct buf* bread(uint dev, uint sector){
+	cprintf("   bread\n");
 	struct buf* b;
 
 	b = bget(dev, sector);
@@ -103,13 +104,15 @@ struct buf* bread(uint dev, uint sector){
 		if(devType == DEV_IDE) {
 			iderw(b);
 		} else if(devType == DEV_SATA) {
-			uint16 buf[512];
+			uint16 buf[SECTOR_SIZE / 2];
 			int success = sata_read(devNum, sector, 1, &buf[0]);
 			if(!success){
 				panic("Error reading SATA\n");
 			}
-			for(int i =0; i != 512; i++) {
-				b->data[i] = (uchar)buf[i];
+			uint16 sector = 0;
+			for(uint16 i =0; i != SECTOR_SIZE / 2; i++) {
+				b->data[sector++] = (uchar)buf[i];
+				b->data[sector++] = (uchar)(buf[i] >> 8);
 			}
 		} else {
 			panic("Unsupported device type");
