@@ -28,6 +28,8 @@ static const struct {
 static uint32 sataDeviceCount = 0;
 static HBA_PORT* BLOCK_DEVICES[AHCI_MAX_SLOT];
 
+uint8 wait_for_sata_command(HBA_PORT *port, int32 slot);
+
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
 	uint16 vendor = ahci_probe(bus, slot, func, AHCI_VENDOR_OFFSET);
 	uint16 device = ahci_probe(bus, slot, func, AHCI_DEVICE_OFFSET);
@@ -163,7 +165,7 @@ int sata_read(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
 int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
 	port->is = (uint32) -1; // Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
-	int slot = ahci_find_cmdslot(port);
+	int32 slot = ahci_find_cmdslot(port);
 	if (slot == -1)
 		return 0;
 
@@ -231,25 +233,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 
 	port->ci = 1<<slot; // Issue command
 
-	// Wait for completion
-	while (1) {
-		// In some longer duration reads, it may be helpful to spin on the DPS bit
-		// in the PxIS port field as well (1 << 5)
-		if ((port->ci & (1<<slot)) == 0)
-			break;
-		if (port->is & HBA_PxIS_TFES) { // Task file error
-			cprintf("Read disk error\n");
-			return 0;
-		}
-	}
-
-	// Check again
-	if (port->is & HBA_PxIS_TFES) {
-		cprintf("Read disk error\n");
-		return 0;
-	}
-
-	return 1;
+	return wait_for_sata_command(port, slot);
 }
 
 
@@ -270,7 +254,7 @@ int sata_write(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
 int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
     port->is = (uint32) -1;
 
-    int slot = ahci_find_cmdslot(port);
+    int32 slot = ahci_find_cmdslot(port);
 	if (slot == -1)
 		return 0;
 
@@ -318,6 +302,10 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 
     port->ci = 1<<slot; // Issue command
 
+	return wait_for_sata_command(port, slot);
+}
+
+uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
 	// Wait for completion
 	while (1) {
 		// In some longer duration reads, it may be helpful to spin on the DPS bit
