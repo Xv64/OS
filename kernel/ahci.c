@@ -2,7 +2,7 @@
 #include "types.h"
 #include "defs.h"
 #include "x86.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 #include "spinlock.h"
 #include "memlayout.h"
 

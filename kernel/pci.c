@@ -5,7 +5,7 @@
 #include "pcireg.h"
 #include "assert.h"
 #include "ahci.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 
 #define ARRAY_SIZE(a)   (sizeof(a) / sizeof(a[0]))
 
@@ -35,7 +35,7 @@ struct pci_driver pci_attach_class[] = {
 // pci_attach_vendor matches the vendor ID and device ID of a PCI device. key1
 // and key2 should be the vendor ID and device ID respectively
 struct pci_driver pci_attach_vendor[] = {
-	//{ 0x8086, 0x100e, &e1000_init },
+	{ 0x8086, 0x100e, &e1000_init },
 	{ 0, 0, 0 },
 };
 

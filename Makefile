@@ -11,6 +11,12 @@ QEMU ?= qemu-system-x86_64
 OPT ?= -O0
 
 OBJS := \
+	kobj/arp.o\
+	kobj/klib.o\
+	kobj/ip.o\
+    kobj/e1000.o\
+	kobj/ethernet.o\
+	kobj/net.o\
 	kobj/bio.o\
 	kobj/ahci.o\
 	kobj/console.o\

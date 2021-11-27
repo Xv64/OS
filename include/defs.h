@@ -8,6 +8,56 @@ struct spinlock;
 struct stat;
 struct superblock;
 
+// Networking
+struct pci_func;
+struct netdev;
+struct netif;
+struct queue_head;
+struct queue_entry;
+struct socket;
+struct sockaddr;
+
+// arp.c
+typedef uint32 ip_addr_t;
+typedef int32  time_t;
+int             arp_resolve(struct netif *netif, const ip_addr_t *pa, uint8 *ha, const void *data, uint32 len);
+int             arp_init(void);
+
+// e1000.c
+int             e1000_init(struct pci_func *pcif);
+void            e1000intr(void);
+
+// ethernet.c
+int             ethernet_addr_pton(const char *p, uint8 *n);
+char *          ethernet_addr_ntop(const uint8 *n, char *p, uint32 size);
+int32           ethernet_rx_helper(struct netdev *dev, uint8 *frame, uint32 flen, void (*cb)(struct netdev*, uint16, uint8*, uint32));
+int32           ethernet_tx_helper(struct netdev *dev, uint16 type, const uint8 *payload, uint32 plen, const void *dst, int32 (*cb)(struct netdev*, uint8*, uint32));
+void            ethernet_netdev_setup(struct netdev *dev);
+
+// net.c
+struct netdev * netdev_root(void);
+struct netdev * netdev_alloc(void (*setup)(struct netdev *));
+int             netdev_register(struct netdev *dev);
+struct netdev * netdev_by_index(int index);
+struct netdev * netdev_by_name(const char *name);
+void            netdev_receive(struct netdev *dev, uint16 type, uint8 *packet, unsigned int plen);
+int             netdev_add_netif(struct netdev *dev, struct netif *netif);
+struct netif *  netdev_get_netif(struct netdev *dev, int family);
+int             netproto_register(unsigned short type, void (*handler)(uint8 *packet, uint32 plen, struct netdev *dev));
+void            netinit(void);
+
+// ip.c
+int             ip_addr_pton(const char *p, ip_addr_t *n);
+char *          ip_addr_ntop(const ip_addr_t *n, char *p, uint32 size);
+struct netif *  ip_netif_alloc(ip_addr_t unicast, ip_addr_t netmask, ip_addr_t gateway);
+struct netif *  ip_netif_register(struct netdev *dev, const char *addr, const char *netmask, const char *gateway);
+int             ip_netif_reconfigure(struct netif *netif, ip_addr_t unicast, ip_addr_t netmask, ip_addr_t gateway);
+struct netif *  ip_netif_by_addr(ip_addr_t *addr);
+struct netif *  ip_netif_by_peer(ip_addr_t *peer);
+int32           ip_tx(struct netif *netif, uint8 protocol, const uint8 *buf, uint32 len, const ip_addr_t *dst);
+int             ip_add_protocol(uint8 type, void (*handler)(uint8 *payload, uint32 len, ip_addr_t *src, ip_addr_t *dst, struct netif *netif));
+int             ip_init(void);
+
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);

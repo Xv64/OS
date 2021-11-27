@@ -4,7 +4,7 @@
 #include "spinlock.h"
 #include "fs.h"
 #include "buf.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 
 // Simple logging that allows concurrent FS system calls.
 //

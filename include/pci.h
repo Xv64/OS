@@ -40,5 +40,6 @@ struct pci_bus {
 #define PCI_BAR5_OFFSET   0x24
 
 void pciinit(void);
+void pci_func_enable(struct pci_func* f);
 
 #endif

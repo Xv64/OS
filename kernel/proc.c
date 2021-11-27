@@ -6,7 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 #include "fs.h"
 #include "file.h"
 

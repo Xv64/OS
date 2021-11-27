@@ -7,7 +7,7 @@
 #include "x86.h"
 #include "acpi.h"
 #include "pci.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 
 static void bsd4_spam();
 static void startothers(void);
@@ -44,6 +44,7 @@ int main(void){
 	ideinit(); // disk
 	// if (!ismp)
 	//     timerinit(); // uniprocessor timer
+	netinit();
 	startothers(); // start other processors
 	kinit2(P2V(4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 	userinit(); // first user process

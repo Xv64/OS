@@ -10,7 +10,7 @@
 #include "x86.h"
 #include "mmu.h"
 #include "proc.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 
 struct cpu cpus[NCPU];
 static struct cpu* bcpu;

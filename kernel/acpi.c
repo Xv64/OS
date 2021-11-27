@@ -33,7 +33,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "acpi.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 
 extern struct cpu cpus[NCPU];
 extern int ismp;

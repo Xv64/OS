@@ -8,7 +8,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "spinlock.h"
-#include "kernel/string.h"
+#include "kernel/klib.h"
 
 void freerange(void* vstart, void* vend);
 extern char end[]; // first address after kernel loaded from ELF file

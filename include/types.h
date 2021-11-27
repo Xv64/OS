@@ -14,6 +14,9 @@ typedef short int16;
 typedef int  int32;
 typedef long int64;
 
+//pointers
+typedef unsigned long uintptr_t;
+
 
 typedef unsigned long uintp;
 
