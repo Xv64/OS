@@ -200,7 +200,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	// Last entry
 	cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
 	cmdtbl->prdt_entry[i].dbau = ADDRHI(addr);
-	cmdtbl->prdt_entry[i].dbc = (count<<9)-1; // 512 bytes per sector
+	cmdtbl->prdt_entry[i].dbc = 511; // 512 bytes per sector, 0-based. So 0 means 1, 1 means 2, etc.
 	cmdtbl->prdt_entry[i].i = 1;
 
 	// Setup command
