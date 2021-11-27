@@ -77,6 +77,10 @@ void ideinit(void){
 		}
 	}
 
+	if(!havedisk0 && !havedisk1) {
+		cprintf("   no IDE devices detected\n");
+	}
+
 	// Switch back to disk 0.
 	amd64_out8(ideChannel + 6, IDE_MASTER);
 }
