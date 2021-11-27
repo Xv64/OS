@@ -1,13 +1,13 @@
 #define SECTOR_SIZE 512
 
 struct buf {
-  int flags;
-  uint dev;
-  uint sector;
+  int32 flags;
+  uint32 dev;
+  uint32 sector;
   struct buf *prev; // LRU cache list
   struct buf *next;
   struct buf *qnext; // disk queue
-  uchar data[SECTOR_SIZE];
+  uint8 data[SECTOR_SIZE];
 };
 #define B_BUSY  0x1  // buffer is locked by some process
 #define B_VALID 0x2  // buffer has been read from disk
