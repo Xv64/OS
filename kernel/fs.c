@@ -251,6 +251,7 @@ struct inode* idup(struct inode* ip){
 void ilock(struct inode* ip){
 	struct buf* bp;
 	struct dinode* dip;
+	cprintf("Locking inode %d\n", ip->inum);
 
 	if (ip == 0 || ip->ref < 1)
 		panic("ilock");
@@ -264,7 +265,8 @@ void ilock(struct inode* ip){
 	if (!(ip->flags & I_VALID)) {
 		uint32 sector = IBLOCK(ip->inum);
 		bp = bread(ip->dev, sector);
-		dip = (struct dinode*)bp->data + ip->inum % IPB;
+		dip = (struct dinode*)bp->data
+		dip += ip->inum % IPB; // increment dip to the correct inode in the sector
 		ip->type = dip->type;
 		ip->major = dip->major;
 		ip->minor = dip->minor;
