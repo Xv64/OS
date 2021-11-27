@@ -200,6 +200,7 @@ UPROGS=\
 	fs/init\
 	fs/bin/kill\
 	fs/bin/bless\
+	fs/bin/uptime\
 	fs/bin/halt\
 	fs/bin/ln\
 	fs/bin/ls\

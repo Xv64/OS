@@ -32,3 +32,4 @@ int bfork(void);
 int mkvdev(char*);
 int pstate(int);
 int pname(int, char*, int);
+int ticks(void);
