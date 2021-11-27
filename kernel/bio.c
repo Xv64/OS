@@ -103,15 +103,9 @@ struct buf* bread(uint dev, uint sector){
 		if(devType == DEV_IDE) {
 			iderw(b);
 		} else if(devType == DEV_SATA) {
-			uint16 buf[SECTOR_SIZE / 2];
-			int success = sata_read(devNum, sector, 1, &buf[0]);
+			int success = sata_read(devNum, sector, 1, &b->data[0]);
 			if(!success){
 				panic("Error reading SATA\n");
-			}
-			uint16 s = 0;
-			for(uint16 i =0; i != SECTOR_SIZE / 2; i++) {
-				b->data[s++] = (uchar)buf[i];
-				b->data[s++] = (uchar)(buf[i] >> 8);
 			}
 		} else {
 			panic("Unsupported device type");
@@ -131,14 +125,7 @@ void bwrite(struct buf* b){
 	if(devType == DEV_IDE) {
 		iderw(b);
 	} else {
-		uint16 buf[SECTOR_SIZE / 2];
-		uint16 sector = 0;
-		for(uint16 i =0; i != SECTOR_SIZE / 2; i++) {
-			uint16 lo = b->data[sector++];
-			uint16 hi = b->data[sector++];
-			buf[i] = (hi << 8) + lo;
-		}
-		int success = sata_write(devNum, b->sector, 1, &buf[0]);
+		int success = sata_write(devNum, b->sector, 1, &b->data[0]);
 		if(!success){
 			panic("Error writing SATA\n");
 		}

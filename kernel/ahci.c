@@ -149,7 +149,7 @@ uint32 sata_device_count() {
 	return sataDeviceCount;
 }
 
-int sata_read(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
+int sata_read(uint32 dev, uint64 lba, uint32 count, uint8 *buf) {
 	if( dev >= AHCI_MAX_SLOT) {
 		return 0;
 	}
@@ -162,7 +162,7 @@ int sata_read(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
 	return ahci_sata_read(port, lbal, lbah, count, buf);
 }
 
-int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
+int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint8 *buf) {
 	port->is = (uint32) -1; // Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
 	int32 slot = ahci_find_cmdslot(port);
@@ -238,7 +238,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 }
 
 
-int sata_write(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
+int sata_write(uint32 dev, uint64 lba, uint32 count, uint8 *buf) {
 	if( dev >= AHCI_MAX_SLOT) {
 		return 0;
 	}
@@ -252,7 +252,7 @@ int sata_write(uint32 dev, uint64 lba, uint32 count, uint16 *buf) {
 }
 
 
-int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint16 *buf) {
+int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint8 *buf) {
     port->is = (uint32) -1;
 
     int32 slot = ahci_find_cmdslot(port);
@@ -331,7 +331,7 @@ inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
 
 void ahci_sata_init(HBA_PORT *port, int num){
 	if(ahci_rebase_port(port,num) > 0) {
-		uint16 buf[512];
+		uint8 buf[512];
 		int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
 		if(success == 1) {
 			uint32 devNum = sataDeviceCount++;
