@@ -187,6 +187,9 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 
 	// 8K bytes (16 sectors) per PRDT
 	uint64 addr = V2P(buf);
+	if (addr & 0x1) {
+		panic("SATA CBA address not word aligned.");
+	}
 	int i;
 	for (i=0; i < cmdheader->prdtl - 1; i++) {
 		panic("Unsupported read request - only single sector reads are supported.");
