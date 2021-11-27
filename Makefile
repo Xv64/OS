@@ -13,6 +13,9 @@ OPT ?= -O0
 OBJS := \
 	kobj/arp.o\
 	kobj/klib.o\
+	kobj/icmp.o\
+	kobj/tcp.o\
+	kobj/udp.o\
 	kobj/ip.o\
     kobj/e1000.o\
 	kobj/ethernet.o\

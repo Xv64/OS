@@ -20,8 +20,35 @@ int isdigit(int c);
 
 #define strcmp(s1, s2) (strncmp(s1, s2, (uint32)(-1)))
 
+struct queue_entry {
+    void *data;
+    uint32 size;
+    struct queue_entry *next;
+};
+
+struct queue_head {
+    struct queue_entry *next;
+    struct queue_entry *tail;
+    unsigned int num;
+};
+
+#define MIN(_a, _b)						\
+({								\
+	typeof(_a) __a = (_a);					\
+	typeof(_b) __b = (_b);					\
+	__a <= __b ? __a : __b;					\
+})
+
+#define array_tailof(x) (x + (sizeof(x) / sizeof(*x)))
+#define array_offset(x, y) (((uintptr_t)y - (uintptr_t)x) / sizeof(*y))
+
 int strncmp(const char* p, const char* q, uint n);
 long strtol(const char *restrict str, char **restrict endptr, int base);
 int snprintf(char *s, unsigned int n, const char *fmt, ...);
 uint16 ntoh16 (uint16 n);
 uint16 hton16 (uint16 h);
+uint32 ntoh32(uint32 n);
+uint32 hton32(uint32 h);
+uint16 cksum16 (uint16 *data, uint16 size, uint32 init);
+struct queue_entry *queue_push (struct queue_head *queue, void *data, uint32 size);
+struct queue_entry *queue_pop (struct queue_head *queue);

@@ -18,7 +18,8 @@
 #define ARP_TABLE_SIZE 4096
 #define ARP_TABLE_TIMEOUT_SEC 300
 
-#define array_tailof(x) (x + (sizeof(x) / sizeof(*x)))
+extern int sys_ticks();
+#define time sys_ticks
 
 struct arp_hdr {
     uint16 hrd;
@@ -95,7 +96,7 @@ static int arp_table_update (struct netdev *dev, const ip_addr_t *pa, const uint
         return -1;
     }
     memcpy(entry->ha, ha, ETHERNET_ADDR_LEN);
-    time(&entry->timestamp);
+    entry->timestamp = time() / 100;
     if (entry->data) {
         if (entry->netif->dev != dev) {
             /* warning: receive response from unintended device */
@@ -131,7 +132,7 @@ static int arp_table_insert (const ip_addr_t *pa, const uint8 *ha) {
     entry->used = 1;
     entry->pa = *pa;
     memcpy(entry->ha, ha, ETHERNET_ADDR_LEN);
-    time(&entry->timestamp);
+    entry->timestamp = time() /  100; // why 100?
     //pthread_cond_broadcast(&entry->cond);
     return 0;
 }
@@ -238,7 +239,7 @@ static void arp_rx (uint8 *packet, uint32 plen, struct netdev *dev) {
     arp_dump(packet, plen);
 #endif
     acquire(&arplock);
-    time(&now);
+    now = time() / 100;
     if (now - timestamp > 10) {
         timestamp = now;
         arp_table_patrol();
@@ -261,7 +262,6 @@ static void arp_rx (uint8 *packet, uint32 plen, struct netdev *dev) {
 
 int arp_resolve (struct netif *netif, const ip_addr_t *pa, uint8 *ha, const void *data, uint32 len) {
     struct arp_entry *entry;
-    int ret;
 
     acquire(&arplock);
     entry = arp_table_select(pa);
@@ -293,7 +293,7 @@ int arp_resolve (struct netif *netif, const ip_addr_t *pa, uint8 *ha, const void
 */
     entry->used = 1;
     entry->pa = *pa;
-    time(&entry->timestamp);
+    entry->timestamp = time() / 100;
     entry->netif = netif;
     arp_send_request(netif, pa);
     release(&arplock);
@@ -301,9 +301,7 @@ int arp_resolve (struct netif *netif, const ip_addr_t *pa, uint8 *ha, const void
 }
 
 int arp_init (void) {
-    struct arp_entry *entry;
-
-    time(&timestamp);
+    timestamp = time() / 100;
     initlock(&arplock, "arp");
     netproto_register(NETPROTO_TYPE_ARP, arp_rx);
     return 0;

@@ -58,6 +58,29 @@ int32           ip_tx(struct netif *netif, uint8 protocol, const uint8 *buf, uin
 int             ip_add_protocol(uint8 type, void (*handler)(uint8 *payload, uint32 len, ip_addr_t *src, ip_addr_t *dst, struct netif *netif));
 int             ip_init(void);
 
+// icmp.c
+int             icmp_tx(struct netif *netif, uint8 type, uint8 code, uint32 values, uint8 *data, uint32 len, ip_addr_t *dst);
+int             icmp_init(void);
+
+// udp.c
+int             udp_init(void);
+int             udp_api_open(void);
+int             udp_api_close(int soc);
+int             udp_api_bind(int soc, struct sockaddr *addr, int addrlen);
+int32           udp_api_recvfrom(int soc, uint8 *buf, uint32 size, struct sockaddr *addr, int *addrlen);
+int32           udp_api_sendto(int soc, uint8 *buf, uint32 len, struct sockaddr *addr, int addrlen);
+
+// tcp.c
+int             tcp_init(void);
+int             tcp_api_open(void);
+int             tcp_api_close(int soc);
+int             tcp_api_connect(int soc, struct sockaddr *addr, int addrlen);
+int             tcp_api_bind(int soc, struct sockaddr *addr, int addrlen);
+int             tcp_api_listen(int soc, int backlog);
+int             tcp_api_accept(int soc, struct sockaddr *addr, int *addrlen);
+int32           tcp_api_recv(int soc, uint8 *buf, uint32 size);
+int32           tcp_api_send(int soc, uint8 *buf, uint32 len);
+
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);

@@ -4,15 +4,18 @@
 #include "types.h"
 #include "stat.h"
 #include "fcntl.h"
-#include "user.h"
 #include "x86.h"
-#include "console.h"
+#include "defs.h"
+#include "kernel/klib.h"
 
 #define PRINT_SCREEN 0
 #define PRINT_BUFFER 1
 
 static int32 putc(int fd, char c) {
-	write(fd, &c, 1);
+	char str[2];
+	str[0] = c;
+	str[1] = '\0';
+	cprintf(str);
 	return 1;
 }
 
@@ -102,6 +105,35 @@ uint16 hton16 (uint16 h) {
     if (!endian)
         endian = byteorder();
     return endian == __LITTLE_ENDIAN ? byteswap16(h) : h;
+}
+
+uint32 ntoh32(uint32 n) {
+    if (!endian)
+        endian = byteorder();
+    return endian == __LITTLE_ENDIAN ? byteswap32(n) : n;
+}
+
+uint32 hton32(uint32 h) {
+    if (!endian)
+        endian = byteorder();
+    return endian == __LITTLE_ENDIAN ? byteswap32(h) : h;
+}
+
+
+uint16 cksum16 (uint16 *data, uint16 size, uint32 init) {
+    uint32 sum;
+
+    sum = init;
+    while(size > 1) {
+        sum += *(data++);
+        size -= 2;
+    }
+    if(size) {
+        sum += *(uint8 *)data;
+    }
+    sum  = (sum & 0xffff) + (sum >> 16);
+    sum  = (sum & 0xffff) + (sum >> 16);
+    return ~(uint16)sum;
 }
 
 
@@ -229,4 +261,43 @@ int strncmp(const char* p, const char* q, uint n) {
 	if (n == 0)
 		return 0;
 	return (uchar) * p - (uchar) * q;
+}
+
+struct queue_entry *queue_push (struct queue_head *queue, void *data, uint32 size) {
+    struct queue_entry *entry;
+
+    if (!queue || !data) {
+        return 0;
+    }
+    entry = (struct queue_entry *)kalloc();
+    if (!entry) {
+        return 0;
+    }
+    entry->data = data;
+    entry->size = size;
+    entry->next = 0;
+    if (queue->tail) {
+        queue->tail->next = entry;
+    }
+    queue->tail = entry;
+    if (!queue->next) {
+        queue->next = entry;
+    }
+    queue->num++;
+    return entry;
+}
+
+struct queue_entry *queue_pop (struct queue_head *queue) {
+    struct queue_entry *entry;
+
+    if (!queue || !queue->next) {
+        return 0;
+    }
+    entry = queue->next;
+    queue->next = entry->next;
+    if (!queue->next) {
+        queue->tail = 0;
+    }
+    queue->num--;
+    return entry;
 }

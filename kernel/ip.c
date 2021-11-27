@@ -7,6 +7,7 @@
 #include "net.h"
 #include "ethernet.h"
 #include "ip.h"
+#include "kernel/klib.h"
 
 #define IP_VERSION_IPV4 4
 
@@ -79,30 +80,30 @@ char *ip_addr_ntop (const ip_addr_t *n, char *p, uint32 size) {
     return p;
 }
 
-void ip_dump (struct netif *netif, uint8 *packet, uint32 plen) {
-    struct netif_ip *iface;
-    char addr[IP_ADDR_STR_LEN];
-    struct ip_hdr *hdr;
-    uint8 hl;
-    uint16 offset;
-
-    iface = (struct netif_ip *)netif;
-    cprintf(" dev: %s (%s)\n", netif->dev->name, ip_addr_ntop(&iface->unicast, addr, sizeof(addr)));
-    hdr = (struct ip_hdr *)packet;
-    hl = hdr->vhl & 0x0f;
-    cprintf("      vhl: %02x [v: %u, hl: %u (%u)]\n", hdr->vhl, (hdr->vhl & 0xf0) >> 4, hl, hl << 2);
-    cprintf("      tos: %02x\n", hdr->tos);
-    cprintf("      len: %u\n", ntoh16(hdr->len));
-    cprintf("       id: %u\n", ntoh16(hdr->id));
-    offset = ntoh16(hdr->offset);
-    cprintf("   offset: 0x%04x [flags=%x, offset=%u]\n", offset, (offset & 0xe0) >> 5, offset & 0x1f);
-    cprintf("      ttl: %u\n", hdr->ttl);
-    cprintf(" protocol: %u\n", hdr->protocol);
-    cprintf("      sum: 0x%04x\n", ntoh16(hdr->sum));
-    cprintf("      src: %s\n", ip_addr_ntop(&hdr->src, addr, sizeof(addr)));
-    cprintf("      dst: %s\n", ip_addr_ntop(&hdr->dst, addr, sizeof(addr)));
-    hexdump(packet, plen);
-}
+// void ip_dump (struct netif *netif, uint8 *packet, uint32 plen) {
+//     struct netif_ip *iface;
+//     char addr[IP_ADDR_STR_LEN];
+//     struct ip_hdr *hdr;
+//     uint8 hl;
+//     uint16 offset;
+//
+//     iface = (struct netif_ip *)netif;
+//     cprintf(" dev: %s (%s)\n", netif->dev->name, ip_addr_ntop(&iface->unicast, addr, sizeof(addr)));
+//     hdr = (struct ip_hdr *)packet;
+//     hl = hdr->vhl & 0x0f;
+//     cprintf("      vhl: %02x [v: %u, hl: %u (%u)]\n", hdr->vhl, (hdr->vhl & 0xf0) >> 4, hl, hl << 2);
+//     cprintf("      tos: %02x\n", hdr->tos);
+//     cprintf("      len: %u\n", ntoh16(hdr->len));
+//     cprintf("       id: %u\n", ntoh16(hdr->id));
+//     offset = ntoh16(hdr->offset);
+//     cprintf("   offset: 0x%04x [flags=%x, offset=%u]\n", offset, (offset & 0xe0) >> 5, offset & 0x1f);
+//     cprintf("      ttl: %u\n", hdr->ttl);
+//     cprintf(" protocol: %u\n", hdr->protocol);
+//     cprintf("      sum: 0x%04x\n", ntoh16(hdr->sum));
+//     cprintf("      src: %s\n", ip_addr_ntop(&hdr->src, addr, sizeof(addr)));
+//     cprintf("      dst: %s\n", ip_addr_ntop(&hdr->dst, addr, sizeof(addr)));
+//     hexdump(packet, plen);
+// }
 
 /*
  * IP ROUTING
@@ -138,7 +139,7 @@ static int ip_route_del (struct netif *netif) {
 }
 
 static struct ip_route *ip_route_lookup (const struct netif *netif, const ip_addr_t *dst) {
-    struct ip_route *route, *candidate = NULL;
+    struct ip_route *route, *candidate = 0;
 
     for (route = route_table; route < array_tailof(route_table); route++) {
         if (route->used && (*dst & route->netmask) == route->network && (!netif || route->netif == netif)) {
@@ -156,27 +157,26 @@ static struct ip_route *ip_route_lookup (const struct netif *netif, const ip_add
 
 struct netif *ip_netif_alloc (ip_addr_t unicast, ip_addr_t netmask, ip_addr_t gateway) {
     struct netif_ip *iface;
-    ip_addr_t gw;
 
     iface = (struct netif_ip *)kalloc();
     if (!iface) {
-        return NULL;
+        return 0;
     }
-    ((struct netif *)iface)->next = NULL;
+    ((struct netif *)iface)->next = 0;
     ((struct netif *)iface)->family = NETIF_FAMILY_IPV4;
-    ((struct netif *)iface)->dev = NULL;
+    ((struct netif *)iface)->dev = 0;
     iface->unicast = unicast;
     iface->netmask = netmask;
     iface->network = iface->unicast & iface->netmask;
     iface->broadcast = iface->network | ~iface->netmask;
     if (ip_route_add(iface->network, iface->netmask, IP_ADDR_ANY, (struct netif *)iface) == -1) {
         kfree((char*)iface);
-        return NULL;
+        return 0;
     }
     if (gateway) {
         if (ip_route_add(IP_ADDR_ANY, IP_ADDR_ANY, gateway, (struct netif *)iface) == -1) {
             kfree((char*)iface);
-            return NULL;
+            return 0;
         }
     }
     return (struct netif *)iface;
@@ -187,30 +187,29 @@ struct netif *ip_netif_register (struct netdev *dev, const char *addr, const cha
     ip_addr_t unicast, mask, gw = 0;
 
     if (ip_addr_pton(addr, &unicast) == -1) {
-        return NULL;
+        return 0;
     }
     if (ip_addr_pton(netmask, &mask) == -1) {
-        return NULL;
+        return 0;
     }
     if (gateway) {
         if (ip_addr_pton(gateway, &gw) == -1) {
-            return NULL;
+            return 0;
         }
     }
     netif = ip_netif_alloc(unicast, mask, gw);
     if (!netif) {
-        return NULL;
+        return 0;
     }
     if (netdev_add_netif(dev, netif) == -1) {
         kfree((char*)netif);
-        return NULL;
+        return 0;
     }
     return netif;
 }
 
 int ip_netif_reconfigure (struct netif *netif, ip_addr_t unicast, ip_addr_t netmask, ip_addr_t gateway) {
     struct netif_ip *iface;
-    ip_addr_t gw;
 
     iface = (struct netif_ip *)netif;
     ip_route_del(netif);
@@ -240,15 +239,15 @@ struct netif *ip_netif_by_addr (ip_addr_t *addr) {
             }
         }
     }
-    return NULL;
+    return 0;
 }
 
 struct netif *ip_netif_by_peer (ip_addr_t *peer) {
     struct ip_route *route;
 
-    route = ip_route_lookup(NULL, peer);
+    route = ip_route_lookup(0, peer);
     if (!route) {
-        return NULL;
+        return 0;
     }
     return route->netif;
 }
@@ -297,10 +296,10 @@ static void ip_rx (uint8 *dgram, uint32 dlen, struct netdev *dev) {
             return;
         }
     }
-#ifdef DEBUG
-    cprintf(">>> ip_rx <<<\n");
-    ip_dump((struct netif *)iface, dgram, dlen);
-#endif
+// #ifdef DEBUG
+//     cprintf(">>> ip_rx <<<\n");
+//     ip_dump((struct netif *)iface, dgram, dlen);
+// #endif
     payload = (uint8 *)hdr + hlen;
     plen = ntoh16(hdr->len) - hlen;
     offset = ntoh16(hdr->offset);
@@ -356,10 +355,10 @@ static int ip_tx_core (struct netif *netif, uint8 protocol, const uint8 *buf, ui
     hdr->dst = *dst;
     hdr->sum = cksum16((uint16 *)hdr, hlen, 0);
     memcpy(hdr + 1, buf, len);
-#ifdef DEBUG
-    cprintf(">>> ip_tx_core <<<\n");
-    ip_dump(netif, (uint8 *)packet, hlen + len);
-#endif
+// #ifdef DEBUG
+//     cprintf(">>> ip_tx_core <<<\n");
+//     ip_dump(netif, (uint8 *)packet, hlen + len);
+// #endif
     return ip_tx_netdev(netif, (uint8 *)packet, hlen + len, nexthop);
 }
 
@@ -376,14 +375,14 @@ ip_generate_id (void) {
 
 int32 ip_tx (struct netif *netif, uint8 protocol, const uint8 *buf, uint32 len, const ip_addr_t *dst) {
     struct ip_route *route;
-    ip_addr_t *nexthop = NULL, *src = NULL;
+    ip_addr_t *nexthop = 0, *src = 0;
     uint16 id, flag, offset;
     uint32 done, slen;
 
     if (netif && *dst == IP_ADDR_BROADCAST) {
-        nexthop = NULL;
+        nexthop = 0;
     } else {
-        route = ip_route_lookup(NULL, dst);
+        route = ip_route_lookup(0, dst);
         if (!route) {
             cprintf("ip no route to host.\n");
             return -1;
