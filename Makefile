@@ -199,7 +199,6 @@ UPROGS=\
 	fs/bin/grep\
 	fs/init\
 	fs/bin/kill\
-	fs/bin/bless\
 	fs/bin/uptime\
 	fs/bin/halt\
 	fs/bin/ln\
@@ -208,7 +207,6 @@ UPROGS=\
 	fs/bin/rm\
 	fs/bin/sh\
 	fs/bin/wc\
-	fs/bin/zombie\
 	fs/bin/reboot\
 
 fs/README.md: README.md
