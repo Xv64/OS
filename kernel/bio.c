@@ -26,6 +26,7 @@
 #include "spinlock.h"
 #include "buf.h"
 #include "ahci.h"
+#include "kernel/string.h"
 
 struct {
 	struct spinlock lock;
@@ -103,10 +104,16 @@ struct buf* bread(uint dev, uint sector){
 		if(devType == DEV_IDE) {
 			iderw(b);
 		} else if(devType == DEV_SATA) {
-			int success = sata_read(devNum, sector, 1, &b->data[0]);
+			uint8 *buf = (uint8 *)kalloc(); //4K
+			int success = sata_read(devNum, sector, 1, buf);
 			if(!success){
 				panic("Error reading SATA\n");
 			}
+			memmove(b->data, buf, 512);
+			b->flags |= B_VALID;
+			b->flags &= ~B_DIRTY;
+			wakeup(b);
+			kfree((void *)buf);
 		} else {
 			panic("Unsupported device type");
 		}
@@ -125,7 +132,10 @@ void bwrite(struct buf* b){
 	if(devType == DEV_IDE) {
 		iderw(b);
 	} else {
-		int success = sata_write(devNum, b->sector, 1, &b->data[0]);
+		uint8 *buf = (uint8 *)kalloc(); //4K
+		memmove(buf, b->data, 512);
+		int success = sata_write(devNum, b->sector, 1, buf);
+		kfree((void *)buf);
 		if(!success){
 			panic("Error writing SATA\n");
 		}
