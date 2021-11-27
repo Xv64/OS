@@ -28,7 +28,25 @@ static const struct {
 static uint32 sataDeviceCount = 0;
 static HBA_PORT* BLOCK_DEVICES[AHCI_MAX_SLOT];
 
-uint8 wait_for_sata_command(HBA_PORT *port, int32 slot);
+static inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
+	// Wait for completion
+	while (1) {
+		if (port->is & 0x20) {
+			// In some longer duration reads, it may be helpful to spin on the DPS bit
+			// in the PxIS port field as well (1 << 5)
+			continue;
+		}
+		if ((port->ci & (1<<slot)) == 0) {
+			break;
+		}
+		if (port->is & HBA_PxIS_TFES) { // Task file error
+			return 0;
+		}
+	}
+
+	// Check again
+	return (port->is & HBA_PxIS_TFES) > 0 ? 0 : 1;
+}
 
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
 	uint16 vendor = ahci_probe(bus, slot, func, AHCI_VENDOR_OFFSET);
@@ -280,6 +298,9 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 	       (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
 
 	uint64 addr = V2P(buf);
+	if (addr & 0x1) {
+		panic("SATA CBA address not word aligned.");
+	}
 	cmdtbl->prdt_entry[0].dba = ADDRLO(addr);
 	cmdtbl->prdt_entry[0].dbau = ADDRHI(addr);
 	cmdtbl->prdt_entry[0].dbc = (count<<9)-1; // 512 bytes per sector
@@ -307,28 +328,6 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
     port->ci = 1<<slot; // Issue command
 
 	return wait_for_sata_command(port, slot);
-}
-
-inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
-	// Wait for completion
-	while (1) {
-		// In some longer duration reads, it may be helpful to spin on the DPS bit
-		// in the PxIS port field as well (1 << 5)
-		if ((port->ci & (1<<slot)) == 0)
-			break;
-		if (port->is & HBA_PxIS_TFES) { // Task file error
-			cprintf("Read disk error\n");
-			return 0;
-		}
-	}
-
-	// Check again
-	if (port->is & HBA_PxIS_TFES) {
-		cprintf("Read disk error\n");
-		return 0;
-	}
-
-	return 1;
 }
 
 
