@@ -180,7 +180,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*) P2V(
 		HILO2ADDR(cmdheader->ctbau, cmdheader->ctba)
 		);
-	//cprintf("cmdtbl: %x, cmdheader: %x, prdtl: %x, ctbau: %x, ctba: %x\n", cmdtbl, cmdheader, cmdheader->prdtl, cmdheader->ctbau, cmdheader->ctba);
+	// cprintf("cmdtbl: %x, cmdheader: %x, prdtl: %x, ctbau: %x, ctba: %x, slot: %d\n", cmdtbl, cmdheader, cmdheader->prdtl, cmdheader->ctbau, cmdheader->ctba, slot);
 
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
 	       (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
@@ -189,6 +189,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	uint64 addr = V2P(buf);
 	int i;
 	for (i=0; i < cmdheader->prdtl - 1; i++) {
+		panic("Unsupported read request - only single sector reads are supported.");
 		cmdtbl->prdt_entry[i].dba = ADDRLO(addr);
 		cmdtbl->prdt_entry[i].dbau = ADDRHI(addr);
 		cmdtbl->prdt_entry[i].dbc = 8*1024-1;   // 8K bytes (this value should always be set to 1 less than the actual value)
@@ -305,7 +306,7 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 	return wait_for_sata_command(port, slot);
 }
 
-uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
+inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
 	// Wait for completion
 	while (1) {
 		// In some longer duration reads, it may be helpful to spin on the DPS bit
