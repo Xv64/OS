@@ -262,7 +262,8 @@ void ilock(struct inode* ip){
 	release(&icache.lock);
 
 	if (!(ip->flags & I_VALID)) {
-		bp = bread(ip->dev, IBLOCK(ip->inum));
+		uint32 sector = IBLOCK(ip->inum);
+		bp = bread(ip->dev, sector);
 		dip = (struct dinode*)bp->data + ip->inum % IPB;
 		ip->type = dip->type;
 		ip->major = dip->major;
@@ -272,8 +273,10 @@ void ilock(struct inode* ip){
 		memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
 		brelse(bp);
 		ip->flags |= I_VALID;
-		if (ip->type == 0)
+		if (ip->type == 0) {
+			cprintf("Error reading inode %d from sector %d\n", ip->inum, sector);
 			panic("ilock: no type");
+		}
 	}
 }
 
