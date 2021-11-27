@@ -62,6 +62,15 @@ int sys_sleep(void){
 	return 0;
 }
 
+int sys_ticks(void) {
+  uint tickcount;
+
+  acquire(&tickslock);
+  tickcount = ticks;
+  release(&tickslock);
+  return tickcount;
+}
+
 unsigned int sys_getppid(void) {
 	return proc->parent->pid;
 }
