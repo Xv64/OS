@@ -44,7 +44,7 @@ int main(void){
 	binit();   // buffer cache
 	fileinit(); // file table
 	iinit();   // inode cache
-	ideinit(); // disk
+	ideinit(); // init IDE disks
 
 	cprintf("Root dev: (%d, %d)\n", GETDEVTYPE(ROOT_DEV), GETDEVNUM(ROOT_DEV));
 	startothers(); // start other processors
