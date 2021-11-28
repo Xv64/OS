@@ -47,7 +47,7 @@ struct log {
 };
 
 struct log log;
-
+extern uint64 ROOT_DEV;
 static void recover_from_log(void);
 static void commit();
 
@@ -57,10 +57,10 @@ void initlog(void){
 
 	struct superblock sb;
 	initlock(&log.lock, "log");
-	readsb(ROOTDEV, &sb);
+	readsb(ROOT_DEV, &sb);
 	log.start = sb.size - sb.nlog;
 	log.size = sb.nlog;
-	log.dev = ROOTDEV;
+	log.dev = ROOT_DEV;
 	recover_from_log();
 }
 

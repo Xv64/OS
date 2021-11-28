@@ -1,6 +1,7 @@
 #include "ahci.h"
 #include "types.h"
 #include "defs.h"
+#include "buf.h"
 #include "x86.h"
 #include "kernel/string.h"
 #include "memlayout.h"
@@ -24,6 +25,7 @@ static const struct {
 	{0, 0, ""} //this is a terminal node - this must be present and the last entry
 };
 
+extern uint64 ROOT_DEV;
 static uint32 sataDeviceCount = 0;
 static HBA_PORT* BLOCK_DEVICES[AHCI_MAX_SLOT];
 
@@ -329,7 +331,6 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 	return wait_for_sata_command(port, slot);
 }
 
-
 void ahci_sata_init(HBA_PORT *port, int num){
 	if(ahci_rebase_port(port,num) > 0) {
 		uint8 buf[512];
@@ -338,6 +339,9 @@ void ahci_sata_init(HBA_PORT *port, int num){
 			uint32 devNum = sataDeviceCount++;
 			cprintf("   Init success: /dev/sata%d\n", devNum);
 			BLOCK_DEVICES[devNum] = port;
+			if(devNum == 0){
+				ROOT_DEV = TODEVNUM(DEV_SATA, 0);
+			}
 		}else{
 			cprintf("   Init failure\n");
 		}

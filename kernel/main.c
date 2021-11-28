@@ -7,12 +7,14 @@
 #include "x86.h"
 #include "acpi.h"
 #include "pci.h"
+#include "buf.h"
 #include "kernel/string.h"
 
 static void bsd4_spam();
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t* kpgdir;
+uint64 ROOT_DEV = 1;
 extern char end[]; // first address after kernel loaded from ELF file
 
 // Bootstrap processor starts running C code here.
@@ -44,6 +46,7 @@ int main(void){
 	ideinit(); // disk
 	// if (!ismp)
 	//     timerinit(); // uniprocessor timer
+	cprintf("Root dev: (%d, %d)\n", GETDEVTYPE(ROOT_DEV), GETDEVNUM(ROOT_DEV));
 	startothers(); // start other processors
 	kinit2(P2V(4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 	userinit(); // first user process

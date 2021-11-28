@@ -158,6 +158,7 @@ void iinit(void){
 	initlock(&icache.lock, "icache");
 }
 
+extern uint64 ROOT_DEV;
 static struct inode* iget(uint dev, uint inum);
 
 
@@ -570,7 +571,7 @@ static struct inode* namex(char* path, int nameiparent, char* name){
 	struct inode* ip, * next;
 
 	if (*path == '/')
-		ip = iget(ROOTDEV, ROOTINO);
+		ip = iget(ROOT_DEV, ROOTINO);
 	else
 		ip = idup(proc->cwd);
 

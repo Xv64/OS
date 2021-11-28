@@ -20,3 +20,4 @@ struct buf {
 
 #define GETDEVTYPE(a) ((a & DEV_TYPE_MASK) >> 28)
 #define GETDEVNUM(a) (a & DEV_NUM_MASK)
+#define TODEVNUM(type, num) ((type << 28) + (DEV_NUM_MASK & num))
