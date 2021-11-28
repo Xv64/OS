@@ -86,7 +86,7 @@ void readsect(void* dst, uint offset){
 
 	// Read data.
 	waitdisk();
-	insl(0x1F0, dst, SECTSIZE / 4);
+	amd64_insl(0x1F0, dst, SECTSIZE / 4);
 }
 
 // Read 'count' bytes at 'offset' from kernel into physical address 'pa'.

@@ -120,7 +120,7 @@ void ideintr(void){
 
 	// Read data if needed.
 	if (!(b->flags & B_DIRTY) && idewait(1) >= 0)
-		insl(ideChannel, b->data, 512 / 4);
+		amd64_insl(ideChannel, b->data, 512 / 4);
 
 	// Wake process waiting for this buf.
 	b->flags |= B_VALID;
