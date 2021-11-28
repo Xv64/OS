@@ -64,7 +64,7 @@ void ideinit(void){
 	}
 	havedisk0 = idewait(0);
 	if(havedisk0) {
-		cprintf("   Init success: /dev/ide0\n");
+		cprintf("   Init success: disk(%d, 0)\n", DEV_IDE);
 	}
 
 	// Check if disk 1 is present
@@ -72,7 +72,7 @@ void ideinit(void){
 	for (i = 0; i < 1000; i++) {
 		if (inb(ideChannel + 7) != 0) {
 			havedisk1 = 1;
-			cprintf("   Init success: /dev/ide1\n");
+			cprintf("   Init success: disk(%d, 1)\n", DEV_IDE);
 			break;
 		}
 	}

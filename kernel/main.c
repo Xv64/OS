@@ -46,7 +46,7 @@ int main(void){
 	iinit();   // inode cache
 	ideinit(); // init IDE disks
 
-	cprintf("Root dev: (%d, %d)\n", GETDEVTYPE(ROOT_DEV), GETDEVNUM(ROOT_DEV));
+	cprintf("Root dev: disk(%d, %d)\n", GETDEVTYPE(ROOT_DEV), GETDEVNUM(ROOT_DEV));
 	startothers(); // start other processors
 	kinit2(P2V(4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 	userinit(); // first user process
