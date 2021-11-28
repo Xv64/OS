@@ -23,13 +23,14 @@ char *statename(enum procstate state) {
 int main(int argc, char *argv[]) {
 	char *name = malloc(32 * sizeof(char));
 
-	fprintf(stdout, "PID\tNAME\tSTATE\n");
+	fprintf(stdout, "PID\tNAME\tBLESSED\tSTATE\n");
 	for(uint64 pid = 0; pid != NPROC; pid++) {
 		enum procstate state = pstate(pid);
 		if (state != UNUSED) {
 			char *statestr = statename(state);
 			pname(pid, name, 32);
-			fprintf(stdout, "%d\t%s\t%s (%d)\n", pid, name, statestr, state);
+			char *blessed = isblessed(pid) ? "Y" : "n";
+			fprintf(stdout, "%d\t%s\t%s\t%s (%d)\n", pid, name, blessed, statestr, state);
 		}
 	}
 	procexit();
