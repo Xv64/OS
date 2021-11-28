@@ -135,6 +135,9 @@ void bwrite(struct buf* b){
 		uint8 *buf = (uint8 *)kalloc(); //4K
 		memmove(buf, b->data, 512);
 		int success = sata_write(devNum, b->sector, 1, buf);
+		b->flags |= B_VALID;
+		b->flags &= ~B_DIRTY;
+		wakeup(b);
 		kfree((void *)buf);
 		if(!success){
 			panic("Error writing SATA\n");
