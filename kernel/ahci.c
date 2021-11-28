@@ -3,7 +3,6 @@
 #include "defs.h"
 #include "x86.h"
 #include "kernel/string.h"
-#include "spinlock.h"
 #include "memlayout.h"
 
 //AHCI implementation.
@@ -303,7 +302,7 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 	}
 	cmdtbl->prdt_entry[0].dba = ADDRLO(addr);
 	cmdtbl->prdt_entry[0].dbau = ADDRHI(addr);
-	cmdtbl->prdt_entry[0].dbc = (count<<9)-1; // 512 bytes per sector
+	cmdtbl->prdt_entry[0].dbc = 511; // 512 bytes per sector
 	cmdtbl->prdt_entry[0].i = 0;
 
     // Setup command
