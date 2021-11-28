@@ -1,7 +1,4 @@
-FROM debian:10.2
-
-RUN apt-get update
-RUN apt-get -y install build-essential qemu qemu-kvm
+FROM xv64/compiler:1.0.2
 
 RUN mkdir -p /src/out
 WORKDIR /src/
