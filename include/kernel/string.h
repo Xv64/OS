@@ -1,6 +1,7 @@
 
 #define memset(dst, c, n) (sys_memset(dst, c, n))
 #define memmove(dst, src, n) (sys_memmove(dst, src, n))
+#define memcopy(dst, src, n) (sys_memmove(dst, src, n))
 #define safestrcpy(s, t, n) (sys_safestrcpy(s, t, n))
 #define strlen(c) (sys_strlen(c))
 #define strncmp(p, q, n) (sys_strncmp(p, q, n))

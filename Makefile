@@ -45,6 +45,10 @@ OBJS := \
 	kobj/sysstring.o\
 	$(XOBJS)
 
+
+K_FS_SRCS = $(wildcard kernel/fs/*.c)
+K_FS_OBJS = $(patsubst %.c,%.o,$(K_FS_SRCS))
+
 ifneq ("$(MEMFS)","")
 # build filesystem image in to kernel and use memory-ide-device
 # instead of mounting the filesystem on ide1
@@ -85,6 +89,10 @@ xv6memfs.img: out/bootblock out/kernelmemfs.elf
 # kernel object files
 kobj/%.o: kernel/%.c
 	@mkdir -p kobj
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+kobj/fs/%.o: kernel/fs/%.c
+	@mkdir -p kobj/fs
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 kobj/%.o: kernel/%.S
@@ -144,8 +152,8 @@ out/initcode: $(INITCODESRC)
 
 ENTRYCODE = kobj/entry$(BITS).o
 LINKSCRIPT = kernel/kernel$(BITS).ld
-out/kernel.elf: $(OBJS) $(ENTRYCODE) out/entryother out/initcode $(LINKSCRIPT) $(FSIMAGE)
-	$(LD) $(LDFLAGS) -T $(LINKSCRIPT) -o out/kernel.elf $(ENTRYCODE) $(OBJS) -b binary out/initcode out/entryother $(FSIMAGE)
+out/kernel.elf: $(OBJS) $(ENTRYCODE) out/entryother out/initcode $(LINKSCRIPT) $(FSIMAGE) $(K_FS_OBJS)
+	$(LD) $(LDFLAGS) -T $(LINKSCRIPT) -o out/kernel.elf $(ENTRYCODE) $(OBJS) $(K_FS_OBJS) -b binary out/initcode out/entryother $(FSIMAGE)
 	$(OBJDUMP) -S out/kernel.elf > out/kernel.asm
 	$(OBJDUMP) -t out/kernel.elf | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > out/kernel.sym
 	cp out/kernel.elf bin/kernel

@@ -10,6 +10,5 @@ vectors.S
 mkfs
 .gdbinit
 out
-fs
 .DS_Store
 bin/**/*
