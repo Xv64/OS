@@ -109,7 +109,7 @@ struct buf* bread(uint dev, uint sector){
 			if(!success){
 				panic("Error reading SATA\n");
 			}
-			memmove(b->data, buf, 512);
+			memmove(b->data, buf, SECTOR_SIZE);
 			b->flags |= B_VALID;
 			b->flags &= ~B_DIRTY;
 			wakeup(b);
@@ -133,7 +133,7 @@ void bwrite(struct buf* b){
 		iderw(b);
 	} else {
 		uint8 *buf = (uint8 *)kalloc(); //4K
-		memmove(buf, b->data, 512);
+		memmove(buf, b->data, SECTOR_SIZE);
 		int success = sata_write(devNum, b->sector, 1, buf);
 		b->flags |= B_VALID;
 		b->flags &= ~B_DIRTY;
