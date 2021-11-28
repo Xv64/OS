@@ -99,7 +99,7 @@ static void idestart(struct buf* b){
 	amd64_out8(ideChannel + 6, (b->dev == 1 ? IDE_SLAVE : IDE_MASTER) | ((b->sector >> 24) & 0x0f));
 	if (b->flags & B_DIRTY) {
 		amd64_out8(ideChannel + 7, IDE_CMD_WRITE);
-		outsl(ideChannel, b->data, 512 / 4);
+		amd64_outsl(ideChannel, b->data, 512 / 4);
 	} else {
 		amd64_out8(ideChannel + 7, IDE_CMD_READ);
 	}
