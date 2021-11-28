@@ -537,6 +537,18 @@ int damn(int pid){
 	return 0;
 }
 
+int isblessed(int pid){
+	struct proc* p;
+
+	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+		if (p->pid == pid) {
+			int r = p->blessed;
+			return r;
+		}
+	}
+	return 0;
+}
+
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.

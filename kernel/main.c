@@ -27,7 +27,8 @@ int main(void){
 	if (acpiinit()) // try to use acpi for machine info
 		mpinit(); // otherwise use bios MP tables
 	if (!ismp)
-		panic("too few processors"); //really, it's the year 2020.
+		panic("too few processors"); //really, it's the year 2021.
+
 	lapicinit();
 	seginit(); // set up segments
 	cprintf("\ncpu%d: starting Xv64\n\n", cpu->id);
@@ -44,12 +45,12 @@ int main(void){
 	fileinit(); // file table
 	iinit();   // inode cache
 	ideinit(); // disk
-	// if (!ismp)
-	//     timerinit(); // uniprocessor timer
+
 	cprintf("Root dev: (%d, %d)\n", GETDEVTYPE(ROOT_DEV), GETDEVNUM(ROOT_DEV));
 	startothers(); // start other processors
 	kinit2(P2V(4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 	userinit(); // first user process
+
 	// Finish setting up this processor in mpmain.
 	mpmain();
 }

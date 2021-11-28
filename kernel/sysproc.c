@@ -92,6 +92,14 @@ int sys_damn(void){
 }
 
 int sys_isblessed(void){
+	int pid;
+
+	if (argint(0, &pid) < 0)
+		return -1;
+	return isblessed(pid);
+}
+
+int sys_amblessed(void){
 	return proc->blessed;
 }
 
@@ -116,16 +124,4 @@ int sys_pname(void) {
 		return -1;
 	}
 	return pname(pid, buf, n);
-}
-
-
-// return how many clock tick interrupts have occurred
-// since start.
-int sys_uptime(void){
-	uint xticks;
-
-	acquire(&tickslock);
-	xticks = ticks;
-	release(&tickslock);
-	return xticks;
 }

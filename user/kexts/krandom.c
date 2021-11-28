@@ -9,7 +9,7 @@
 #define c 1442695040888963407
 
 void main(void){
-	if (!isblessed()) {
+	if (!amblessed()) {
 		fprintf(stdout, "Not blessed, exiting\n");
 		procexit();
 	}

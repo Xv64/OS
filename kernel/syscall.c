@@ -118,7 +118,7 @@ extern int sys_sleep(void);
 extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
-extern int sys_uptime(void);
+extern int sys_amblessed(void);
 extern int sys_reboot(void);
 extern int sys_kconsole_info(void);
 extern int sys_seek(void);
@@ -146,7 +146,7 @@ static int (*syscalls[])(void) = {
 	[SYS_getpid]        sys_getpid,
 	[SYS_sbrk]          sys_sbrk,
 	[SYS_sleep]         sys_sleep,
-	[SYS_uptime]        sys_uptime,
+	[SYS_amblessed]     sys_amblessed,
 	[SYS_open]          sys_open,
 	[SYS_write]         sys_write,
 	[SYS_mknod]         sys_mknod,

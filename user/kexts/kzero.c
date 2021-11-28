@@ -3,7 +3,7 @@
 #include "fcntl.h"
 
 void main(void){
-	if (!isblessed()) {
+	if (!amblessed()) {
 		fprintf(stdout, "Not blessed, exiting\n");
 		procexit();
 	}
