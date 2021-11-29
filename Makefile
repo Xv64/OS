@@ -69,17 +69,18 @@ AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
-CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -ggdb -fno-omit-frame-pointer
+CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -g -ggdb -fno-omit-frame-pointer
 CFLAGS += -ffreestanding -fno-common -nostdlib -Iinclude -gdwarf-2 $(XFLAGS) $(OPT)
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASFLAGS = -fno-pic -gdwarf-2 -Wa,-divide -Iinclude $(XFLAGS)
 
-xv6.img: out/bootblock out/kernel.elf fs.img
-	dd if=/dev/zero of=xv6.img count=10000
-	dd if=out/bootblock of=xv6.img conv=notrunc
-	dd if=out/kernel.elf of=xv6.img seek=1 conv=notrunc
-	cp xv6.img bin/boot.img
-	qemu-img convert xv6.img -O vdi bin/boot.vdi
+boot.img: out/bootblock out/kernel.elf fs.img
+	# Build boot disk image
+	dd if=/dev/zero of=boot.img count=10000
+	dd if=out/bootblock of=boot.img conv=notrunc
+	dd if=out/kernel.elf of=boot.img seek=1 conv=notrunc
+	cp boot.img bin/boot.img
+	qemu-img convert boot.img -O vdi bin/boot.vdi
 
 xv6memfs.img: out/bootblock out/kernelmemfs.elf
 	dd if=/dev/zero of=xv6memfs.img count=10000
@@ -128,7 +129,7 @@ uobj/%.o: ulib/%.S
 
 out/bootblock: kernel/bootasm.S kernel/bootmain.c
 	@mkdir -p out
-	$(CC) -fno-builtin -fno-pic -m32 -nostdinc -Iinclude -O -o out/bootmain.o -c kernel/bootmain.c
+	$(CC) -fno-builtin -fno-pic -m32 -nostdinc -Iinclude -O -o out/bootmain.o -g -c kernel/bootmain.c
 	$(CC) -fno-builtin -fno-pic -m32 -nostdinc -Iinclude -o out/bootasm.o -c kernel/bootasm.S
 	$(LD) -m elf_i386 -nodefaultlibs -N -e start -Ttext 0x7C00 -o out/bootblock.o out/bootasm.o out/bootmain.o
 	$(OBJDUMP) -S out/bootblock.o > out/bootblock.asm
@@ -236,18 +237,18 @@ fs.img: out/mkfs fs/README.md $(UPROGS) $(SUBPROGS)
 clean:
 	rm -rf out fs uobj kobj
 	rm -rf ./bin/*
-	rm -f kernel/vectors.S xv6.img xv6memfs.img fs.img .gdbinit
+	rm -f kernel/vectors.S boot.img xv6memfs.img fs.img .gdbinit
 	#put these back...
 	touch ./bin/.gitkeep
 	mkdir out
 
 
-binaries : fs.img xv6.img
-	#build fs.img & xv6.img, now build vm images...
+binaries : fs.img boot.img
+	#build fs.img & boot.img, now build vm images...
 	cp Xv64.vmwarevm.tar.gz ./bin/
 	cp -r fs ./bin/
 	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
-	qemu-img convert xv6.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
+	qemu-img convert boot.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
 	mkdir bin/artifacts
 	cp -r uobj bin/artifacts/
 	cp -r kobj bin/artifacts/
