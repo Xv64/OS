@@ -218,15 +218,15 @@ UPROGS=\
 	fs/bin/wc\
 	fs/bin/reboot\
 
-fs/README.md: README.md
+fs/LICENSE: LICENSE
 	@mkdir -p fs
-	cp README.md fs/README.md
+	cp LICENSE fs/LICENSE
 
 # headers: FORCE
 # 	@mkdir -p fs/src/include
 # 	cp -r include fs/src
 
-fs.img: out/mkfs fs/README.md $(UPROGS) $(SUBPROGS)
+fs.img: out/mkfs fs/LICENSE $(UPROGS) $(SUBPROGS)
 	find fs -type f | xargs out/mkfs fs.img $0
 	touch fs.img
 	cp fs.img bin/fs.img

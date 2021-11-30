@@ -10,7 +10,7 @@
 #include "buf.h"
 #include "kernel/string.h"
 
-static void bsd4_spam();
+static void credits();
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t* kpgdir;
@@ -32,7 +32,7 @@ int main(void){
 	lapicinit();
 	seginit(); // set up segments
 	cprintf("\ncpu%d: starting Xv64\n\n", cpu->id);
-	bsd4_spam();
+	credits();
 	picinit(); // interrupt controller
 	ioapicinit(); // another interrupt controller
 	consoleinit(); // I/O devices & their interrupts
@@ -55,9 +55,9 @@ int main(void){
 	mpmain();
 }
 
-void bsd4_spam(){
-	//I LOVE the BSD license, but the 4-clause license is spammy.
-	//put any 4-clause BSD notices in this method
+void credits(){
+	cprintf("Xv64 is Copyright (c) 1997-2021, contributors.\nSee LICENSE for details.\n");
+	// Next: any misc. credits
 	cprintf("This product includes software developed by Charles M. Hannum, Christopher G. Demetriou\n"); //include/pcireg.hj
 }
 
