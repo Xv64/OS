@@ -34,6 +34,7 @@ int main(void) {
 		spawn("/kexts/kzero", "kzero", 1);
 		spawn("/kexts/krandom", "krandom", 1);
 		spawn("/bin/sh", "sh", 0);
+		fprintf(stdout, "Welcome to Xv64\n");
 
 		while(1) {
 			sleep(30);

@@ -84,11 +84,6 @@ static void mpmain(void){
 	idtinit(); // load idt register
 	xchg(&cpu->started, 1); // tell startothers() we're up
 	cprintf("cpu#%d (%s - %d): ready\n", cpu->id, cpu_vendor, regs[0]);
-	if(cpu->id == 0) {
-		//if this is the primary CPU, display a hello message
-		//before we never return again
-		cprintf("Welcome to Xv64\n");
-	}
 	scheduler(); // start running processes
 }
 
