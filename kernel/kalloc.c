@@ -31,14 +31,18 @@ int kalloc_fullysetup = 0;
 // 2. main() calls kinit2() with the rest of the physical pages
 // after installing a full page table that maps them on all cores.
 void kinit1(void* vstart, void* vend){
-	cprintf("Freeing mem from 0x%x to 0x%x...\n", vstart, vend);
+	uint64 startmb = V2P(vstart) / 1024 / 1024;
+	uint64 endmb = V2P(vend) / 1024 / 1024;
+	cprintf("Freeing mem from %d MB to %d MB...\n", startmb, endmb);
 	initlock(&kmem.lock, "kmem");
 	kmem.use_lock = 0;
 	freerange(vstart, vend);
 }
 
 void kinit2(void* vstart, void* vend){
-	cprintf("Freeing mem from 0x%x to 0x%x...\n", vstart, vend);
+	uint64 startmb = V2P(vstart) / 1024 / 1024;
+	uint64 endmb = V2P(vend) / 1024 / 1024;
+	cprintf("Freeing mem from %d MB to %d MB...\n", startmb, endmb);
 	freerange(vstart, vend);
 	kmem.use_lock = 1;
 	kalloc_fullysetup = 1;
