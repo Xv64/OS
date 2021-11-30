@@ -22,7 +22,7 @@ extern char end[]; // first address after kernel loaded from ELF file
 // doing some setup required for memory allocator to work.
 int main(void){
 	uartearlyinit();
-	kinit1(end, P2V(4 * 1024 * 1024)); // phys page allocator
+	kinit1(P2V(KALLOC_START), P2V(KALLOC_START + 4 * 1024 * 1024)); // phys page allocator
 	kvmalloc(); // kernel page table
 	if (acpiinit()) // try to use acpi for machine info
 		mpinit(); // otherwise use bios MP tables
@@ -48,7 +48,7 @@ int main(void){
 
 	cprintf("Root dev: disk(%d, %d)\n", GETDEVTYPE(ROOT_DEV), GETDEVNUM(ROOT_DEV));
 	startothers(); // start other processors
-	kinit2(P2V(4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
+	kinit2(P2V(KALLOC_START + 4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 	userinit(); // first user process
 
 	// Finish setting up this processor in mpmain.

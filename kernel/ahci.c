@@ -348,7 +348,6 @@ void ahci_sata_init(HBA_PORT *port, int num){
 	}
 }
 
-#define AHCI_MEM 0xFA00000
 int8 ahci_rebase_port(HBA_PORT *port, int num) {
 	cprintf("   rebasing port...");
 	if(!ahci_stop_port(port)) {
@@ -356,7 +355,7 @@ int8 ahci_rebase_port(HBA_PORT *port, int num) {
 		return -1;
 	}
 
-	uint64 ahciBase = AHCI_MEM + (1024 * 1024 * 4) * num; // AHCI_MEM + 4MB/port
+	uint64 ahciBase = AHCI_MEM + 1024 * 1024 * num; // AHCI_MEM + 1MB/port
 	port->clb = ADDRLO(ahciBase);
 	port->clbu = ADDRHI(ahciBase);
 

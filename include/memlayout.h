@@ -1,6 +1,8 @@
 // Memory layout
 
 #define EXTMEM  0x100000            // Start of extended memory
+#define AHCI_MEM 0x500000           // 5 MB to 36 MB
+#define KALLOC_START 0x3200000      // start kalloc @ 50 MB
 #define PHYSTOP 0xE000000           // Top physical memory
 #define DEVSPACE 0xFE000000         // Other devices are at high addresses
 
