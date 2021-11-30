@@ -23,6 +23,8 @@ struct {
 	struct run* freelist;
 } kmem;
 
+int kalloc_fullysetup = 0;
+
 // Initialization happens in two phases.
 // 1. main() calls kinit1() while still using entrypgdir to place just
 // the pages mapped by entrypgdir on free list.
@@ -37,6 +39,7 @@ void kinit1(void* vstart, void* vend){
 void kinit2(void* vstart, void* vend){
 	freerange(vstart, vend);
 	kmem.use_lock = 1;
+	kalloc_fullysetup = 1;
 }
 
 void freerange(void* vstart, void* vend){
@@ -86,6 +89,9 @@ char* kalloc(void){
 }
 
 char *kmalloc(uint16 pages){
+	if(!kalloc_fullysetup) {
+		panic("kalloc not fully setup");
+	}
 	struct run* r;
 
 	if (kmem.use_lock)
