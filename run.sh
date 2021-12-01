@@ -18,7 +18,7 @@ fi
 
 DEBUG_OPTS=""
 if [ -n "$DEBUG" ]; then
-    CORES=1
+    CORES=2
     DEBUG_OPTS="-gdb tcp:0.0.0.0:1234 -S"
     echo "waiting on GDB..."
 fi
