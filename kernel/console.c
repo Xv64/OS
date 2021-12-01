@@ -175,6 +175,10 @@ void panic(char* s){
 		cprintf(" [%d] %p\n",i, pcs[i]);
 	}
 	cprintf("HLT\n");
+	halt();
+}
+
+void halt() {
 	panicked = 1; // freeze other CPU
 	acpi_halt();
 	for (;;)
@@ -256,6 +260,9 @@ void consoleintr(int (*getc)(void)){
 		switch (c) {
 		case C('Z'): // reboot
 			lidt(0, 0);
+			break;
+		case C('Q'): // halt
+			halt();
 			break;
 		case C('P'): // Process listing.
 			procdump();
