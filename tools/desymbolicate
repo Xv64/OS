@@ -2,9 +2,33 @@
 
 import sys
 import re
+from pathlib import Path
 
 stack = sys.stdin.read()
 symfile = open("bin/kernel.sym", "r")
+
+def find_best_func(addr):
+    prefix = "bin/"
+    best_func = None
+    best_func_addr = None
+    best_func_file = None
+
+    for p in Path(prefix).glob("**/*.sym"):
+        symfile = open(str(p), "r")
+        for line in symfile:
+            parts = line.split()
+            func_addr_s = parts[0]
+            func_name = parts[1]
+            func_addr = int(func_addr_s, 16)
+
+            if func_addr < addr:
+                if best_func_addr is None or func_addr > best_func_addr:
+                    best_func = func_name
+                    best_func_addr = func_addr
+                    best_func_file = p
+
+    return (best_func, best_func_file, best_func_addr, )
+
 
 # Example stack trace:
 #
@@ -15,25 +39,19 @@ symfile = open("bin/kernel.sym", "r")
 #  [3] ffffffff80109516
 #  [4] ffffffff8010934a
 # HLT
-
 pattern = re.compile(r"\[([0-9]+)\] ([0-9a-f]+)")
-#for match in re.findall(r"\[([0-9]+)\] ([0-9a-f]+)", stack):
+
 for match in pattern.finditer(stack):
     line_num = match.group(1).strip()
     addr_s = match.group(2).strip()
     addr = int(addr_s, 16)
 
-    best_func = "?"
-    best_func_addr = None
+    result = find_best_func(addr)
+    best_func = result[0]
+    best_func_file = result[1]
+    best_func_addr = result[2]
 
-    for line in symfile:
-        parts = line.split()
-        func_addr_s = parts[0]
-        func_name = parts[1]
-        func_addr = int(func_addr_s, 16)
-
-        if func_addr < addr:
-            if best_func_addr is None or func_addr > best_func_addr:
-                best_func = func_name
-                best_func_addr = func_addr
-    print("[{}] {} - {}".format(line_num, addr_s, best_func))
+    if best_func_addr:
+        print("[{}] {} - {} / {}".format(line_num, addr_s, best_func, best_func_file))
+    else:
+        print("[{}] {} - ".format(line_num, addr_s))
