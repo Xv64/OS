@@ -33,16 +33,15 @@ uint8 sacquire(struct spinlock* lk, uint32 wait){
 		int i;
 		cprintf("lock '%s':\n", lk->name);
 		for (i = 0; i < 10; i++)
-			cprintf(" %p", lk->pcs[i]);
+			cprintf(" [%d] %p\n",i, lk->pcs[i]);
 		cprintf("\n");
 		panic("acquire: already holding lock");
 	}
-
-	// The xchg is atomic.
+	// The amd64_xchg is atomic.
 	// It also serializes, so that reads after acquire are not
 	// reordered before it.
 	uint32 startticks = ticks;
-	while (xchg(&lk->locked, 1) != 0) {
+	while (amd64_xchg(&lk->locked, 1) != 0) {
 		uint32 delta = ticks - startticks;
 		if(delta > wait){
 			return 0;
@@ -63,16 +62,16 @@ void release(struct spinlock* lk){
 	lk->pcs[0] = 0;
 	lk->cpu = 0;
 
-	// The xchg serializes, so that reads before release are
+	// The amd64_xchg serializes, so that reads before release are
 	// not reordered after it.  The 1996 PentiumPro manual (Volume 3,
 	// 7.2) says reads can be carried out speculatively and in
 	// any order, which implies we need to serialize here.
 	// But the 2007 Intel 64 Architecture Memory Ordering White
 	// Paper says that Intel 64 and IA-32 will not move a load
 	// after a store. So lock->locked = 0 would work here.
-	// The xchg being asm volatile ensures gcc emits it after
+	// The amd64_xchg being asm volatile ensures gcc emits it after
 	// the above assignments (and after the critical section).
-	xchg(&lk->locked, 0);
+	amd64_xchg(&lk->locked, 0);
 
 	popcli();
 }
