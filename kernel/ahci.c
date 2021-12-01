@@ -334,8 +334,8 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 void ahci_sata_init(HBA_PORT *port, int num){
 	if(ahci_rebase_port(port,num) > 0) {
 		uint8 buf[512];
-		int success = ahci_sata_read(port, 0, 0, 1, &buf[0]);
-		if(success == 1) {
+		int result = ahci_sata_read(port, 0, 0, 1, &buf[0]);
+		if(success == SATA_IO_SUCCESS) {
 			uint32 devNum = sataDeviceCount++;
 			cprintf("   Init success: disk(%d, %d)\n", DEV_SATA, devNum);
 			BLOCK_DEVICES[devNum] = port;
