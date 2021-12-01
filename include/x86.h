@@ -177,7 +177,7 @@ static inline void hlt(void) {
 	asm volatile ("hlt");
 }
 
-static inline unsigned int xchg(volatile unsigned int *addr, unsigned long newval) {
+static inline unsigned int amd64_xchg(volatile unsigned int *addr, unsigned long newval) {
 	unsigned int result;
 
 	// The + in "+m" denotes a read-modify-write operand.

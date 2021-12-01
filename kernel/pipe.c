@@ -8,6 +8,7 @@
 #include "spinlock.h"
 
 #define PIPESIZE 512
+#define LOCK_WAIT_TICKS 1000
 
 struct pipe {
 	struct spinlock lock;
@@ -71,7 +72,10 @@ void pipeclose(struct pipe* p, int writable){
 int pipewrite(struct pipe* p, char* addr, int n){
 	int i;
 
-	acquire(&p->lock);
+	uint8 success = sacquire(&p->lock, LOCK_WAIT_TICKS);
+	if(!success) {
+		return 0;
+	}
 	for (i = 0; i < n; i++) {
 		while (p->nwrite == p->nread + PIPESIZE) { // pipewrite-full
 			if (p->readopen == 0 || proc->killed) {
@@ -91,7 +95,10 @@ int pipewrite(struct pipe* p, char* addr, int n){
 int piperead(struct pipe* p, char* addr, int n){
 	int i;
 
-	acquire(&p->lock);
+	uint8 success = sacquire(&p->lock, LOCK_WAIT_TICKS);
+	if(!success) {
+		return 0;
+	}
 	while (p->nread == p->nwrite && p->writeopen) { // pipe-empty
 		if (proc->killed) {
 			release(&p->lock);

@@ -80,7 +80,7 @@ static void mpmain(void){
 	char *cpu_vendor = (char *)vendor;
 
 	idtinit(); // load idt register
-	xchg(&cpu->started, 1); // tell startothers() we're up
+	amd64_xchg(&cpu->started, 1); // tell startothers() we're up
 	cprintf("cpu#%d (%s - %d): ready\n", cpu->id, cpu_vendor, regs[0]);
 	scheduler(); // start running processes
 }
