@@ -5,31 +5,28 @@ import re
 from pathlib import Path
 
 stack = sys.stdin.read()
-symfile = open("bin/kernel.sym", "r")
 
-def find_best_func(addr):
+
+def find_best_func(addr, symfilename):
     prefix = "bin/"
     best_func = None
     best_func_addr = None
-    best_func_file = None
     offset = 0
 
-    for p in Path(prefix).glob("**/*.sym"):
-        symfile = open(str(p), "r")
-        for line in symfile:
-            parts = line.split()
-            func_addr_s = parts[0]
-            func_name = parts[1]
-            func_addr = int(func_addr_s, 16)
+    symfile = open(symfilename, "r")
+    for line in symfile:
+        parts = line.split()
+        func_addr_s = parts[0]
+        func_name = parts[1]
+        func_addr = int(func_addr_s, 16)
 
-            if func_addr < addr:
-                if best_func_addr is None or func_addr > best_func_addr:
-                    best_func = func_name
-                    best_func_addr = func_addr
-                    best_func_file = p
-                    offset = addr - func_addr
+        if func_addr < addr:
+            if best_func_addr is None or func_addr > best_func_addr:
+                best_func = func_name
+                best_func_addr = func_addr
+                offset = addr - func_addr
 
-    return (best_func, best_func_file, best_func_addr, offset, )
+    return (best_func, best_func_addr, offset, )
 
 
 # Example stack trace:
@@ -48,13 +45,12 @@ for match in pattern.finditer(stack):
     addr_s = match.group(2).strip()
     addr = int(addr_s, 16)
 
-    result = find_best_func(addr)
+    result = find_best_func(addr, "bin/kernel.sym")
     best_func = result[0]
-    best_func_file = result[1]
-    best_func_addr = result[2]
-    offset = result[3]
+    best_func_addr = result[1]
+    offset = result[2]
 
     if best_func_addr:
-        print("[{}]\t{}\t@ +{} bytes in {}  ({})".format(line_num, addr_s, offset, best_func, best_func_file))
+        print("[{}]\t{}\t@ +{} bytes in {}".format(line_num, addr_s, offset, best_func))
     else:
         print("[{}]\t{}\t?".format(line_num, addr_s))
