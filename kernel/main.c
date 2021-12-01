@@ -57,8 +57,6 @@ int main(void){
 
 void credits(){
 	cprintf("Xv64 is Copyright (c) 1997-2021, contributors.\nSee LICENSE for details.\n");
-	// Next: any misc. credits
-	cprintf("This product includes software developed by Charles M. Hannum, Christopher G. Demetriou\n"); //include/pcireg.hj
 }
 
 // Other CPUs jump here from entryother.S.

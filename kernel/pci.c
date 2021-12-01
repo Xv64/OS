@@ -2,10 +2,13 @@
 #include "defs.h"
 #include "x86.h"
 #include "pci.h"
-#include "pcireg.h"
 #include "assert.h"
 #include "ahci.h"
 #include "kernel/string.h"
+
+#define	PCI_CLASS_BRIDGE 0x06
+#define	PCI_SUBCLASS_BRIDGE_PCI 0x04
+
 
 #define ARRAY_SIZE(a)   (sizeof(a) / sizeof(a[0]))
 
@@ -28,7 +31,7 @@ struct pci_driver {
 
 // pci_attach_class matches the class and subclass of a PCI device
 struct pci_driver pci_attach_class[] = {
-	{ PCI_CLASS_BRIDGE, PCI_SUBCLASS_BRIDGE_PCI, &pci_bridge_attach },
+	{ PCI_DEV_CLASS_BRIDGE, PCI_SUBCLASS_BRIDGE_PCI, &pci_bridge_attach },
 	{ 0, 0, 0 },
 };
 
@@ -204,9 +207,9 @@ static int pci_bridge_attach(struct pci_func* pcif){
 
 void pci_func_enable(struct pci_func* f){
 	pci_conf_write(f, PCI_COMMAND_STATUS_REG,
-	               PCI_COMMAND_IO_ENABLE |
-	               PCI_COMMAND_MEM_ENABLE |
-	               PCI_COMMAND_MASTER_ENABLE);
+	               PCI_CMD_IO_ENABLE |
+	               PCI_CMD_MEM_ENABLE |
+	               PCI_CMD_MASTER_ENABLE);
 
 	uint32 bar_width;
 	uint32 bar;
