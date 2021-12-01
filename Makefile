@@ -156,7 +156,7 @@ LINKSCRIPT = kernel/kernel$(BITS).ld
 out/kernel.elf: $(OBJS) $(ENTRYCODE) out/entryother out/initcode $(LINKSCRIPT) $(FSIMAGE) $(K_FS_OBJS)
 	$(LD) $(LDFLAGS) -T $(LINKSCRIPT) -o out/kernel.elf $(ENTRYCODE) $(OBJS) $(K_FS_OBJS) -b binary out/initcode out/entryother $(FSIMAGE)
 	$(OBJDUMP) -S out/kernel.elf > out/kernel.asm
-	$(OBJDUMP) -t out/kernel.elf | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > out/kernel.sym
+	$(OBJDUMP) -t out/kernel.elf | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > bin/kernel.sym
 	cp out/kernel.elf bin/kernel
 
 MKVECTORS = tools/vectors$(BITS).pl
@@ -169,13 +169,13 @@ fs/bin/%: uobj/%.o $(ULIB)
 	@mkdir -p fs out fs/bin
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > out/$*.asm
-	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > out/$*.sym
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > bin/$*.sym
 
 fs/%: uobj/%.o $(ULIB)
 	@mkdir -p fs out fs/bin
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > out/$*.asm
-	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > out/$*.sym
+	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > bin/$*.sym
 
 fs/forktest: uobj/forktest.o $(ULIB)
 	@mkdir -p fs
