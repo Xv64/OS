@@ -37,6 +37,14 @@
 #define AHCI_VENDOR_INTEL  0x8086
 #define AHCI_VENDOR_VMWARE 0x15AD
 
+// SATA I/O Status Codes:
+#define SATA_IO_SUCCESS               0x0
+#define SATA_IO_ERROR_DEV_GT_MAX_SLOT 0x1
+#define SATA_IO_ERROR_NO_PORT         0x2
+#define SATA_IO_ERROR_NO_SLOT         0x3
+#define SATA_IO_ERROR_HUNG_PORT       0x4
+#define SATA_IO_ERROR_TASK_ERR        0x5
+
 
 //The following structs are as documented @ https://wiki.osdev.org/AHCI
 //START

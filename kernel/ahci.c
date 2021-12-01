@@ -46,7 +46,7 @@ static inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
 	}
 
 	// Check again
-	return (port->is & HBA_PxIS_TFES) > 0 ? 0 : 1;
+	return (port->is & HBA_PxIS_TFES) > 0 ? SATA_IO_ERROR_TASK_ERR : SATA_IO_SUCCESS;
 }
 
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
@@ -170,11 +170,11 @@ uint32 sata_device_count() {
 
 int sata_read(uint32 dev, uint64 lba, uint32 count, uint8 *buf) {
 	if( dev >= AHCI_MAX_SLOT) {
-		return 0;
+		return SATA_IO_ERROR_DEV_GT_MAX_SLOT;
 	}
 	HBA_PORT *port = BLOCK_DEVICES[dev];
 	if(!port) {
-		return 0;
+		return SATA_IO_ERROR_NO_PORT;
 	}
 	uint32 lbal = (uint32)lba;
 	uint32 lbah = (uint32)(lba >> 32);
@@ -186,7 +186,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	int spin = 0; // Spin lock timeout counter
 	int32 slot = ahci_find_cmdslot(port);
 	if (slot == -1)
-		return 0;
+		return SATA_IO_ERROR_NO_SLOT;
 
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*) P2V(
 		HILO2ADDR(port->clbu, port->clb)
@@ -251,7 +251,7 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	}
 	if (spin == 1000000) {
 		cprintf("Port is hung\n");
-		return 0;
+		return SATA_IO_ERROR_HUNG_PORT;
 	}
 
 	port->ci = 1<<slot; // Issue command
@@ -262,11 +262,11 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 
 int sata_write(uint32 dev, uint64 lba, uint32 count, uint8 *buf) {
 	if( dev >= AHCI_MAX_SLOT) {
-		return 0;
+		return SATA_IO_ERROR_DEV_GT_MAX_SLOT;
 	}
 	HBA_PORT *port = BLOCK_DEVICES[dev];
 	if(!port) {
-		return 0;
+		return SATA_IO_ERROR_NO_PORT;
 	}
 	uint32 lbal = (uint32)lba;
 	uint32 lbah = (uint32)(lba >> 32);
@@ -279,7 +279,7 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 
     int32 slot = ahci_find_cmdslot(port);
 	if (slot == -1)
-		return 0;
+		return SATA_IO_ERROR_NO_SLOT;
 
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*) P2V(
 		HILO2ADDR(port->clbu, port->clb)

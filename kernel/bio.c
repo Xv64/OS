@@ -104,9 +104,10 @@ struct buf* bread(uint dev, uint sector){
 		if(devType == DEV_IDE) {
 			iderw(b);
 		} else if(devType == DEV_SATA) {
-			int success = sata_read(devNum, sector, 1, &b->data[0]);
-			if(!success){
-				panic("Error reading SATA\n");
+			int status = sata_read(devNum, sector, 1, &b->data[0]);
+			if(status != SATA_IO_SUCCESS){
+				cprintf("Error reading SATA: %d\n", status);
+				panic("SATA I/O ERROR");
 			}
 			b->flags |= B_VALID;
 			b->flags &= ~B_DIRTY;
@@ -129,12 +130,13 @@ void bwrite(struct buf* b){
 	if(devType == DEV_IDE) {
 		iderw(b);
 	} else {
-		int success = sata_write(devNum, b->sector, 1, &b->data[0]);
+		int status = sata_write(devNum, b->sector, 1, &b->data[0]);
 		b->flags |= B_VALID;
 		b->flags &= ~B_DIRTY;
 		wakeup(b);
-		if(!success){
-			panic("Error writing SATA\n");
+		if(status != SATA_IO_SUCCESS){
+			cprintf("Error writing SATA: %d\n", status);
+			panic("SATA I/O ERROR");
 		}
 	}
 }
