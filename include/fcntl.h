@@ -1,5 +1,6 @@
-#define O_RDONLY   0x000
-#define O_WRONLY   0x001
-#define O_RDWR     0x002
-#define O_DRTYREAD 0x004
-#define O_CREATE   0x200
+#define _BIT(x) (1 << x)
+
+#define O_RDONLY   _BIT(1)
+#define O_WRONLY   _BIT(2)
+#define O_RDWR     _BIT(3)
+#define O_CREATE   _BIT(4)

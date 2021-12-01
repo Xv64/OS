@@ -280,12 +280,6 @@ int sys_open(void){
 
 	begin_op();
 
-	int dolock = 1;
-	if(omode == O_DRTYREAD) {
-		omode = O_RDONLY;
-		dolock = 0;
-	}
-
 	if (omode & O_CREATE) {
 		ip = create(path, T_FILE, 0, 0);
 		if (ip == 0) {
@@ -297,11 +291,9 @@ int sys_open(void){
 			end_op();
 			return -1;
 		}
-		if(dolock)
-			ilock(ip);
+		ilock(ip);
 		if (ip->type == T_DIR && omode != O_RDONLY) {
-			if(dolock)
-				iunlockput(ip);
+			iunlockput(ip);
 			end_op();
 			return -1;
 		}
@@ -310,19 +302,16 @@ int sys_open(void){
 	if ((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0) {
 		if (f)
 			fileclose(f);
-		if(dolock)
-			iunlockput(ip);
+		iunlockput(ip);
 		end_op();
 		return -1;
 	}
-	if(dolock)
-		iunlock(ip);
+	iunlock(ip);
 	end_op();
 
 	f->type = FD_INODE;
 	f->ip = ip;
 	f->off = 0;
-	f->dirtyread = !dolock;
 	f->readable = !(omode & O_WRONLY);
 	f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
 	return fd;
