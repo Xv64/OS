@@ -126,3 +126,8 @@ void sys_reboot(){
 	cprintf("Goodbye\n");
 	acpi_reboot();
 }
+
+void sys_halt(){
+	cprintf("Xv64 is shutting down now. Goodbye...\n");
+	halt();
+}

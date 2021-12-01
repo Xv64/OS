@@ -32,3 +32,4 @@
 #define SYS_pstate        31
 #define SYS_pname         32
 #define SYS_ticks         33
+#define SYS_halt          34

@@ -131,6 +131,7 @@ extern int sys_mkvdev(void);
 extern int sys_pstate(void);
 extern int sys_pname(void);
 extern int sys_ticks(void);
+extern int sys_halt(void);
 
 static int (*syscalls[])(void) = {
 	[SYS_fork]          sys_fork,
@@ -166,6 +167,7 @@ static int (*syscalls[])(void) = {
 	[SYS_pstate]        sys_pstate,
 	[SYS_pname]         sys_pname,
 	[SYS_ticks]         sys_ticks,
+	[SYS_halt]          sys_halt,
 };
 
 void syscall(void){
