@@ -13,6 +13,7 @@ void initlock(struct spinlock* lk, char* name){
 	lk->name = name;
 	lk->locked = 0;
 	lk->cpu = 0;
+	lk->sig = SPINLOCK_SIG;
 }
 
 
@@ -99,6 +100,9 @@ void getstackpcs(uintp* ebp, uintp pcs[]){
 
 // Check whether this cpu is holding the lock.
 int holding(struct spinlock* lock){
+	if(lock->sig != SPINLOCK_SIG) {
+		cprintf("*lock is not a lock\n");
+	}
 	return lock->locked && lock->cpu == cpu;
 }
 

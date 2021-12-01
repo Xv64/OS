@@ -24,6 +24,7 @@ int main(void){
 	uartearlyinit();
 	kinit1(P2V(KALLOC_START), P2V(KALLOC_START + 4 * 1024 * 1024)); // phys page allocator
 	kvmalloc(); // kernel page table
+	trapinit();
 	if (acpiinit()) // try to use acpi for machine info
 		mpinit(); // otherwise use bios MP tables
 	if (!ismp)

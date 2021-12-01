@@ -22,6 +22,11 @@ irqhandler irqHandlers[MAX_IRQS];
 
 irqhandler get_registered_handler(uint16 irq);
 
+void trapinit() {
+	initlock(&tickslock, "tickslock");
+	initlock(&irqHandlersLock, "irqHandlersLock");
+}
+
 void trap(struct trapframe* tf){
 	if (tf->trapno == T_SYSCALL) {
 		if (proc->killed)

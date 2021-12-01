@@ -157,6 +157,7 @@ void            syscall(void);
 void            timerinit(void);
 
 // trap.c
+void            trapinit(void);
 void            idtinit(void);
 extern uint     ticks;
 void            tvinit(void);
