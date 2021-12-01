@@ -134,6 +134,7 @@ void            swtch(struct context**, struct context*);
 
 // spinlock.c
 void            acquire(struct spinlock*);
+uint8           sacquire(struct spinlock*, uint32 waitticks);
 void            getcallerpcs(void*, uintp*);
 void            getstackpcs(uintp*, uintp*);
 int             holding(struct spinlock*);

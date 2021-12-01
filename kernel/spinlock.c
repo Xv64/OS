@@ -15,11 +15,19 @@ void initlock(struct spinlock* lk, char* name){
 	lk->cpu = 0;
 }
 
+
+void acquire(struct spinlock* lk){
+	uint8 success = sacquire(lk, UINT32_MAX);
+	if(!success){
+		panic("acquire: failed to acquire lock");
+	}
+}
+
 // Acquire the lock.
 // Loops (spins) until the lock is acquired.
 // Holding a lock for a long time may cause
 // other CPUs to waste time spinning to acquire it.
-void acquire(struct spinlock* lk){
+uint8 sacquire(struct spinlock* lk, uint32 wait){
 	pushcli(); // disable interrupts to avoid deadlock.
 	if (holding(lk)) {
 		int i;
@@ -27,18 +35,24 @@ void acquire(struct spinlock* lk){
 		for (i = 0; i < 10; i++)
 			cprintf(" %p", lk->pcs[i]);
 		cprintf("\n");
-		panic("acquire");
+		panic("acquire: already holding lock");
 	}
 
 	// The xchg is atomic.
 	// It also serializes, so that reads after acquire are not
 	// reordered before it.
-	while (xchg(&lk->locked, 1) != 0)
-		;
+	uint32 startticks = ticks;
+	while (xchg(&lk->locked, 1) != 0) {
+		uint32 delta = ticks - startticks;
+		if(delta > wait){
+			return 0;
+		}
+	}
 
 	// Record info about lock acquisition for debugging.
 	lk->cpu = cpu;
 	getcallerpcs(&lk, lk->pcs);
+	return 1;
 }
 
 // Release the lock.
