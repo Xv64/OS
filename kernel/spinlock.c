@@ -101,7 +101,7 @@ void getstackpcs(uintp* ebp, uintp pcs[]){
 // Check whether this cpu is holding the lock.
 int holding(struct spinlock* lock){
 	if(lock->sig != SPINLOCK_SIG) {
-		cprintf("*lock is not a lock\n");
+		panic("*lock is not a lock\n");
 	}
 	return lock->locked && lock->cpu == cpu;
 }
