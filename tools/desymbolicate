@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import re
@@ -12,6 +12,7 @@ def find_best_func(addr):
     best_func = None
     best_func_addr = None
     best_func_file = None
+    offset = 0
 
     for p in Path(prefix).glob("**/*.sym"):
         symfile = open(str(p), "r")
@@ -26,8 +27,9 @@ def find_best_func(addr):
                     best_func = func_name
                     best_func_addr = func_addr
                     best_func_file = p
+                    offset = addr - func_addr
 
-    return (best_func, best_func_file, best_func_addr, )
+    return (best_func, best_func_file, best_func_addr, offset, )
 
 
 # Example stack trace:
@@ -50,8 +52,9 @@ for match in pattern.finditer(stack):
     best_func = result[0]
     best_func_file = result[1]
     best_func_addr = result[2]
+    offset = result[3]
 
     if best_func_addr:
-        print("[{}] {} - {} / {}".format(line_num, addr_s, best_func, best_func_file))
+        print("[{}]\t{}\t@ +{} bytes in {}  ({})".format(line_num, addr_s, offset, best_func, best_func_file))
     else:
-        print("[{}] {} - ".format(line_num, addr_s))
+        print("[{}]\t{}\t?".format(line_num, addr_s))
