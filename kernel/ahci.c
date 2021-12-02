@@ -29,6 +29,8 @@ extern uint64 ROOT_DEV;
 static uint32 sataDeviceCount = 0;
 static HBA_PORT* BLOCK_DEVICES[AHCI_MAX_SLOT];
 
+#define SATA_IO_MAX_WAIT 10000
+
 static inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
 	// Wait for completion
 	while (1) {
@@ -246,11 +248,10 @@ int ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, u
 	cmdfis->counth = (count >> 8) & 0xFF;
 
 	// The below loop waits until the port is no longer busy before issuing a new command
-	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < 1000000) {
+	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < SATA_IO_MAX_WAIT) {
 		spin++;
 	}
-	if (spin == 1000000) {
-		cprintf("Port is hung\n");
+	if (spin == SATA_IO_MAX_WAIT) {
 		return SATA_IO_ERROR_HUNG_PORT;
 	}
 
@@ -276,6 +277,7 @@ int sata_write(uint32 dev, uint64 lba, uint32 count, uint8 *buf) {
 
 int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint8 *buf) {
     port->is = (uint32) -1;
+	int spin = 0; // Spin lock timeout counter
 
     int32 slot = ahci_find_cmdslot(port);
 	if (slot == -1)
@@ -325,6 +327,14 @@ int ahci_sata_write(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, 
 
     cmdfis->countl = 2;
     cmdfis->counth = 0;
+
+	// The below loop waits until the port is no longer busy before issuing a new command
+	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < SATA_IO_MAX_WAIT) {
+		spin++;
+	}
+	if (spin == SATA_IO_MAX_WAIT) {
+		return SATA_IO_ERROR_HUNG_PORT;
+	}
 
     port->ci = 1<<slot; // Issue command
 
