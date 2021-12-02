@@ -34,21 +34,17 @@ static HBA_PORT* BLOCK_DEVICES[AHCI_MAX_SLOT];
 static inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
 	// Wait for completion
 	while (1) {
-		if (port->is & 0x20) {
-			// In some longer duration reads, it may be helpful to spin on the DPS bit
-			// in the PxIS port field as well (1 << 5)
-			continue;
-		}
+		amd64_nop();
 		if ((port->ci & (1<<slot)) == 0) {
 			break;
 		}
-		if (port->is & HBA_PxIS_TFES) { // Task file error
-			return 0;
+		if ((port->is & HBA_PxIS_TFES) == HBA_PxIS_TFES) { // Task file error
+			return SATA_IO_ERROR_TASK_ERR;
 		}
 	}
 
 	// Check again
-	return (port->is & HBA_PxIS_TFES) > 0 ? SATA_IO_ERROR_TASK_ERR : SATA_IO_SUCCESS;
+	return (port->is & HBA_PxIS_TFES) == HBA_PxIS_TFES ? SATA_IO_ERROR_TASK_ERR : SATA_IO_SUCCESS;
 }
 
 void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
