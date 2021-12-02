@@ -14,9 +14,7 @@ static const struct {
 	uint16 device;
 	const char  *name;
 } ahci_devices[] = {
-	{AHCI_VENDOR_INTEL, 0x27D0, "Intel ICH7 Port 1"},
-	{AHCI_VENDOR_INTEL, 0x27D2, "Intel ICH7 Port 2"},
-	//{AHCI_VENDOR_INTEL, 0x244E, "Intel 82801 PCI Bridge"},
+	{AHCI_VENDOR_INTEL, 0x27C0, "Intel ICH7 SATA Controller"},
 	{AHCI_VENDOR_INTEL, 0x2829, "Intel ICH8M"},
 	{AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
 	{AHCI_VENDOR_INTEL, 0x1E03, "Intel Panther Point"},
@@ -73,7 +71,6 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
 	cprintf("%s controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", dev_name, bus, slot, func, ahci_base_mem);
 
 	HBA_MEM *ptr = (HBA_MEM *)IO2V(ahci_base_mem);
-	cprintf("   Capabilities: %x\n", ptr->cap);
 	cprintf("   HBA in ");
 	if(ptr->ghc == 0x0) {
 		cprintf("legacy mode\n");
