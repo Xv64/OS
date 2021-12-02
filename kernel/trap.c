@@ -78,9 +78,8 @@ void trap(struct trapframe* tf){
 		break;
 
 	default:
-		acquire(&irqHandlersLock);
+		amd64_nop(); // a label can only appear directly in front of a statement, so...
 		void (*dynamicIrqHandler)(uint16) = get_registered_handler(tf->trapno);
-		release(&irqHandlersLock);
 
 		if(dynamicIrqHandler) {
 			//all's good, we found a dyanmic IRQ handler that was defined for this
