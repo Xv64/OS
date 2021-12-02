@@ -73,6 +73,7 @@ void ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bu
 	cprintf("%s controller found (bus=%d, slot=%d, func=%d, abar=0x%x)\n", dev_name, bus, slot, func, ahci_base_mem);
 
 	HBA_MEM *ptr = (HBA_MEM *)IO2V(ahci_base_mem);
+	cprintf("   Capabilities: %x\n", ptr->cap);
 	cprintf("   HBA in ");
 	if(ptr->ghc == 0x0) {
 		cprintf("legacy mode\n");
