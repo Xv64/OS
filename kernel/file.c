@@ -145,7 +145,7 @@ int filewrite(struct file* f, char* addr, int n){
 			if (r < 0)
 				break;
 			if (r != n1)
-				panic("short filewrite");
+				return r;
 			i += r;
 		}
 		return i == n ? n : -1;
