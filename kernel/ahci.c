@@ -36,12 +36,20 @@ static inline uint8 wait_for_sata_command(HBA_PORT *port, int32 slot) {
 		if ((port->ci & (1<<slot)) == 0) {
 			break;
 		}
-		if ((port->is & HBA_PxIS_TFES) == HBA_PxIS_TFES) { // Task file error
-			return SATA_IO_ERROR_TASK_ERR;
+		if ((port->is & HBA_PxIS_ERR_MASK) > 0) {
+			break;
 		}
 	}
+	if ((port->is & HBA_PxIS_IFS) == HBA_PxIS_IFS) {
+		return SATA_IO_ERROR_CRC_ERR;
+	}
+	if ((port->is & HBA_PxIS_HBDS) == HBA_PxIS_HBDS) {
+		return SATA_IO_HBA_DATA_ERR;
+	}
+	if ((port->is & HBA_PxIS_HBFS) == HBA_PxIS_HBFS) {
+		return SATA_IO_HBA_HOST_BUS_ERR;
+	}
 
-	// Check again
 	return (port->is & HBA_PxIS_TFES) == HBA_PxIS_TFES ? SATA_IO_ERROR_TASK_ERR : SATA_IO_SUCCESS;
 }
 

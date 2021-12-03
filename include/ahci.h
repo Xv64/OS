@@ -9,7 +9,12 @@
 #define HBA_PxCMD_FRE   0x0010
 #define HBA_PxCMD_FR    0x4000
 #define HBA_PxCMD_CR    0x8000
-#define HBA_PxIS_TFES   0x40000000
+
+#define HBA_PxIS_ERR_MASK 0x78000000 // all error conditions
+#define HBA_PxIS_IFS      0x8000000  // bit 27
+#define HBA_PxIS_HBDS     0x10000000 // bit 28
+#define HBA_PxIS_HBFS     0x20000000 // bit 29
+#define HBA_PxIS_TFES     0x40000000 // bit 30
 
 #define FIS_TYPE_REG_H2D      0x27
 #define ATA_CMD_READ_DMA_EX   0x25
@@ -44,7 +49,9 @@
 #define SATA_IO_ERROR_NO_SLOT         0x3
 #define SATA_IO_ERROR_HUNG_PORT       0x4
 #define SATA_IO_ERROR_TASK_ERR        0x5
-
+#define SATA_IO_ERROR_CRC_ERR         0x6
+#define SATA_IO_HBA_DATA_ERR          0x7
+#define SATA_IO_HBA_HOST_BUS_ERR      0x8
 
 //The following structs are as documented @ https://wiki.osdev.org/AHCI
 //START
