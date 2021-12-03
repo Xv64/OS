@@ -39,9 +39,9 @@ void main(void){
 		str[6] = (char)(rnd >> 48);
 		str[7] = (char)(rnd >> 56);
 
-		write(fd, &str, 8);
-		if(delay > 0){
-			sleep(delay--);
+		int bytes = write(fd, &str, 8);
+		if(bytes == 0){
+			sleep(delay);
 		}
 	}
 }
