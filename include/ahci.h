@@ -42,6 +42,9 @@
 #define AHCI_VENDOR_INTEL  0x8086
 #define AHCI_VENDOR_VMWARE 0x15AD
 
+//AHCI devices:
+#define AHCI_ICH7_SATA 0x27C0
+
 // SATA I/O Status Codes:
 #define SATA_IO_SUCCESS               0x0
 #define SATA_IO_ERROR_DEV_GT_MAX_SLOT 0x1
@@ -190,6 +193,8 @@ typedef volatile struct tagHBA_MEM
 
 uint16 ahci_probe(uint16 bus, uint16 slot, uint16 func, uint16 offset);
 uint64 ahci_read(uint16 bus, uint16 slot, uint16 func, uint16 offset);
+void   ahci_write8(ushort bus, ushort slot,ushort func, ushort offset, uint8 data);
+void   ahci_device_hacks(uint16 bus, uint16 slot, uint16 func, uint16 vendor, uint16 device);
 void   ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func);
 void   ahci_try_setup_known_device(char *dev_name, uint64 ahci_base_mem, uint16 bus, uint16 slot, uint16 func);
 int    ahci_sata_read(HBA_PORT *port, uint32 startl, uint32 starth, uint32 count, uint8 *buf);

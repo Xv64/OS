@@ -14,7 +14,7 @@ static const struct {
 	uint16 device;
 	const char  *name;
 } ahci_devices[] = {
-	{AHCI_VENDOR_INTEL, 0x27C0, "Intel ICH7 SATA Controller"},
+	{AHCI_VENDOR_INTEL, AHCI_ICH7_SATA, "Intel ICH7 SATA Controller"},
 	{AHCI_VENDOR_INTEL, 0x2829, "Intel ICH8M"},
 	{AHCI_VENDOR_INTEL, 0x2922, "Intel ICH9"},
 	{AHCI_VENDOR_INTEL, 0x1E03, "Intel Panther Point"},
@@ -57,6 +57,7 @@ void ahci_try_setup_device(uint16 bus, uint16 slot, uint16 func) {
 	uint16 vendor = ahci_probe(bus, slot, func, AHCI_VENDOR_OFFSET);
 	uint16 device = ahci_probe(bus, slot, func, AHCI_DEVICE_OFFSET);
 
+	ahci_device_hacks(bus, slot, func, vendor, device);
 	uint64 ahci_base_mem = ahci_read(bus, slot, func, AHCI_BAR5_OFFSET); //find ABAR
 
 	if(ahci_base_mem != 0 && ahci_base_mem != 0xffffffff) {
@@ -142,6 +143,12 @@ ushort ahci_probe(ushort bus, ushort slot, uint16 func, ushort offset){
 	return (ushort) ((register_value >> ((offset & 2) * 8)) & 0xFFFF);
 }
 
+void ahci_device_hacks(uint16 bus, uint16 slot, uint16 func, uint16 vendor, uint16 device) {
+	if (vendor == AHCI_VENDOR_INTEL && device == AHCI_ICH7_SATA) {
+		ahci_write8(bus, slot, func, 0x90, 0x40); // enable AHCI mode
+	}
+}
+
 uint64 ahci_read(ushort bus, ushort slot,ushort func, ushort offset){
 
 	uint32 lbus = (uint32)bus;
@@ -155,6 +162,16 @@ uint64 ahci_read(ushort bus, ushort slot,ushort func, ushort offset){
 	amd64_out32(AHCI_HBA_PORT, address);
 	tmp = (uint64)(amd64_in32 (0xCFC) /* & 0xffff*/);
 	return (tmp);
+}
+
+void ahci_write8(ushort bus, ushort slot,ushort func, ushort offset, uint8 data) {
+	uint32 lbus = (uint32)bus;
+	uint32 lslot = (uint32)slot;
+	uint32 lfunc = (uint32)func;
+
+	uint32 address = (uint32)((lbus << 16) | (lslot << 11) |
+	                          (lfunc << 8) | (offset & 0xfc) | ((uint32)0x80000000));
+	amd64_out32(AHCI_HBA_PORT, address);
 }
 
 int32 ahci_find_cmdslot(HBA_PORT *port) {
