@@ -15,9 +15,9 @@ void main(void){
 		procexit();
 	}
 
-	sleep(10);
 	while(1) {
-		write(fd, "\0\0\0\0\0\0\0\0\0\0", 10);
-		sleep(1);
+		if(write(fd, "\0\0\0\0\0\0\0\0\0\0", 10) < 10){
+			sleep(30);
+		}
 	}
 }
