@@ -12,3 +12,5 @@ struct spinlock {
 };
 
 #define SPINLOCK_SIG 0xAD16
+#define SPINLOCK_ACQUIRED 1
+#define SPINLOCK_NOT_ACQUIRED 0

@@ -18,8 +18,8 @@ void initlock(struct spinlock* lk, char* name){
 
 
 void acquire(struct spinlock* lk){
-	uint8 success = sacquire(lk, UINT32_MAX);
-	if(!success){
+	uint8 status = sacquire(lk, UINT32_MAX);
+	if(status == SPINLOCK_NOT_ACQUIRED){
 		panic("acquire: failed to acquire lock");
 	}
 }
@@ -45,14 +45,14 @@ uint8 sacquire(struct spinlock* lk, uint32 wait){
 	while (amd64_xchg(&lk->locked, 1) != 0) {
 		uint32 delta = ticks - startticks;
 		if(delta > wait){
-			return 0;
+			return SPINLOCK_NOT_ACQUIRED;
 		}
 	}
 
 	// Record info about lock acquisition for debugging.
 	lk->cpu = cpu;
 	getcallerpcs(&lk, lk->pcs);
-	return 1;
+	return SPINLOCK_ACQUIRED;
 }
 
 // Release the lock.
