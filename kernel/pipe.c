@@ -6,9 +6,13 @@
 #include "fs.h"
 #include "file.h"
 #include "spinlock.h"
+#include "x86.h"
+#include "fcntl.h"
 
 #define PIPESIZE 512
-#define LOCK_WAIT_TICKS 1000
+#define LOCK_WAIT_TICKS 10
+#define MAX_WRITE_WAIT 1000
+#define MAX_READ_WAIT  1000
 
 struct pipe {
 	struct spinlock lock;
@@ -73,17 +77,23 @@ int pipewrite(struct pipe* p, char* addr, int n){
 	int i;
 
 	uint8 success = sacquire(&p->lock, LOCK_WAIT_TICKS);
-	if(!success) {
-		return 0;
+	if(success != SPINLOCK_ACQUIRED) {
+		return FNOT_READY;
 	}
 	for (i = 0; i < n; i++) {
-		while (p->nwrite == p->nread + PIPESIZE) { // pipewrite-full
+		uint32 loops = 0;
+		while ((p->nwrite == p->nread + PIPESIZE) && loops++ < MAX_WRITE_WAIT) { // pipewrite-full
 			if (p->readopen == 0 || proc->killed) {
 				release(&p->lock);
-				return -1;
+				return F_ERROR;
 			}
 			wakeup(&p->nread);
-			sleep(&p->nwrite, &p->lock); // pipewrite-sleep
+			amd64_nop();
+		}
+		if(loops >= MAX_WRITE_WAIT) {
+			wakeup(&p->nread);
+			release(&p->lock);
+			return FNOT_READY;
 		}
 		p->data[p->nwrite++ % PIPESIZE] = addr[i];
 	}
@@ -96,15 +106,21 @@ int piperead(struct pipe* p, char* addr, int n){
 	int i;
 
 	uint8 success = sacquire(&p->lock, LOCK_WAIT_TICKS);
-	if(!success) {
-		return 0;
+	if(success != SPINLOCK_ACQUIRED) {
+		return FNOT_READY;
 	}
-	while (p->nread == p->nwrite && p->writeopen) { // pipe-empty
+	uint32 loops = 0;
+	while (p->nread == p->nwrite && p->writeopen && loops++ < MAX_READ_WAIT) { // pipe-empty
 		if (proc->killed) {
 			release(&p->lock);
-			return -1;
+			return F_ERROR;
 		}
-		sleep(&p->nread, &p->lock); // piperead-sleep
+		amd64_nop();
+	}
+	if(loops >= MAX_READ_WAIT) {
+		wakeup(&p->nwrite);
+		release(&p->lock);
+		return FNOT_READY;
 	}
 	for (i = 0; i < n; i++) { // piperead-copy
 		if (p->nread == p->nwrite)

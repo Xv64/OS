@@ -5,13 +5,14 @@
 
 char buf[32];
 
-void
-cat(int fd)
-{
-	int n;
-
-	while((n = read(fd, buf, sizeof(buf))) > 0)
-		write(1, buf, n);
+void cat(int fd) {
+	int n = 1;
+	while(n > 0 || n == FNOT_READY) {
+		n = read(fd, buf, sizeof(buf));
+		if (n > 0) {
+			write(1, buf, n);
+		}
+	}
 	if(n < 0) {
 		fprintf(stdout, "cat: read error\n");
 		procexit();
