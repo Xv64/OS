@@ -13,6 +13,7 @@ struct cpu {
   volatile uint started;       // Has the CPU started?
   int ncli;                    // Depth of pushcli nesting.
   int intena;                  // Were interrupts enabled before pushcli?
+  uint64 capabilities;         // bitmask of capabilities of this CPU
 
   // Cpu-local storage variables; see below
   void *local;
@@ -21,6 +22,9 @@ struct cpu {
 
 extern struct cpu cpus[NCPU];
 extern int ncpu;
+
+#define CPU_RESERVED_BLESS 0x01
+#define CPU_DISABLED       0x02
 
 // Per-CPU variables, holding pointers to the
 // current cpu and to the current process.

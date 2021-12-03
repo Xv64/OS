@@ -329,8 +329,11 @@ void scheduler(void){
 			if (p->state != RUNNABLE)
 				continue;
 
-			if (cpu->id == 0 && p->blessed != PROC_BLESSED) {
-				// only blessed tasks can run on CPU#0
+			if ((cpu->capabilities & CPU_DISABLED) == CPU_DISABLED) {
+				continue;
+			}
+
+			if (((cpu->capabilities & CPU_RESERVED_BLESS) == CPU_RESERVED_BLESS) && p->blessed != PROC_BLESSED) {
 				continue;
 			}
 
