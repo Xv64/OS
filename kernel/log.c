@@ -61,10 +61,10 @@ void initlog(void){
 	uint8 devtype = GETDEVTYPE(ROOT_DEV);
 	uint32 devnum = GETDEVNUM(ROOT_DEV);
 	if(ext2_init_dev(devtype, devnum) == 1) {
-		cprintf("ext2 filesystem detected on hd(%d,%d)\n", devtype, devnum);
+		cprintf("ext2 filesystem detected on disk(%d,%d)\n", devtype, devnum);
 	} else {
 		// legacy fallback...
-		cprintf("xv6 filesystem assumed on hd(%d,%d)\n", devtype, devnum);
+		cprintf("xv6 filesystem assumed on disk(%d,%d)\n", devtype, devnum);
 		readsb(ROOT_DEV, &sb);
 	}
 	log.start = sb.size - sb.nlog;
