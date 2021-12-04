@@ -3,6 +3,7 @@
 #include "param.h"
 #include "spinlock.h"
 #include "fs.h"
+#include "fs/ext2.h"
 #include "buf.h"
 #include "kernel/string.h"
 
@@ -57,7 +58,15 @@ void initlog(void){
 
 	struct superblock sb;
 	initlock(&log.lock, "log");
-	readsb(ROOT_DEV, &sb);
+	uint8 devtype = GETDEVTYPE(ROOT_DEV);
+	uint32 devnum = GETDEVNUM(ROOT_DEV);
+	if(ext2_init_dev(devtype, devnum) == 1) {
+		cprintf("ext2 filesystem detected on hd(%d,%d)\n", devtype, devnum);
+	} else {
+		// legacy fallback...
+		cprintf("xv6 filesystem assumed on hd(%d,%d)\n", devtype, devnum);
+		readsb(ROOT_DEV, &sb);
+	}
 	log.start = sb.size - sb.nlog;
 	log.size = sb.nlog;
 	log.dev = ROOT_DEV;
