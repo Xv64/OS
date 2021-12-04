@@ -18,5 +18,8 @@ uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
     offset += 512;
     memcopy(offset, &bp2->data[0], 512);
 
+    brelse(bp1);
+    brelse(bp2);
+
     return (sb.ext2_signature == FS_EXT2_SIGNATURE) ? 1 : 0;
 }
