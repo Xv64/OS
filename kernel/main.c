@@ -39,7 +39,7 @@ int main(void){
 	consoleinit(); // I/O devices & their interrupts
 	uartinit(); // serial port
 	pinit();   // process table
-	proclookinit();// setup proc loop device
+	procloopinit();// setup proc loop device
 	tvinit();  // trap vectors
 	pciinit(); // initialize PCI bus (AHCI also)
 	binit();   // buffer cache

@@ -91,7 +91,7 @@ void            end_op();
 extern int      ismp;
 int             mpbcpu(void);
 void            mpinit(void);
-void            proclookinit();
+void            procloopinit();
 void            mpstartthem(void);
 
 // apic.c

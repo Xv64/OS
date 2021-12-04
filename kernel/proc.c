@@ -70,7 +70,7 @@ void pinit(void){
 	initlock(&ptable.lock, "ptable");
 }
 
-void proclookinit() {
+void procloopinit() {
 	cprintf("init: process loop device\n");
 	devsw[LOOP0].write = procloopwrite;
 	devsw[LOOP0].read = procloopread;
