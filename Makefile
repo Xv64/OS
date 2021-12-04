@@ -232,6 +232,14 @@ fs.img: out/mkfs fs/LICENSE $(UPROGS) $(SUBPROGS)
 	cp fs.img bin/fs.img
 	qemu-img convert fs.img -O vdi bin/fs.vdi
 
+	dd if=/dev/zero of=bin/fs-ext2.img bs=1k count=5000
+	mkfs -t ext2 -i 1024 -b 1024 -F bin/fs-ext2.img
+	mkdir /tmp/loop
+	mount -o loop bin/fs-ext2.img /tmp/loop
+	cp -r ./fs/ /tmp/loop/
+	umount /tmp/loop
+
+
 -include */*.d
 
 clean:
