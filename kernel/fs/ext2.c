@@ -7,7 +7,7 @@
 
 struct ext2_superblock sb;
 
-uint8 init_dev(uint16 devt, uint32 devnum) {
+uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
     // assumes 512 byte sectors...
 
     struct buf* bp1 = bread(TODEVNUM(devt, devnum), 2);

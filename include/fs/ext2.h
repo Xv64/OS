@@ -44,4 +44,4 @@ struct ext2_superblock {
 #define FS_EXT2_CREATOR_FREEBSD 0x3
 #define FS_EXT2_CREATOR_OTHER   0x4
 
-uint8 init_dev(uint16 devt, uint32 devnum);
+uint8 ext2_init_dev(uint16 devt, uint32 devnum);
