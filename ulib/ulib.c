@@ -30,9 +30,7 @@ char *gets(char *buf, int max) {
 	return buf;
 }
 
-int
-stat(char *n, struct stat *st)
-{
+int stat(char *n, struct stat *st) {
 	int fd;
 	int r;
 
