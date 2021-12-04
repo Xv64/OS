@@ -16,7 +16,7 @@ OBJS := \
 	kobj/console.o\
 	kobj/exec.o\
 	kobj/file.o\
-	kobj/fs.o\
+	kobj/vfs.o\
 	kobj/ide.o\
 	kobj/ioapic.o\
 	kobj/kalloc.o\

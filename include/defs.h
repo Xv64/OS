@@ -34,7 +34,7 @@ int             filestat(struct file*, struct stat*);
 int             filewrite(struct file*, char*, int n);
 int             fileseek(struct file *f, int offset);
 
-// fs.c
+// vfs.c
 void            readsb(int dev, struct superblock *sb);
 int             dirlink(struct inode*, char*, uint);
 struct inode*   dirlookup(struct inode*, char*, uint*);
