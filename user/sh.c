@@ -136,9 +136,7 @@ runcmd(struct cmd *cmd)
 	procexit();
 }
 
-int
-getcmd(char *buf, int nbuf)
-{
+int getcmd(char *buf, int nbuf) {
 	fprintf(stderr, "~> ");
 	memset(buf, 0, nbuf);
 	gets(buf, nbuf);
@@ -147,19 +145,8 @@ getcmd(char *buf, int nbuf)
 	return 0;
 }
 
-int
-main(void)
-{
+int main(void) {
 	static char buf[100];
-	int fd;
-
-	// Assumes three file descriptors open.
-	while((fd = open("console", O_RDWR)) >= 0) {
-		if(fd >= 3) {
-			close(fd);
-			break;
-		}
-	}
 
 	// Read and run input commands.
 	while(getcmd(buf, sizeof(buf)) >= 0) {
