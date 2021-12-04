@@ -4,6 +4,9 @@
 #include "stat.h"
 #include "user.h"
 #include "fcntl.h"
+#include "param.h"
+#include "mmu.h"
+#include "proc.h"
 
 int spawn(char *task, char *name, int blessed){
 	fprintf(stdout, "init: starting %s\n", name);
@@ -29,17 +32,20 @@ int main(void) {
 	dup(0); // stdout
 	dup(0); // stderr
 
-	for(;;) {
+	int kzeropid = 0;
+	int krandompid = 0;
+	int shpid = 0;
+	int child = 0;
+	fprintf(stdout, "init: starting...\n");
+	while(1) {
 
-		spawn("/kexts/kzero", "kzero", 1);
-		spawn("/kexts/krandom", "krandom", 1);
-		spawn("/bin/sh", "sh", 0);
-		fprintf(stdout, "Welcome to Xv64\n\n");
+		kzeropid = child == kzeropid ? spawn("/kexts/kzero", "kzero", 1) : kzeropid;
+		krandompid = child == krandompid ? spawn("/kexts/krandom", "krandom", 1) : krandompid;
+		shpid = child == shpid ? spawn("/bin/sh", "sh", 0) : shpid;
 
-		while(1) {
-			sleep(30);
-		}
-		// while((wpid=wait()) >= 0 && wpid != pid)
-		//   fprintf(stdout, "zombie!\n");
+		sleep(10);
+		child = wait();
+		write(1, "--", 2);
+		fprintf(stdout, "init: pid %d died - respawning\n", child);
 	}
 }
