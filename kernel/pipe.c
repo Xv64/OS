@@ -10,7 +10,7 @@
 #include "fcntl.h"
 
 #define PIPESIZE 512
-#define LOCK_WAIT_TICKS 10
+#define LOCK_WAIT_TICKS 100
 #define MAX_WRITE_WAIT 1000
 #define MAX_READ_WAIT  1000
 
