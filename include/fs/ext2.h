@@ -45,3 +45,4 @@ struct ext2_superblock {
 #define FS_EXT2_CREATOR_OTHER   0x4
 
 uint8 ext2_init_dev(uint16 devt, uint32 devnum);
+void ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2);
