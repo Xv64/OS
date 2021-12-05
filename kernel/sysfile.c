@@ -10,7 +10,7 @@
 #include "stat.h"
 #include "mmu.h"
 #include "proc.h"
-#include "fs.h"
+#include "fs/fs1.h"
 #include "file.h"
 #include "fcntl.h"
 #include "kernel/string.h"

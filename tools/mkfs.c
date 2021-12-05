@@ -7,9 +7,48 @@
 
 #define stat xv6_stat  // avoid clash with host struct stat
 #include "../include/types.h"
-#include "../include/fs.h"
 #include "../include/stat.h"
 #include "../include/param.h"
+
+// ~~~~~~~~~~~~~~~~~~~~~~~
+// HACK: copy/paste from fs/fs1.h
+#define ROOTINO 1  // root i-number
+#define BSIZE 512  // block size
+
+#define NDIRECT 28
+#define NINDIRECT (BSIZE / sizeof(uint))
+#define MAXFILE (NDIRECT + NINDIRECT)
+
+// On-disk inode structure
+struct dinode {
+  int16  type;               // File type
+  int16  major;              // Major device number (T_DEV only)
+  int16  minor;              // Minor device number (T_DEV only)
+  int16  nlink;              // Number of links to inode in file system
+  uint32 size;               // Size of file (bytes)
+  uint32 addrs[NDIRECT+1];   // Data block addresses
+};
+
+// Inodes per block.
+#define IPB           (BSIZE / sizeof(struct dinode))
+
+// Block containing inode i
+#define IBLOCK(i)     ((i) / IPB + 2)
+
+// Bitmap bits per block
+#define BPB           (BSIZE*8)
+
+// Block containing bit for block b
+#define BBLOCK(b, ninodes) (b/BPB + (ninodes)/IPB + 3)
+
+// Directory is a file containing a sequence of dirent structures.
+#define DIRSIZ 14
+
+struct dirent {
+  ushort inum;
+  char name[DIRSIZ];
+};
+
 
 struct fs1_superblock {
   uint size;         // Size of file system image (blocks)
@@ -17,6 +56,8 @@ struct fs1_superblock {
   uint ninodes;      // Number of inodes.
   uint nlog;         // Number of log blocks
 };
+
+// ~~~~~~~~~~~~~~~~~~~~~~~
 
 #ifndef static_assert
 # define static_assert(a, b) do { switch (0) case 0: case (a):; } while (0)

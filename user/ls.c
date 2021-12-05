@@ -1,7 +1,8 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
-#include "fs.h"
+#include "file.h"
+#include "fs/fs1.h"
 #include "string.h"
 #include "fcntl.h"
 
