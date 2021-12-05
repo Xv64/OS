@@ -51,8 +51,18 @@ static inline int8 setfstype(uint dev, fstype type) {
 }
 
 void readsb(int dev, struct superblock *sb){
-	void *ptr = &(sb->data[0]);
-	fs1_readsb(dev, (struct fs1_superblock *)ptr);
+	fstype t = getfstype(dev);
+	uint8 devtype = GETDEVTYPE(ROOT_DEV);
+	uint32 devnum = GETDEVNUM(ROOT_DEV);
+
+	void *sbptr = &(sb->data[0]);
+	if(t == FS_TYPE_EST2) {
+		ext2_readsb(devtype, devnum, (struct ext2_superblock *)sbptr);
+	} else if(t == FS_TYPE_FS1) {
+		fs1_readsb(dev, (struct fs1_superblock *)sbptr);
+	} else {
+		panic("Unknown fs type");
+	}
 }
 
 int dirlink(struct inode *dp, char *name, uint inum) {
