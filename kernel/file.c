@@ -5,7 +5,7 @@
 #include "types.h"
 #include "defs.h"
 #include "param.h"
-#include "fs.h"
+#include "vfs.h"
 #include "file.h"
 #include "spinlock.h"
 

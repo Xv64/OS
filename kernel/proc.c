@@ -7,7 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "kernel/string.h"
-#include "fs.h"
+#include "vfs.h"
 #include "file.h"
 
 struct {
@@ -417,7 +417,7 @@ void sleep(void* chan, struct spinlock* lk){
 	// (wakeup runs with ptable.lock locked),
 	// so it's okay to release lk.
 	if (lk != &ptable.lock) {
-		acquire(&ptable.lock); 
+		acquire(&ptable.lock);
 		release(lk);
 	}
 

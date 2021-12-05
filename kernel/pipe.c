@@ -3,7 +3,7 @@
 #include "param.h"
 #include "mmu.h"
 #include "proc.h"
-#include "fs.h"
+#include "vfs.h"
 #include "file.h"
 #include "spinlock.h"
 #include "x86.h"

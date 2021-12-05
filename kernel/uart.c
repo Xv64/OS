@@ -7,7 +7,7 @@
 #include "param.h"
 #include "irq.h"
 #include "spinlock.h"
-#include "fs.h"
+#include "vfs.h"
 #include "file.h"
 #include "mmu.h"
 #include "proc.h"

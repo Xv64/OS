@@ -1,5 +1,5 @@
 #include "types.h"
-#include "fs.h" // TODO: rename to vfs.h and make more generic
+#include "vfs.h"
 #include "file.h"
 #include "stat.h"
 #include "fs/fs1.h"

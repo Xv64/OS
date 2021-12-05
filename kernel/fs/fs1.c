@@ -20,7 +20,7 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "buf.h"
-#include "fs.h"
+#include "vfs.h"
 #include "fs/fs1.h"
 #include "file.h"
 #include "kernel/string.h"

@@ -184,7 +184,7 @@ fs/forktest: uobj/forktest.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o fs/forktest uobj/forktest.o uobj/ulib.o uobj/usys.o
 	$(OBJDUMP) -S fs/forktest > out/forktest.asm
 
-out/mkfs: tools/mkfs.c include/fs.h
+out/mkfs: tools/mkfs.c include/vfs.h
 	gcc -Werror -Wall -o out/mkfs tools/mkfs.c
 
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
