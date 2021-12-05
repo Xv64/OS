@@ -32,16 +32,16 @@ int main(void) {
 	dup(0); // stdout
 	dup(0); // stderr
 
-	int kzeropid = 0;
-	int krandompid = 0;
+	// int kzeropid = 0;
+	// int krandompid = 0;
 	int kidlepid = 0;
 	int shpid = 0;
 	int child = 0;
 	fprintf(stdout, "init: starting...\n");
 	while(1) {
 
-		kzeropid = child == kzeropid ? spawn("/kexts/kzero", "kzero", 1) : kzeropid;
-		krandompid = child == krandompid ? spawn("/kexts/krandom", "krandom", 1) : krandompid;
+		//kzeropid = child == kzeropid ? spawn("/kexts/kzero", "kzero", 1) : kzeropid;
+		//krandompid = child == krandompid ? spawn("/kexts/krandom", "krandom", 1) : krandompid;
 		kidlepid = child == kidlepid ? spawn("/kexts/kidle", "kidle", 1) : kidlepid;
 		shpid = child == shpid ? spawn("/bin/sh", "sh", 0) : shpid;
 
