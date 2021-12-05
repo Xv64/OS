@@ -1,4 +1,11 @@
-void            fs1_readsb(int dev, struct superblock *sb);
+struct fs1_superblock {
+  uint size;         // Size of file system image (blocks)
+  uint nblocks;      // Number of data blocks
+  uint ninodes;      // Number of inodes.
+  uint nlog;         // Number of log blocks
+};
+
+void            fs1_readsb(int dev, struct fs1_superblock *sb);
 int             fs1_dirlink(struct inode*, char*, uint);
 struct inode*   fs1_dirlookup(struct inode*, char*, uint*);
 struct inode*   fs1_ialloc(uint, short);

@@ -10,13 +10,11 @@
 
 #define ROOTINO 1  // root i-number
 #define BSIZE 512  // block size
+#define FS_MAX_SB_SIZE 4096
 
 // File system super block
 struct superblock {
-  uint size;         // Size of file system image (blocks)
-  uint nblocks;      // Number of data blocks
-  uint ninodes;      // Number of inodes.
-  uint nlog;         // Number of log blocks
+  uint8 data[FS_MAX_SB_SIZE];
 };
 
 #define NDIRECT 28

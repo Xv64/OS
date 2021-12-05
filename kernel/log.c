@@ -3,6 +3,7 @@
 #include "param.h"
 #include "spinlock.h"
 #include "fs.h"
+#include "fs/fs1.h"
 #include "fs/ext2.h"
 #include "buf.h"
 #include "kernel/string.h"
@@ -56,7 +57,6 @@ void initlog(void){
 	if (sizeof(struct logheader) >= BSIZE)
 		panic("initlog: too big logheader");
 
-	struct superblock sb;
 	initlock(&log.lock, "log");
 	uint8 devtype = GETDEVTYPE(ROOT_DEV);
 	uint32 devnum = GETDEVNUM(ROOT_DEV);
@@ -65,10 +65,11 @@ void initlog(void){
 	} else {
 		// legacy fallback...
 		cprintf("xv6 filesystem assumed on disk(%d,%d)\n", devtype, devnum);
-		readsb(ROOT_DEV, &sb);
+		struct fs1_superblock sb;
+		fs1_readsb(ROOT_DEV, &sb);
+		log.start = sb.size - sb.nlog;
+		log.size = sb.nlog;
 	}
-	log.start = sb.size - sb.nlog;
-	log.size = sb.nlog;
 	log.dev = ROOT_DEV;
 	recover_from_log();
 }

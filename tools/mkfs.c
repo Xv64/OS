@@ -11,6 +11,13 @@
 #include "../include/stat.h"
 #include "../include/param.h"
 
+struct fs1_superblock {
+  uint size;         // Size of file system image (blocks)
+  uint nblocks;      // Number of data blocks
+  uint ninodes;      // Number of inodes.
+  uint nlog;         // Number of log blocks
+};
+
 #ifndef static_assert
 # define static_assert(a, b) do { switch (0) case 0: case (a):; } while (0)
 #endif // static_assert
@@ -24,7 +31,7 @@ int size = 1024 + FREESPACE + 25;
 //size MUST EQUAL nblocks + usedblocks + nlog
 
 int fsfd;
-struct superblock sb;
+struct fs1_superblock sb;
 char zeroes[512];
 uint freeblock;
 uint usedblocks;

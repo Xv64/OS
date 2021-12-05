@@ -5,7 +5,8 @@
 #include "fs/fs1.h"
 
 void readsb(int dev, struct superblock *sb){
-	fs1_readsb(dev, sb);
+	void *ptr = &(sb->data[0]);
+	fs1_readsb(dev, (struct fs1_superblock *)ptr);
 }
 
 int dirlink(struct inode *dp, char *name, uint inum) {

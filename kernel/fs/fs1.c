@@ -21,6 +21,7 @@
 #include "spinlock.h"
 #include "buf.h"
 #include "fs.h"
+#include "fs/fs1.h"
 #include "file.h"
 #include "kernel/string.h"
 
@@ -28,7 +29,7 @@
 static void fs1_itrunc(struct inode*);
 
 // Read the super block.
-void fs1_readsb(int dev, struct superblock* sb){
+void fs1_readsb(int dev, struct fs1_superblock* sb){
 	struct buf* bp;
 
 	bp = bread(dev, 1);
@@ -52,10 +53,10 @@ static void fs1_bzero(int dev, int bno){
 static uint fs1_balloc(uint dev){
 	int b, bi, m;
 	struct buf* bp;
-	struct superblock sb;
+	struct fs1_superblock sb;
 
 	bp = 0;
-	readsb(dev, &sb);
+	fs1_readsb(dev, &sb);
 	for (b = 0; b < sb.size; b += BPB) {
 		bp = bread(dev, BBLOCK(b, sb.ninodes));
 		for (bi = 0; bi < BPB && b + bi < sb.size; bi++) {
@@ -76,10 +77,10 @@ static uint fs1_balloc(uint dev){
 // Free a disk block.
 static void fs1_bfree(int dev, uint b){
 	struct buf* bp;
-	struct superblock sb;
+	struct fs1_superblock sb;
 	int bi, m;
 
-	readsb(dev, &sb);
+	fs1_readsb(dev, &sb);
 	bp = bread(dev, BBLOCK(b, sb.ninodes));
 	bi = b % BPB;
 	m = 1 << (bi % 8);
@@ -171,7 +172,7 @@ struct inode* fs1_ialloc(uint dev, short type){
 	int inum;
 	struct buf* bp;
 	struct dinode* dip;
-	struct superblock sb;
+	struct fs1_superblock sb;
 
 	fs1_readsb(dev, &sb);
 
