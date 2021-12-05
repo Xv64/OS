@@ -125,5 +125,5 @@ void popcli(void){
 	if (--cpu->ncli < 0)
 		panic("popcli");
 	if (cpu->ncli == 0 && cpu->intena)
-		sti();
+		amd64_sti();
 }

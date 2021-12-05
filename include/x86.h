@@ -56,7 +56,6 @@ static volatile inline unsigned long amd64_spinread64(volatile unsigned long *ba
 	return val;
 }
 
-#define amd64_hlt() hlt()
 #define amd64_cli() cli()
 
 static inline void amd64_insl(int port, void *addr, int cnt){
@@ -169,11 +168,11 @@ static inline void cli(void) {
 	asm volatile ("cli");
 }
 
-static inline void sti(void) {
+static inline void amd64_sti(void) {
 	asm volatile ("sti");
 }
 
-static inline void hlt(void) {
+static inline void amd64_hlt(void) {
 	asm volatile ("hlt");
 }
 

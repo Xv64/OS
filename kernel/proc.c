@@ -316,12 +316,12 @@ void scheduler(void){
 
 	for (;;) {
 		// Enable interrupts on this processor.
-		sti();
+		amd64_sti();
 
 		// no runnable processes? (did we hit the end of the table last time?)
 		// if so, wait for irq before trying again.
 		if (p == &ptable.proc[NPROC])
-			hlt();
+			amd64_hlt();
 
 		// Loop over process table looking for process to run.
 		acquire(&ptable.lock);
