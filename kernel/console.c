@@ -57,6 +57,8 @@ static void consputc(int, uint32);
 #define VGA_YELLOW        0x3E
 #define VGA_WHITE         0x3F
 
+#define TAB_SIZE 8
+
 #define CGA_FONT_COLOR(foreground, background) ((background << 4) + foreground)
 #ifdef VGA_GRAPHICS
 #define DEFAULT_CONSOLE_COLOR CGA_FONT_COLOR(VGA_LIGHT_GRAY, VGA_BLACK)
@@ -204,12 +206,16 @@ static void cgaputc(int c, uint32 color){
 	amd64_out8(CRTPORT, 15);
 	pos |= inb(CRTPORT + 1);
 
-	if (c == '\n')
+	if (c == '\n') {
 		pos += COLUMNS - pos % COLUMNS;
-	else if (c == BACKSPACE) {
+	} else if (c == BACKSPACE) {
 		if (pos > 0) --pos;
-	} else
+	} else if (c == '\t') {
+		int offset = TAB_SIZE - (pos % TAB_SIZE);
+		pos += offset;
+	} else {
 		crt[pos++] = (c & 0xFF) | (color << 8);
+	}
 
 	if ((pos / COLUMNS) >= 24) { // Scroll up.
 		memmove(crt, crt + COLUMNS, sizeof(crt[0]) * 23 * COLUMNS);
