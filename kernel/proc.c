@@ -324,11 +324,6 @@ void scheduler(void){
 			continue;
 		}
 
-		// no runnable processes? (did we hit the end of the table last time?)
-		// if so, wait for irq before trying again.
-		if (p == &ptable.proc[NPROC])
-			amd64_hlt();
-
 		// Loop over process table looking for process to run.
 		acquire(&ptable.lock);
 		for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {

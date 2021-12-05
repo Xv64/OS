@@ -103,6 +103,12 @@ int sys_amblessed(void){
 	return proc->blessed;
 }
 
+void sys_cpuhalt(void) {
+	if(proc->blessed) {
+		amd64_hlt();
+	}
+}
+
 int sys_bfork(void){
 	return bfork();
 }

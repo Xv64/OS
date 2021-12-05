@@ -34,6 +34,7 @@ int main(void) {
 
 	int kzeropid = 0;
 	int krandompid = 0;
+	int kidlepid = 0;
 	int shpid = 0;
 	int child = 0;
 	fprintf(stdout, "init: starting...\n");
@@ -41,6 +42,7 @@ int main(void) {
 
 		kzeropid = child == kzeropid ? spawn("/kexts/kzero", "kzero", 1) : kzeropid;
 		krandompid = child == krandompid ? spawn("/kexts/krandom", "krandom", 1) : krandompid;
+		kidlepid = child == kidlepid ? spawn("/kexts/kidle", "kidle", 1) : kidlepid;
 		shpid = child == shpid ? spawn("/bin/sh", "sh", 0) : shpid;
 
 		sleep(10);

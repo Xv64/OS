@@ -36,3 +36,4 @@ int ticks(void);
 void halt(void);
 int info(char *, int);
 int nprocs(void);
+void cpuhalt(void);
