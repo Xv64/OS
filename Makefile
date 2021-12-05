@@ -203,6 +203,7 @@ $(SUBPROGS): uobj/posix.o $(ULIB)
 
 UPROGS=\
 	fs/bin/ps\
+	fs/bin/system\
 	fs/bin/cat\
 	fs/bin/echo\
 	fs/bin/grep\

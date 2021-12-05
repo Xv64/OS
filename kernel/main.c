@@ -138,3 +138,21 @@ void sys_halt(){
 	cprintf("Xv64 is shutting down now. Goodbye...\n");
 	halt();
 }
+
+int sys_info(void) {
+	char *buf;
+	int n;
+
+	if (argint(1, &n) < 0 || argptr(0, &buf, n) < 0)
+		return -1;
+
+	char str[] = "Xv64 0.25 xx-way SMP kernel";
+	int tens = ncpu / 10;
+	int ones = ncpu - (tens * 10);
+
+	str[10] = 48 + tens;
+	str[11] = 48 + ones;
+
+	memcopy(buf, str, sizeof(str));
+	return sizeof(str);
+}
