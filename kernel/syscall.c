@@ -133,6 +133,7 @@ extern int sys_pname(void);
 extern int sys_ticks(void);
 extern int sys_halt(void);
 extern int sys_info(void);
+extern int sys_nprocs(void);
 
 static int (*syscalls[])(void) = {
 	[SYS_fork]          sys_fork,
@@ -170,6 +171,7 @@ static int (*syscalls[])(void) = {
 	[SYS_ticks]         sys_ticks,
 	[SYS_halt]          sys_halt,
 	[SYS_info]          sys_info,
+	[SYS_nprocs]        sys_nprocs,
 };
 
 void syscall(void){

@@ -156,3 +156,7 @@ int sys_info(void) {
 	memcopy(buf, str, sizeof(str));
 	return sizeof(str);
 }
+
+int sys_nprocs() {
+	return ncpu;
+}

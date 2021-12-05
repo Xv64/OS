@@ -34,3 +34,4 @@
 #define SYS_ticks         33
 #define SYS_halt          34
 #define SYS_info          35
+#define SYS_nprocs        36

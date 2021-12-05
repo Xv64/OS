@@ -35,3 +35,4 @@ int pname(int, char*, int);
 int ticks(void);
 void halt(void);
 int info(char *, int);
+int nprocs(void);
