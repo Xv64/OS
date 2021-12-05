@@ -12,6 +12,7 @@
 #include "spinlock.h"
 #include "buf.h"
 #include "defs.h"
+#include "param.h"
 
 struct fsmap_t {
 	fstype type;
@@ -135,6 +136,13 @@ struct inode *nameiparent(char *path, char *name) {
 }
 
 int readi(struct inode *ip, char *dst, uint off, uint n) {
+	if (ip->type == T_DEV) {
+		// if the read request is for a T_DEV, then route it directly there...
+		if (ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
+			return -1;
+		return devsw[ip->major].read(ip, dst, n);
+	}
+	// otherwise, we need to route this to the correct fs impl.
 	return fs1_readi(ip, dst, off, n);
 }
 
