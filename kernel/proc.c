@@ -318,6 +318,13 @@ void scheduler(void){
 		// Enable interrupts on this processor.
 		amd64_sti();
 
+		if ((cpu->capabilities & CPU_DISABLED) == CPU_DISABLED) {
+			// if the CPU has been marked as disabled, halt the CPU
+			// and then just loop
+			amd64_hlt();
+			continue;
+		}
+
 		// no runnable processes? (did we hit the end of the table last time?)
 		// if so, wait for irq before trying again.
 		if (p == &ptable.proc[NPROC])
@@ -328,10 +335,6 @@ void scheduler(void){
 		for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
 			if (p->state != RUNNABLE)
 				continue;
-
-			if ((cpu->capabilities & CPU_DISABLED) == CPU_DISABLED) {
-				continue;
-			}
 
 			if (((cpu->capabilities & CPU_RESERVED_BLESS) == CPU_RESERVED_BLESS) && p->blessed != PROC_BLESSED) {
 				continue;
