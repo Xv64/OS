@@ -91,7 +91,7 @@ static void mpmain(void){
 	amd64_xchg(&cpu->started, 1); // tell startothers() we're up
 	cprintf("cpu#%d (%s - %d): ready\n", cpu->id, cpu_vendor, regs[0]);
 	if(cpu->id == 0){
-		cprintf("%d-way SMP kernel fully online.\nBooting userland...\n", ncpu);
+		cprintf("%d-way SMP kernel fully online.\nentering user space...\n", ncpu);
 	}
 	scheduler(); // start running processes
 }
