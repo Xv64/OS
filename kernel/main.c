@@ -44,10 +44,12 @@ int main(void){
 	pciinit(); // initialize PCI bus (AHCI also)
 	binit();   // buffer cache
 	fileinit(); // file table
-	iinit();   // inode cache
 	ideinit(); // init IDE disks
 
 	cprintf("Root dev: disk(%d, %d)\n", GETDEVTYPE(ROOT_DEV), GETDEVNUM(ROOT_DEV));
+	vfsinit();   // bootstrap fs init
+	             // (must happen after all disk types are initialized)
+
 	startothers(); // start other processors
 	kinit2(P2V(KALLOC_START + 4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 	userinit(); // first user process

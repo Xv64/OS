@@ -3,6 +3,47 @@
 #include "file.h"
 #include "stat.h"
 #include "fs/fs1.h"
+#include "fs/ext2.h"
+#include "spinlock.h"
+#include "buf.h"
+#include "defs.h"
+
+struct fsmap_t {
+	fstype type;
+	uint dev;
+	uint8 used;
+};
+
+extern uint64 ROOT_DEV;
+struct fsmap_t fsmap[FS_MAX_INIT_DEV];
+struct spinlock lock;
+
+static inline fstype getfstype(uint dev) {
+	for(uint16 i = 0; i != FS_MAX_INIT_DEV; i++) {
+		struct fsmap_t map = fsmap[i];
+		if(map.used == 1 && map.dev == dev) {
+			return map.type;
+		}
+	}
+	return -1;
+}
+
+static inline int8 setfstype(uint dev, fstype type) {
+	acquire(&lock);
+	for(uint16 i = 0; i != FS_MAX_INIT_DEV; i++) {
+		struct fsmap_t map = fsmap[i];
+		if(map.used == 0) {
+			map.dev = dev;
+			map.type = type;
+			map.used = 1;
+
+			release(&lock);
+			return 1;
+		}
+	}
+	release(&lock);
+	return -1;
+}
 
 void readsb(int dev, struct superblock *sb){
 	void *ptr = &(sb->data[0]);
@@ -25,8 +66,24 @@ struct inode *idup(struct inode *ip) {
 	return fs1_idup(ip);
 }
 
-void iinit() {
-	fs1_iinit();
+void vfsinit() {
+	fs1_iinit(); // fs1 needs an explicit init before we can invoke any methods
+
+	initlock(&lock, "vfs");
+
+	// for now, let's just run with the ROOT_DEVd
+	// later we will want to enumerate all devices
+	// and build fsmap
+	uint8 devtype = GETDEVTYPE(ROOT_DEV);
+	uint32 devnum = GETDEVNUM(ROOT_DEV);
+	if(ext2_init_dev(devtype, devnum) == 1) {
+		cprintf("ext2 filesystem detected on disk(%d,%d)\n", devtype, devnum);
+		setfstype(ROOT_DEV, FS_TYPE_EST2);
+	} else {
+		// legacy fallback...
+		cprintf("xv6 filesystem assumed on disk(%d,%d)\n", devtype, devnum);
+		setfstype(ROOT_DEV, FS_TYPE_FS1);
+	}
 }
 
 void ilock(struct inode *ip) {

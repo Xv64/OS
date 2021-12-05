@@ -60,11 +60,11 @@ void initlog(void){
 	initlock(&log.lock, "log");
 	uint8 devtype = GETDEVTYPE(ROOT_DEV);
 	uint32 devnum = GETDEVNUM(ROOT_DEV);
+	// TODO: update this code to use vfs, and not the fs directly
 	if(ext2_init_dev(devtype, devnum) == 1) {
-		cprintf("ext2 filesystem detected on disk(%d,%d)\n", devtype, devnum);
+		// ???
 	} else {
 		// legacy fallback...
-		cprintf("xv6 filesystem assumed on disk(%d,%d)\n", devtype, devnum);
 		struct fs1_superblock sb;
 		fs1_readsb(ROOT_DEV, &sb);
 		log.start = sb.size - sb.nlog;
