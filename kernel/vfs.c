@@ -1,3 +1,8 @@
+// Virtual File System implement
+// This exists to abstract which underlying filesystem is being used.
+// All kernel code should use the vfs as opposed to interfacing
+// directly with a given fs driver.
+
 #include "types.h"
 #include "vfs.h"
 #include "file.h"
