@@ -299,11 +299,10 @@ int wait(void){
 		}
 
 		// Wait for children to exit.  (See wakeup1 call in proc_exit.)
-		sleep(proc, &ptable.lock); //DOC: wait-sleep
+		sleep(proc, &ptable.lock);
 	}
 }
 
-//PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
 // Scheduler never returns.  It loops, doing:
@@ -378,7 +377,7 @@ void sched(void){
 
 // Give up the CPU for one scheduling round.
 void yield(void){
-	acquire(&ptable.lock); //DOC: yieldlock
+	acquire(&ptable.lock);
 	proc->state = RUNNABLE;
 	sched();
 	release(&ptable.lock);
@@ -417,8 +416,8 @@ void sleep(void* chan, struct spinlock* lk){
 	// guaranteed that we won't miss any wakeup
 	// (wakeup runs with ptable.lock locked),
 	// so it's okay to release lk.
-	if (lk != &ptable.lock) { //DOC: sleeplock0
-		acquire(&ptable.lock); //DOC: sleeplock1
+	if (lk != &ptable.lock) {
+		acquire(&ptable.lock); 
 		release(lk);
 	}
 
