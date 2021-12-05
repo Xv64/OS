@@ -76,7 +76,9 @@ void vfsinit() {
 	// and build fsmap
 	uint8 devtype = GETDEVTYPE(ROOT_DEV);
 	uint32 devnum = GETDEVNUM(ROOT_DEV);
-	if(ext2_init_dev(devtype, devnum) == 1) {
+	if(devtype != DEV_IDE && ext2_init_dev(devtype, devnum) == 1) {
+		// The current IDE driver does not work in kernel mode, so let's
+		// skip it. Otherwise, test to see if this is an ext2 FS.
 		cprintf("ext2 filesystem detected on disk(%d,%d)\n", devtype, devnum);
 		setfstype(ROOT_DEV, FS_TYPE_EST2);
 	} else {
