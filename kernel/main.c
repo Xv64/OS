@@ -148,7 +148,7 @@ int sys_info(void) {
 	if (argint(1, &n) < 0 || argptr(0, &buf, n) < 0)
 		return -1;
 
-	char str[] = "Xv64 0.25 xx-way SMP kernel";
+	char str[] = "Xv64 0.25 xx-way SMP kernel amd64";
 	int tens = ncpu / 10;
 	int ones = ncpu - (tens * 10);
 
