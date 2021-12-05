@@ -135,6 +135,8 @@ extern int sys_halt(void);
 extern int sys_info(void);
 extern int sys_nprocs(void);
 extern int sys_cpuhalt(void);
+extern int sys_getpriority(void);
+extern int sys_setpriority(void);
 
 static int (*syscalls[])(void) = {
 	[SYS_fork]          sys_fork,
@@ -174,6 +176,8 @@ static int (*syscalls[])(void) = {
 	[SYS_info]          sys_info,
 	[SYS_nprocs]        sys_nprocs,
 	[SYS_cpuhalt]       sys_cpuhalt,
+	[SYS_getpriority]   sys_getpriority,
+	[SYS_setpriority]   sys_setpriority,
 };
 
 void syscall(void){

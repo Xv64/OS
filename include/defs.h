@@ -128,6 +128,8 @@ void            wakeup(void*);
 void            yield(void);
 enum procstate  pstate(int);
 int             pname(int, char*, int);
+int             getpriority(int);
+int             setpriority(int, int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

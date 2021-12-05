@@ -131,3 +131,20 @@ int sys_pname(void) {
 	}
 	return pname(pid, buf, n);
 }
+
+int sys_getpriority(void){
+	int pid;
+
+	if (argint(0, &pid) < 0)
+		return -1;
+	return getpriority(pid);
+}
+
+int sys_setpriority(void) {
+	int pid;
+	int priority;
+
+	if (argint(0, &pid) < 0 || argint(1, &priority) < 0)
+		return -1;
+	return setpriority(pid, priority);
+}

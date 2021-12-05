@@ -19,6 +19,7 @@ void main(void){
 	        if(pid == 0) {
 	            break;
 	        }
+			setpriority(pid, 0); // set kidle worker to lowest scheduling priority
 	    }
 		if(pid == 0) {
 	    	sleep_forever();

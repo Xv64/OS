@@ -36,3 +36,5 @@
 #define SYS_info          35
 #define SYS_nprocs        36
 #define SYS_cpuhalt       37
+#define SYS_getpriority   38
+#define SYS_setpriority   39

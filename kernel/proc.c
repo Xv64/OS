@@ -94,6 +94,7 @@ static struct proc* allocproc(void){
 found:
 	p->state = EMBRYO;
 	p->pid = nextpid++;
+	p->priority = PROC_DEFAULT_PRIORITY;
 	release(&ptable.lock);
 
 	// Allocate kernel stack.
@@ -140,6 +141,7 @@ void userinit(void){
 	safestrcpy(p->name, "initcode", sizeof(p->name));
 	p->cwd = namei("/");
 	p->blessed = PROC_BLESSED;
+	p->priority = PROC_MAX_PRIORITY;
 	_allocpipe(p);
 
 	p->state = RUNNABLE;
@@ -313,7 +315,7 @@ int wait(void){
 void scheduler(void){
 	struct proc* p = 0;
 
-	for (;;) {
+	while(1) {
 		// Enable interrupts on this processor.
 		amd64_sti();
 
@@ -325,6 +327,8 @@ void scheduler(void){
 		}
 
 		// Loop over process table looking for process to run.
+		uint8 highestpriority = 0;
+		struct proc* bestp = 0;
 		acquire(&ptable.lock);
 		for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
 			if (p->state != RUNNABLE)
@@ -334,16 +338,38 @@ void scheduler(void){
 				continue;
 			}
 
+			uint64 effectivepriority = p-> priority > PROC_NO_BOOST_PRIORITY
+									  ? p->priority + p->skipped
+									  : p-> priority;
+			effectivepriority = effectivepriority > PROC_MAX_PRIORITY
+									  ? PROC_MAX_PRIORITY
+									  : effectivepriority;
+
+			if(effectivepriority >= highestpriority) {
+				if(bestp) {
+					// if we previously selected a best fit, mark it as skipped
+					bestp->skipped++;
+				}
+				bestp = p;
+				highestpriority = effectivepriority;
+			} else {
+				// each process that is skipped will receive a boost in effective
+				// priority the next time it runs. This ensures that no process
+				// (except priority =< PROC_NO_BOOST_PRIORITY) is starved.
+				p->skipped++;
+			}
+		}
+		if(bestp) {
 			// Switch to chosen process.  It is the process's job
 			// to release ptable.lock and then reacquire it
 			// before jumping back to us.
-			proc = p;
-			switchuvm(p);
-			p->state = RUNNING;
-			cpu->proc = p;
+			proc = bestp;
+			switchuvm(bestp);
+			bestp->state = RUNNING;
+			bestp->skipped = 0;
+			cpu->proc = bestp;
 			swtch(&cpu->scheduler, proc->context);
 			switchkvm();
-
 			// Process is done running for now.
 			// It should have changed its p->state before coming back.
 			proc = 0;
@@ -549,7 +575,29 @@ int isblessed(int pid){
 	return 0;
 }
 
-//PAGEBREAK: 36
+int getpriority(int pid) {
+	struct proc* p;
+
+	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+		if (p->pid == pid) {
+			return p->priority;
+		}
+	}
+	return -1;
+}
+
+int setpriority(int pid, int priority) {
+	struct proc* p;
+
+	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+		if (p->pid == pid) {
+			p->priority = priority;
+			return 1;
+		}
+	}
+	return -1;
+}
+
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.

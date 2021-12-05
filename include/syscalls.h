@@ -37,3 +37,5 @@ void halt(void);
 int info(char *, int);
 int nprocs(void);
 void cpuhalt(void);
+int getpriority(int);
+int setpriority(int, int);

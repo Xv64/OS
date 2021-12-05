@@ -26,6 +26,10 @@ extern int ncpu;
 #define CPU_RESERVED_BLESS 0x01
 #define CPU_DISABLED       0x02
 
+#define PROC_NO_BOOST_PRIORITY 0x0A
+#define PROC_DEFAULT_PRIORITY  0x80
+#define PROC_MAX_PRIORITY      0xFF
+
 // Per-CPU variables, holding pointers to the
 // current cpu and to the current process.
 // The asm suffix tells gcc to use "%gs:0" to refer to cpu
@@ -34,15 +38,9 @@ extern int ncpu;
 // holding those two variables in the local cpu's struct cpu.
 // This is similar to how thread-local variables are implemented
 // in thread libraries such as Linux pthreads.
-#if X64
 extern __thread struct cpu *cpu;
 extern __thread struct proc *proc;
-#else
-extern struct cpu *cpu asm("%gs:0");       // &cpus[cpunum()]
-extern struct proc *proc asm("%gs:4");     // cpus[cpunum()].proc
-#endif
 
-//PAGEBREAK: 17
 // Saved registers for kernel context switches.
 // Don't need to save all the segment registers (%cs, etc),
 // because they are constant across kernel contexts.
@@ -93,6 +91,8 @@ struct proc {
   char name[16];               // Process name (debugging)
   int lastsyscall;
   uint8 blessed;
+  uint8 priority;
+  uint32 skipped;
 
   // rpipe & wpipe are only used by blessed processes
   // both are named from the perspective of the kernel
