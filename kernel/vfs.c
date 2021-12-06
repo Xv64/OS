@@ -143,7 +143,12 @@ int readi(struct inode *ip, char *dst, uint off, uint n) {
 		return devsw[ip->major].read(ip, dst, n);
 	}
 	// otherwise, we need to route this to the correct fs impl.
-	return fs1_readi(ip, dst, off, n);
+	fstype t = getfstype(ip->dev);
+	if(t == FS_TYPE_EST2) {
+		return ext2_readi(ip, dst, off, n);
+	} else {
+		return fs1_readi(ip, dst, off, n);
+	}
 }
 
 void stati(struct inode *ip, struct stat *st) {

@@ -1,4 +1,5 @@
 #include "types.h"
+#include "file.h"
 #include "fs/ext2.h"
 #include "buf.h"
 #include "defs.h"
@@ -27,4 +28,9 @@ void ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2) {
     brelse(bp2);
 
     memcopy(sb2, &sb, sizeof(sb));
+}
+
+int ext2_readi(struct inode *ip, char *dst, uint off, uint n) {
+  // TODO
+  return 0;
 }
