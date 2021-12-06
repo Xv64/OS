@@ -26,6 +26,16 @@ struct ext2_superblock {
     uint16 reserved_gid;          // Group ID that can use reserved blocks
 }; // 1204 bytes in total
 
+struct ext2_blockgroupdesc {
+    uint32 block_usage_addr;      // Block address of block usage bitmap
+    uint32 inode_usage_addr;      // Block address of inode usage bitmap
+    uint32 inode_tbl_addr;        // Starting block address of inode table
+    uint16 unallocated_blocks;    // Number of unallocated blocks in group
+    uint16 unallocated_inodes;    // Number of unallocated inodes in group
+    uint16 dir_count;             // Number of directories in group
+    uint32 reversed[3];
+};
+
 #define FS_EXT2_SIGNATURE 0xEF53
 
 // File System States:
