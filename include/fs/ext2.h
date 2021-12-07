@@ -24,6 +24,26 @@ struct ext2_superblock {
     uint32 major_ver;             // Major portion of version (combine with Minor portion above to construct full version field)
     uint16 reserved_uid;          // User ID that can use reserved blocks
     uint16 reserved_gid;          // Group ID that can use reserved blocks
+    // extended EXT2 fields (only available in version >= 1.0)...
+    uint32 fst_nr_inode;          // First non-reserved inode in file system. (In versions < 1.0, this is fixed as 11)
+    uint16 inode_size;            // Size of each inode structure in bytes. (In versions < 1.0, this is fixed as 128)
+    uint16 sb_block_group;        // Block group that this superblock is part of (if backup copy)
+    uint32 optional_features;     // Optional features present (features that are not required to read or write, but usually result in a performance increase. see below)
+    uint32 required_features;     // Required features present (features that are required to be supported to read or write. see below)
+    uint32 required_or_ro;        // Features that if not supported, the volume must be mounted read-only see below)
+    uint64 fsid[2];               // File system ID (what is output by blkid)
+    uint64 fsname[2];             // Volume name (C-style string: characters terminated by a 0 byte)
+    uint64 last_mount_path[8];    // Path volume was last mounted to (C-style string: characters terminated by a 0 byte)
+    uint16 compression_algo;      // Compression algorithms used (see Required features above)
+    uint8  preallocated;          // Number of blocks to preallocate for files
+                                  // + Number of blocks to preallocate for directories
+    uint8 unused;
+    uint64 journalid[2];          // Journal ID (same style as the File system ID above)
+    uint16 journal_inode;         // Journal inode
+    uint16 journal_dev;           // Journal device
+    uint16 orphan_head;           // Head of orphan inode list
+    uint16 reserved[197];
+
 }; // 1204 bytes in total
 
 struct ext2_blockgroupdesc {
