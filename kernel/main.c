@@ -10,17 +10,24 @@
 #include "buf.h"
 #include "kernel/string.h"
 
+static void identcpu();
 static void credits();
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t* kpgdir;
 uint64 ROOT_DEV = 1;
+
+char CPU_NAME[50];
+char CPU_VENDOR[13];
+uint32 CPU_MODEL;
+
 extern char end[]; // first address after kernel loaded from ELF file
 
 // Bootstrap processor starts running C code here.
 // Allocate a real stack and switch to it, first
 // doing some setup required for memory allocator to work.
 int main(void){
+	identcpu();
 	uartearlyinit();
 	kinit1(P2V(KALLOC_START), P2V(KALLOC_START + 4 * 1024 * 1024)); // phys page allocator
 	kvmalloc(); // kernel page table
@@ -33,6 +40,7 @@ int main(void){
 	lapicinit();
 	seginit(); // set up segments
 	cprintf("\ncpu%d: starting Xv64\n\n", cpu->id);
+	cprintf("%s CPU detected (%s - %d)\n", CPU_NAME, CPU_VENDOR, CPU_MODEL);
 	credits();
 	picinit(); // interrupt controller
 	ioapicinit(); // another interrupt controller
@@ -72,24 +80,11 @@ void mpenter(void){
 
 // Common CPU setup code.
 static void mpmain(void){
-	uint32 vendor[4];
-	memset(&vendor, 0, sizeof(vendor));
-
-	uint32 regs[4];
-
-	amd64_cpuid(0, regs);
-	vendor[0] = regs[1];
-	vendor[1] = regs[3];
-	vendor[2] = regs[2];
-	vendor[4] = (uint32)'\0';
-	char *cpu_vendor = (char *)vendor;
-
 	idtinit(); // load idt register
 	if(cpu->id == 0) {
 		cpu->capabilities = CPU_RESERVED_BLESS;
 	}
 	amd64_xchg(&cpu->started, 1); // tell startothers() we're up
-	cprintf("cpu#%d (%s - %d): ready\n", cpu->id, cpu_vendor, regs[0]);
 	if(cpu->id == 0){
 		cprintf("%d-way SMP kernel fully online.\nentering user space...\n", ncpu);
 	}
@@ -129,6 +124,24 @@ static void startothers(void){
 		while (c->started == 0)
 			;
 	}
+}
+
+void identcpu() {
+		uint32 vendor[4];
+		uint32 regs[4];
+
+		amd64_cpuid(0, regs);
+		vendor[0] = regs[1];
+		vendor[1] = regs[3];
+		vendor[2] = regs[2];
+		vendor[4] = (uint32)'\0';
+		memmove(&CPU_VENDOR, (char *)vendor, sizeof(CPU_VENDOR));
+		CPU_MODEL = regs[0];
+
+		memset(&CPU_NAME, 0, sizeof(CPU_NAME));
+		amd64_cpuid(0x80000002, (void *)&CPU_NAME);
+		amd64_cpuid(0x80000003, ((void *)&CPU_NAME) + 0x10);
+		amd64_cpuid(0x80000004, ((void *)&CPU_NAME) + 0x20);
 }
 
 void sys_reboot(){
