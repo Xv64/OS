@@ -59,6 +59,25 @@ struct ext2_blockgroupdesc {
 struct ext2_inode {
     uint16 type;                   // Type and Permissions (see below)
     uint16 user_id;
+    uint32 lower_size;             // Lower 32 bits of size in bytes
+    uint32 last_accessed_at;       // Last Access Time (in POSIX time)
+    uint32 creation_time;          // Creation Time (in POSIX time)
+    uint32 created_at;             // Last Modification time (in POSIX time)
+    uint32 deleted_at;             // Deletion time (in POSIX time)
+    uint16 group_id;
+    uint16 hard_link_count;        // Count of hard links (directory entries) to this inode. When this reaches 0, the data blocks are marked as unallocated.
+    uint32 disk_sectors;           // Count of disk sectors (not Ext2 blocks) in use by this inode, not counting the actual inode structure nor directory entries linking to the inode
+    uint32 flags;                  // Flags (see below)
+    uint32 os_value;               // Operating System Specific value #1 (see https://web.archive.org/web/20211027105440/https://wiki.osdev.org/Ext2#OS_Specific_Value_1)
+    uint32 block_pointers[12];     // Direct Block Pointers 0 - 11
+    uint32 indirect_blk_ptr;       // Singly Indirect Block Pointer (Points to a block that is a list of block pointers to data)
+    uint32 dbl_indirect_blk_ptr;   // Doubly Indirect Block Pointer (Points to a block that is a list of block pointers to Singly Indirect Blocks)
+    uint32 triple_indirect_blk_ptr;// Triply Indirect Block Pointer (Points to a block that is a list of block pointers to Doubly Indirect Blocks)
+    uint32 gen_num;                // Generation number (Primarily used for NFS)
+    uint32 file_acl;               // In Ext2 version 0, this field is reserved. In version >= 1, Extended attribute block (File ACL).
+    uint32 dir_acl;                // In Ext2 version 0, this field is reserved. In version >= 1, Upper 32 bits of file size (if feature bit set) if it's a file, Directory ACL if it's a directory
+    uint32 fragment_blk_addr;      // Block address of fragment
+    uint32 os_value2[3];           // Operating System Specific Value #2 (see https://web.archive.org/web/20211027105440/https://wiki.osdev.org/Ext2#OS_Specific_Value_2)
 };
 
 #define FS_EXT2_SIGNATURE 0xEF53
