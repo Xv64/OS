@@ -47,6 +47,7 @@ struct ext2_superblock {
 }; // 1204 bytes in total
 
 #define FS_EXT2_SB_SIZE 1024
+#define FS_EXT2_OLD_INODE_SIZE 128
 
 struct ext2_blockgroupdesc {
     uint32 block_usage_addr;      // Block address of block usage bitmap

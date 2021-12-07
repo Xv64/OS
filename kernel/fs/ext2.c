@@ -47,12 +47,15 @@ int ext2_readi(struct inode *ip, char *dst, uint off, uint n) {
 
     readblock(devt, devnum, 2, sb.block_size, &bgd, sizeof(bgd));
 
-    // int blockgroup = (ip->inum – 1) / sb.inodes_in_group;
-    // int index = (ip->inum – 1) % sb.inodes_in_group;
-    // int inodesize =
-    // int containingblock = (index * inodesize) / sb.block_size;
-    cprintf("dir count = %d\n", bgd.dir_count);
+    int blockgroup = (ip->inum - 1) / sb.inodes_in_group;
+    int index = (ip->inum - 1) % sb.inodes_in_group;
+    int inodesize = sb.major_ver >= 1 ? sb.inode_size : FS_EXT2_OLD_INODE_SIZE;
+    int containingblock = (index * inodesize) / sb.block_size;
 
+    // TODO: fetch block and extract inode...
+    cprintf("dir count = %d\n", bgd.dir_count);
+    cprintf("containingblock = %d\n", containingblock);
+    cprintf("blockgroup = %d\n", blockgroup);
 
     return 0;
 }
