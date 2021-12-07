@@ -46,9 +46,6 @@ struct ext2_superblock {
 
 }; // 1204 bytes in total
 
-#define FS_EXT2_SB_SIZE 1024
-#define FS_EXT2_OLD_INODE_SIZE 128
-
 struct ext2_blockgroupdesc {
     uint32 block_usage_addr;      // Block address of block usage bitmap
     uint32 inode_usage_addr;      // Block address of inode usage bitmap
@@ -59,7 +56,14 @@ struct ext2_blockgroupdesc {
     uint32 reversed[3];
 };
 
+struct ext2_inode {
+    uint16 type;                   // Type and Permissions (see below)
+    uint16 user_id;
+};
+
 #define FS_EXT2_SIGNATURE 0xEF53
+#define FS_EXT2_SB_SIZE 1024
+#define FS_EXT2_OLD_INODE_SIZE 128
 
 // File System States:
 #define FS_EXT2_CLEAN  0x1
