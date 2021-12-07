@@ -31,18 +31,18 @@ struct ext2_superblock {
     uint32 optional_features;     // Optional features present (features that are not required to read or write, but usually result in a performance increase. see below)
     uint32 required_features;     // Required features present (features that are required to be supported to read or write. see below)
     uint32 required_or_ro;        // Features that if not supported, the volume must be mounted read-only see below)
-    uint64 fsid[2];               // File system ID (what is output by blkid)
-    uint64 fsname[2];             // Volume name (C-style string: characters terminated by a 0 byte)
-    uint64 last_mount_path[8];    // Path volume was last mounted to (C-style string: characters terminated by a 0 byte)
-    uint16 compression_algo;      // Compression algorithms used (see Required features above)
-    uint8  preallocated;          // Number of blocks to preallocate for files
-                                  // + Number of blocks to preallocate for directories
-    uint8 unused;
-    uint64 journalid[2];          // Journal ID (same style as the File system ID above)
-    uint16 journal_inode;         // Journal inode
-    uint16 journal_dev;           // Journal device
-    uint16 orphan_head;           // Head of orphan inode list
-    uint16 reserved[197];
+    uint8  fsid[16];              // File system ID (what is output by blkid)
+    uint8  fsname[16];            // Volume name (C-style string: characters terminated by a 0 byte)
+    uint8  last_mount_path[64];   // Path volume was last mounted to (C-style string: characters terminated by a 0 byte)
+    uint32 compression_algo;      // Compression algorithms used (see Required features above)
+    uint8  preallocated_files;    // Number of blocks to preallocate for files
+    uint8  preallocated_dirs;     // Number of blocks to preallocate for directories
+    uint8  unused[2];
+    uint8  journalid[16];         // Journal ID (same style as the File system ID above)
+    uint32 journal_inode;         // Journal inode
+    uint32 journal_dev;           // Journal device
+    uint32 orphan_head;           // Head of orphan inode list
+    uint8  reserved[788];
 
 }; // 1204 bytes in total
 
