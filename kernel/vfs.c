@@ -57,7 +57,7 @@ void readsb(int dev, struct superblock *sb){
 	uint32 devnum = GETDEVNUM(ROOT_DEV);
 
 	void *sbptr = &(sb->data[0]);
-	if(t == FS_TYPE_EST2) {
+	if(t == FS_TYPE_EXT2) {
 		ext2_readsb(devtype, devnum, (struct ext2_superblock *)sbptr);
 	} else if(t == FS_TYPE_FS1) {
 		fs1_readsb(dev, (struct fs1_superblock *)sbptr);
@@ -96,7 +96,7 @@ void vfsinit() {
 		// The current IDE driver does not work in kernel mode, so let's
 		// skip it. Otherwise, test to see if this is an ext2 FS.
 		cprintf("ext2 filesystem detected on disk(%d,%d)\n", devtype, devnum);
-		setfstype(ROOT_DEV, FS_TYPE_EST2);
+		setfstype(ROOT_DEV, FS_TYPE_EXT2);
 	} else {
 		// legacy fallback...
 		cprintf("xv6 filesystem assumed on disk(%d,%d)\n", devtype, devnum);
@@ -105,7 +105,12 @@ void vfsinit() {
 }
 
 void ilock(struct inode *ip) {
-	fs1_ilock(ip);
+	fstype t = getfstype(ip->dev);
+	if(t == FS_TYPE_EXT2) {
+		ext2_ilock(ip);
+	} else {
+		fs1_ilock(ip);
+	}
 }
 
 void iput(struct inode *ip) {
@@ -144,7 +149,7 @@ int readi(struct inode *ip, char *dst, uint off, uint n) {
 	}
 	// otherwise, we need to route this to the correct fs impl.
 	fstype t = getfstype(ip->dev);
-	if(t == FS_TYPE_EST2) {
+	if(t == FS_TYPE_EXT2) {
 		return ext2_readi(ip, dst, off, n);
 	} else {
 		return fs1_readi(ip, dst, off, n);

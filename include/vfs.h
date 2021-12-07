@@ -9,4 +9,4 @@ struct superblock {
 typedef int16 fstype;
 
 #define FS_TYPE_FS1  0x1
-#define FS_TYPE_EST2 0x2
+#define FS_TYPE_EXT2 0x2

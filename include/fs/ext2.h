@@ -46,6 +46,8 @@ struct ext2_superblock {
 
 }; // 1204 bytes in total
 
+#define FS_EXT2_SB_SIZE 1024
+
 struct ext2_blockgroupdesc {
     uint32 block_usage_addr;      // Block address of block usage bitmap
     uint32 inode_usage_addr;      // Block address of inode usage bitmap
@@ -76,4 +78,5 @@ struct ext2_blockgroupdesc {
 
 uint8 ext2_init_dev(uint16 devt, uint32 devnum);
 void  ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2);
+void  ext2_ilock(struct inode *ip);
 int   ext2_readi(struct inode *ip, char *dst, uint off, uint n);
