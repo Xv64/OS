@@ -35,7 +35,7 @@ ROOT_DISK="-drive id=disk,file=./bin/$ROOT_IMG,if=none -device driver=ide-hd,dri
 if [ -n "$IDE_MODE" ]; then
     ROOT_DISK="-hdd ./bin/$ROOT_IMG"
 fi
-CPU="-cpu Denverton -smp sockets=1 -smp cores=2 -smp threads=1"
+CPU="-cpu phenom-v1 -smp sockets=1 -smp cores=4 -smp threads=1"
 if [ -n "$BIG" ]; then
     CPU="-cpu IvyBridge-v2 -smp sockets=2 -smp cores=12 -smp threads=2"
 fi
