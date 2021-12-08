@@ -5,10 +5,22 @@
 #include "buf.h"
 #include "defs.h"
 #include "kernel/string.h"
+#include "spinlock.h"
 
 
 struct ext2_superblock sb;
 #define DISK_SECTOR_SIZE 512
+
+struct ext2_icache_node {
+    uint8 used;
+    struct inode inode;
+    struct ext2_icache_node *next;
+};
+
+struct {
+	struct spinlock lock;
+    struct ext2_icache_node *head;
+} ext2_icache;
 
 static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n) {
     uint32 spb = blocksize / DISK_SECTOR_SIZE; // 2
@@ -34,6 +46,7 @@ uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
         cprintf("unsupported block size (%d bytes) - unmountable\n", blocksize);
         return 0;
     }
+    initlock(&ext2_icache.lock, "ext2_icache");
     return 1;
 }
 
@@ -45,7 +58,7 @@ void ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2) {
 }
 
 void ext2_ilock(struct inode *ip) {
-    // do nothing
+    panic("ext2_ilock not implemented yet");
 }
 
 int ext2_readi(struct inode *ip, char *dst, uint off, uint n) {
@@ -109,6 +122,10 @@ int ext2_namecmp(const char *s, const char *t) {
 }
 
 struct inode *ext2_namei(char *path) {
+    cprintf("Looking for path: %s\n", path);
+    if (strncmp("/", path, 2) == 0) {
+        panic("root dir not implemented\n");
+    }
     panic("ext2_namei not implemented yet");
 }
 
