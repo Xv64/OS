@@ -25,7 +25,15 @@ static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32
 
 uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
     ext2_readsb(devt, devnum, &sb);
-    return (sb.ext2_signature == FS_EXT2_SIGNATURE) ? 1 : 0;
+    if (sb.ext2_signature != FS_EXT2_SIGNATURE) {
+        return 0;
+    }
+    int blocksize = (1024 << sb.block_size);
+    if (blocksize > FS_EXT2_MAX_BLOCK_SIZE) {
+        cprintf("unsupported block size (%d bytes) - unmountable\n", blocksize);
+        return 0;
+    }
+    return 1;
 }
 
 void ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2) {
@@ -33,7 +41,6 @@ void ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2) {
     if (&sb != sb2) {
         memcopy(sb2, &sb, sizeof(sb));
     }
-    cprintf("EXT2 version %d.%d\n", sb.major_ver, sb.minor_ver);
 }
 
 void ext2_ilock(struct inode *ip) {
@@ -47,15 +54,15 @@ int ext2_readi(struct inode *ip, char *dst, uint off, uint n) {
 
     readblock(devt, devnum, 2, sb.block_size, &bgd, sizeof(bgd));
 
-    int blockgroup = (ip->inum - 1) / sb.inodes_in_group;
+    int blocksize = (1024 << sb.block_size);
+    // int blockgroup = (ip->inum - 1) / sb.inodes_in_group;
     int index = (ip->inum - 1) % sb.inodes_in_group;
     int inodesize = sb.major_ver >= 1 ? sb.inode_size : FS_EXT2_OLD_INODE_SIZE;
-    int containingblock = (index * inodesize) / sb.block_size;
+    int containingblock = (index * inodesize) / blocksize;
 
-    // TODO: fetch block and extract inode...
-    cprintf("dir count = %d\n", bgd.dir_count);
-    cprintf("containingblock = %d\n", containingblock);
-    cprintf("blockgroup = %d\n", blockgroup);
-
-    return 0;
+    char *buf = kalloc();
+    readblock(devt, devnum, containingblock + 3, sb.block_size, buf, sb.block_size);
+    memmove(dst, buf + (index * inodesize), inodesize);
+    kfree(buf);
+    return 1;
 }

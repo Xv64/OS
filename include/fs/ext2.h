@@ -78,11 +78,12 @@ struct ext2_inode {
     uint32 dir_acl;                // In Ext2 version 0, this field is reserved. In version >= 1, Upper 32 bits of file size (if feature bit set) if it's a file, Directory ACL if it's a directory
     uint32 fragment_blk_addr;      // Block address of fragment
     uint32 os_value2[3];           // Operating System Specific Value #2 (see https://web.archive.org/web/20211027105440/https://wiki.osdev.org/Ext2#OS_Specific_Value_2)
-};
+}; // 128 bytes
 
 #define FS_EXT2_SIGNATURE 0xEF53
 #define FS_EXT2_SB_SIZE 1024
 #define FS_EXT2_OLD_INODE_SIZE 128
+#define FS_EXT2_MAX_BLOCK_SIZE 4096 // this should match the page size (in bytes) as allocated by kalloc
 
 // File System States:
 #define FS_EXT2_CLEAN  0x1
