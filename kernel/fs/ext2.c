@@ -1,5 +1,6 @@
 #include "types.h"
 #include "file.h"
+#include "stat.h"
 #include "fs/ext2.h"
 #include "buf.h"
 #include "defs.h"
@@ -65,4 +66,52 @@ int ext2_readi(struct inode *ip, char *dst, uint off, uint n) {
     memmove(dst, buf + (index * inodesize), inodesize);
     kfree(buf);
     return 1;
+}
+
+int ext2_dirlink(struct inode *dp, char *name, uint inum) {
+    panic("ext2_dirlink not implemented yet");
+}
+
+struct inode *ext2_dirlookup(struct inode *dp, char *name, uint *poff) {
+    panic("ext2_dirlookup not implemented yet");
+}
+
+struct inode *ext2_ialloc(uint dev, short type) {
+    panic("ext2_ialloc not implemented yet");
+}
+
+struct inode *ext2_idup(struct inode *ip) {
+    panic("ext2_idup not implemented yet");
+}
+
+void ext2_iput(struct inode *ip) {
+    panic("ext2_iput not implemented yet");
+}
+
+void ext2_iunlock(struct inode *ip) {
+    panic("ext2_iunlock not implemented yet");
+}
+
+void ext2_iunlockput(struct inode *ip) {
+    panic("ext2_iunlockput not implemented yet");
+}
+
+void ext2_iupdate(struct inode *ip) {
+    panic("ext2_iupdate not implemented yet");
+}
+
+int ext2_namecmp(const char *s, const char *t) {
+    panic("ext2_namecmp not implemented yet");
+}
+
+struct inode *ext2_namei(char *path) {
+    panic("ext2_namei not implemented yet");
+}
+
+struct inode *ext2_nameiparent(char *path, char *name) {
+    panic("ext2_nameiparent not implemented yet");
+}
+
+void ext2_stati(struct inode *ip, struct stat *st) {
+    panic("ext2_stati not implemented yet");
 }

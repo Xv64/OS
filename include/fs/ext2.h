@@ -101,7 +101,19 @@ struct ext2_inode {
 #define FS_EXT2_CREATOR_FREEBSD 0x3
 #define FS_EXT2_CREATOR_OTHER   0x4
 
-uint8 ext2_init_dev(uint16 devt, uint32 devnum);
-void  ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2);
-void  ext2_ilock(struct inode *ip);
-int   ext2_readi(struct inode *ip, char *dst, uint off, uint n);
+uint8         ext2_init_dev(uint16 devt, uint32 devnum);
+void          ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2);
+void          ext2_ilock(struct inode *ip);
+int           ext2_readi(struct inode *ip, char *dst, uint off, uint n);
+int           ext2_dirlink(struct inode *dp, char *name, uint inum);
+struct inode *ext2_dirlookup(struct inode *dp, char *name, uint *poff);
+struct inode *ext2_ialloc(uint dev, short type);
+struct inode *ext2_idup(struct inode *ip);
+void          ext2_iput(struct inode *ip);
+void          ext2_iunlock(struct inode *ip);
+void          ext2_iunlockput(struct inode *ip);
+void          ext2_iupdate(struct inode *ip);
+int           ext2_namecmp(const char *s, const char *t);
+struct inode *ext2_namei(char *path);
+struct inode *ext2_nameiparent(char *path, char *name);
+void          ext2_stati(struct inode *ip, struct stat *st);
