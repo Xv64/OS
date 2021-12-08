@@ -19,8 +19,11 @@ struct ext2_icache_node {
 
 struct {
 	struct spinlock lock;
+    uint16 unused_nodes;
     struct ext2_icache_node *head;
 } ext2_icache;
+
+void growicache();
 
 static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n) {
     uint32 spb = blocksize / DISK_SECTOR_SIZE; // 2
@@ -47,6 +50,9 @@ uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
         return 0;
     }
     initlock(&ext2_icache.lock, "ext2_icache");
+    ext2_icache.head = 0;
+    ext2_icache.unused_nodes = 0;
+    growicache();
     return 1;
 }
 
@@ -135,4 +141,28 @@ struct inode *ext2_nameiparent(char *path, char *name) {
 
 void ext2_stati(struct inode *ip, struct stat *st) {
     panic("ext2_stati not implemented yet");
+}
+
+// only call this function if you hold a lock on the cache!
+void growicache() {
+    void *ptr = (void *)kalloc();
+    memset(ptr, 0, 4096);
+    uint16 allot = 4096 / sizeof(struct ext2_icache_node);
+    uint16 offset = 0;
+    struct ext2_icache_node *last;
+    if (ext2_icache.head == 0) {
+        ext2_icache.head = (struct ext2_icache_node *)ptr;
+        offset++;
+        last = ext2_icache.head;
+    } else {
+        last = ext2_icache.head;
+        while(last->next != 0) {
+            last = last->next;
+        }
+    }
+    while(allot > offset) {
+        last->next = ((struct ext2_icache_node *)ptr) + offset++;
+        last = last->next;
+    }
+    ext2_icache.unused_nodes += allot;
 }
