@@ -43,7 +43,6 @@ static inline int8 setfstype(uint64 dev, fstype type) {
 			map->dev = dev;
 			map->type = type;
 			map->used = 1;
-			cprintf("SAT\n");
 
 			release(&lock);
 			return 1;
