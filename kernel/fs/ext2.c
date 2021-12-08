@@ -68,6 +68,10 @@ int ext2_readi(struct inode *ip, char *dst, uint off, uint n) {
     return 1;
 }
 
+int ext2_writei(struct inode *ip, char *src, uint off, uint n) {
+    panic("ext2_writei not implemented yet");
+}
+
 int ext2_dirlink(struct inode *dp, char *name, uint inum) {
     panic("ext2_dirlink not implemented yet");
 }
