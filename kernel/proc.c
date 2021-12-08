@@ -10,10 +10,17 @@
 #include "vfs.h"
 #include "file.h"
 
+struct ptable_node {
+    struct proc proc;
+    struct ptable_node *next;
+};
+
 struct {
 	struct spinlock lock;
-	struct proc proc[NPROC];
+	struct ptable_node *head;
 } ptable;
+
+#define EACH_PTABLE_NODE struct ptable_node *node = ptable.head; node->next != 0; node = node->next
 
 static struct proc* initproc;
 
@@ -25,6 +32,7 @@ void _allocpipe(struct proc* p);
 void _deallocpipe(struct proc* p);
 
 static void wakeup1(void* chan);
+int growptable();
 
 int procloopread(struct inode* ip, char* buf, int n){
 	//cprintf("Reading: minor=%d, from proc = %d\n", ip->minor, proc->pid);
@@ -32,7 +40,8 @@ int procloopread(struct inode* ip, char* buf, int n){
 	struct proc *p;
 
 	acquire(&ptable.lock);
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == ip->minor) {
 			tp = p;
 			break;
@@ -52,7 +61,8 @@ int procloopwrite(struct inode* ip, char* buf, int n){
 	struct proc *p;
 
 	acquire(&ptable.lock);
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == ip->minor) {
 			tp = p;
 			break;
@@ -68,6 +78,7 @@ int procloopwrite(struct inode* ip, char* buf, int n){
 
 void pinit(void){
 	initlock(&ptable.lock, "ptable");
+	growptable();
 }
 
 void procloopinit() {
@@ -85,9 +96,16 @@ static struct proc* allocproc(void){
 	char* sp;
 
 	acquire(&ptable.lock);
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-		if (p->state == UNUSED)
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
+		if (p->state == UNUSED) {
 			goto found;
+		}
+	}
+	if(growptable() > 0) {
+			release(&ptable.lock);
+			return allocproc();
+	}
 	release(&ptable.lock);
 	return 0;
 
@@ -250,7 +268,8 @@ void exit(void){
 	wakeup1(proc->parent);
 
 	// Pass abandoned children to init.
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->parent == proc) {
 			p->parent = initproc;
 			if (p->state == ZOMBIE)
@@ -274,7 +293,8 @@ int wait(void){
 	for (;;) {
 		// Scan through table looking for zombie children.
 		havekids = 0;
-		for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+		for(EACH_PTABLE_NODE){
+			p = &(node->proc);
 			if (p->parent != proc)
 				continue;
 			havekids = 1;
@@ -330,7 +350,8 @@ void scheduler(void){
 		uint8 highestpriority = 0;
 		struct proc* bestp = 0;
 		acquire(&ptable.lock);
-		for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+		for(EACH_PTABLE_NODE){
+			p = &(node->proc);
 			if (p->state != RUNNABLE)
 				continue;
 
@@ -463,9 +484,12 @@ void sleep(void* chan, struct spinlock* lk){
 static void wakeup1(void* chan){
 	struct proc* p;
 
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-		if (p->state == SLEEPING && p->chan == chan)
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
+		if (p->state == SLEEPING && p->chan == chan) {
 			p->state = RUNNABLE;
+		}
+	}
 }
 
 // Wake up all processes sleeping on chan.
@@ -483,7 +507,8 @@ int kill(int pid){
 	struct proc* p;
 
 	acquire(&ptable.lock);
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			p->killed = 1;
 			// Wake process from sleep if necessary.
@@ -500,7 +525,8 @@ int kill(int pid){
 enum procstate pstate(int pid) {
 	struct proc* p;
 
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			return p->state;
 		}
@@ -512,7 +538,8 @@ int pname(int pid, char *buf, int n) {
 	struct proc* p;
 
 	int minsize = n < 16 ? n : 16;
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			safestrcpy(buf, &(p->name[0]), minsize);
 			return 0;
@@ -530,7 +557,8 @@ int bless(int pid){
 	}
 
 	acquire(&ptable.lock);
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			p->blessed = PROC_BLESSED;
 			_allocpipe(p);
@@ -551,7 +579,8 @@ int damn(int pid){
 	}
 
 	acquire(&ptable.lock);
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			p->blessed = PROC_DAMNED;
 			_deallocpipe(p);
@@ -566,7 +595,8 @@ int damn(int pid){
 int isblessed(int pid){
 	struct proc* p;
 
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			int r = p->blessed;
 			return r;
@@ -578,7 +608,8 @@ int isblessed(int pid){
 int getpriority(int pid) {
 	struct proc* p;
 
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			return p->priority;
 		}
@@ -589,7 +620,8 @@ int getpriority(int pid) {
 int setpriority(int pid, int priority) {
 	struct proc* p;
 
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->pid == pid) {
 			p->priority = priority;
 			return 1;
@@ -615,7 +647,8 @@ void procdump(void){
 	char* state;
 	uintp pc[10];
 
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+	for(EACH_PTABLE_NODE){
+		p = &(node->proc);
 		if (p->state == UNUSED)
 			continue;
 		if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
@@ -641,4 +674,30 @@ void _allocpipe(struct proc* p){
 void _deallocpipe(struct proc* p){
 	p->rpipe = 0;
 	p->wpipe = 0;
+}
+
+int growptable() {
+	void *ptr = (void *)kalloc();
+	if (ptr == 0) {
+			return 0;
+	}
+	memset(ptr, 0, 4096);
+	uint16 allot = 4096 / sizeof(struct ptable_node);
+	uint16 offset = 0;
+	struct ptable_node *last;
+	if (ptable.head == 0) {
+			ptable.head = (struct ptable_node *)ptr;
+			offset++;
+			last = ptable.head;
+	} else {
+			last = ptable.head;
+			while(last->next != 0) {
+					last = last->next;
+			}
+	}
+	while(allot > offset) {
+			last->next = ((struct ptable_node *)ptr) + offset++;
+			last = last->next;
+	}
+	return 1;
 }
