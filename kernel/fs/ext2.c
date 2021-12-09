@@ -1,3 +1,12 @@
+
+/*
+  EXT2 filesystem implementation.
+
+  references:
+    * https://engineering.purdue.edu/~ee469/lectures/469_lec22_part3.pdf
+    * https://web.archive.org/web/20211027105440/https://wiki.osdev.org/Ext2
+*/
+
 #include "types.h"
 #include "file.h"
 #include "stat.h"
@@ -60,7 +69,7 @@ void ext2_ilock(struct inode *ip) {
 int ext2_readi(struct inode *ip, char *dst, uint off, uint n) {
     struct ext2_blockgroupdesc bgd;
     uint8 devt = GETDEVTYPE(ip->dev);
-	uint32 devnum = GETDEVNUM(ip->dev);
+    uint32 devnum = GETDEVNUM(ip->dev);
 
     readblock(devt, devnum, 2, sb.block_size, &bgd, sizeof(bgd));
 
@@ -120,8 +129,11 @@ int ext2_namecmp(const char *s, const char *t) {
 struct inode *ext2_namei(char *path) {
     cprintf("Looking for path: %s\n", path);
     if (strncmp("/", path, 2) == 0) {
-        struct inode* ip = ext2_iget(ROOT_DEV, 3);
-        // TODO...
+        struct inode* ip = ext2_iget(ROOT_DEV, 2);
+        struct ext2_inode inode;
+        memset(&inode, 0, sizeof(struct ext2_inode));
+        ext2_readi(ip, (void *)&inode, 0 /* ??? */, 1);
+        cprintf("inode.user_id=%d\n", inode.user_id);
         panic("root dir not implemented\n");
         return ip;
     }
