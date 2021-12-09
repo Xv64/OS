@@ -23,21 +23,11 @@ struct {
     struct ext2_icache_node *head;
 } ext2_icache;
 
+extern uint64 ROOT_DEV;
+
 void growicache();
-
-static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n) {
-    uint32 spb = blocksize / DISK_SECTOR_SIZE; // 2
-    uint64 start = blocknum * spb;
-    uint32 legacydevid = TODEVNUM(devt, devnum);
-
-    for(uint8 i = 0; i != spb && n > 0; i++) {
-        struct buf* bp = bread(legacydevid, start + i);
-        void *offset = buf + (DISK_SECTOR_SIZE * i);
-        memcopy(offset, &bp->data[0], n > DISK_SECTOR_SIZE ? DISK_SECTOR_SIZE : 0);
-        n -= DISK_SECTOR_SIZE;
-        brelse(bp);
-    }
-}
+static inline struct inode* ext2_iget(uint64 dev, uint32 inum);
+static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n);
 
 uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
     ext2_readsb(devt, devnum, &sb);
@@ -130,7 +120,10 @@ int ext2_namecmp(const char *s, const char *t) {
 struct inode *ext2_namei(char *path) {
     cprintf("Looking for path: %s\n", path);
     if (strncmp("/", path, 2) == 0) {
+        struct inode* ip = ext2_iget(ROOT_DEV, 3);
+        // TODO...
         panic("root dir not implemented\n");
+        return ip;
     }
     panic("ext2_namei not implemented yet");
 }
@@ -165,4 +158,53 @@ void growicache() {
         last = last->next;
     }
     ext2_icache.unused_nodes += allot;
+}
+
+static inline struct inode* ext2_iget(uint64 dev, uint32 inum){
+	struct inode* ip, * empty;
+
+	acquire(&ext2_icache.lock);
+
+	// Is the inode already cached?
+	empty = 0;
+    for (struct ext2_icache_node *node = ext2_icache.head; node->next != 0; node = node->next) {
+        ip = &(node->inode);
+		if (ip->ref > 0 && ip->dev == dev && ip->inum == inum) {
+			ip->ref++;
+			release(&ext2_icache.lock);
+			return ip;
+		}
+		if (empty == 0 && ip->ref == 0) // Remember empty slot.
+			empty = ip;
+	}
+
+	// Recycle an inode cache entry.
+	if (empty == 0) {
+        growicache();
+        release(&ext2_icache.lock);
+		return ext2_iget(dev, inum);
+    }
+
+	ip = empty;
+	ip->dev = dev;
+	ip->inum = inum;
+	ip->ref = 1;
+	ip->flags = 0;
+	release(&ext2_icache.lock);
+
+	return ip;
+}
+
+static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n) {
+    uint32 spb = blocksize / DISK_SECTOR_SIZE; // 2
+    uint64 start = blocknum * spb;
+    uint32 legacydevid = TODEVNUM(devt, devnum);
+
+    for(uint8 i = 0; i != spb && n > 0; i++) {
+        struct buf* bp = bread(legacydevid, start + i);
+        void *offset = buf + (DISK_SECTOR_SIZE * i);
+        memcopy(offset, &bp->data[0], n > DISK_SECTOR_SIZE ? DISK_SECTOR_SIZE : 0);
+        n -= DISK_SECTOR_SIZE;
+        brelse(bp);
+    }
 }
