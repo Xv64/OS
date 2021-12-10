@@ -216,6 +216,7 @@ UPROGS=\
 	fs/bin/mkdir\
 	fs/bin/rm\
 	fs/bin/sh\
+	fs/bin/stress\
 	fs/bin/wc\
 	fs/bin/reboot\
 
