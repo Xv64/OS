@@ -92,10 +92,6 @@ void ext2_iput(struct inode *ip) {
     panic("ext2_iput not implemented yet");
 }
 
-void ext2_iunlock(struct inode *ip) {
-    panic("ext2_iunlock not implemented yet");
-}
-
 void ext2_iupdate(struct inode *ip) {
     panic("ext2_iupdate not implemented yet");
 }

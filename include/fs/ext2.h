@@ -112,7 +112,6 @@ struct inode *ext2_dirlookup(struct inode *dp, char *name, uint *poff);
 struct inode *ext2_ialloc(uint dev, short type);
 struct inode *ext2_idup(struct inode *ip);
 void          ext2_iput(struct inode *ip);
-void          ext2_iunlock(struct inode *ip);
 void          ext2_iupdate(struct inode *ip);
 int           ext2_namecmp(const char *s, const char *t);
 void          ext2_stati(struct inode *ip, struct stat *st);

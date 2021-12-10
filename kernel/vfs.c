@@ -192,15 +192,15 @@ void iput(struct inode *ip) {
 	}
 }
 
+// Unlock the given inode.
 void iunlock(struct inode *ip) {
-	fstype t = getfstype(ip->dev);
-	if(t == FS_TYPE_EXT2) {
-		ext2_iunlock(ip);
-	} else if(t == FS_TYPE_FS1) {
-		fs1_iunlock(ip);
-	} else {
-		panic("Unknown fs type");
-	}
+	if (ip == 0 || !(ip->flags & I_BUSY) || ip->ref < 1)
+		panic("iunlock");
+
+	acquire(&lock);
+	ip->flags &= ~I_BUSY;
+	wakeup(ip);
+	release(&lock);
 }
 
 // Common idiom: unlock, then put.

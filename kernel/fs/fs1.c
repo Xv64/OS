@@ -251,17 +251,6 @@ struct inode* fs1_idup(struct inode* ip){
 	return ip;
 }
 
-// Unlock the given inode.
-void fs1_iunlock(struct inode* ip){
-	if (ip == 0 || !(ip->flags & I_BUSY) || ip->ref < 1)
-		panic("iunlock");
-
-	acquire(&fs1_icache.lock);
-	ip->flags &= ~I_BUSY;
-	wakeup(ip);
-	release(&fs1_icache.lock);
-}
-
 // Drop a reference to an in-memory inode.
 // If that was the last reference, the inode cache entry can
 // be recycled.

@@ -26,7 +26,6 @@ struct inode*   fs1_idup(struct inode*);
 void            fs1_iinit(void);
 void            fs1_readinode(struct inode *);
 void            fs1_iput(struct inode*);
-void            fs1_iunlock(struct inode*);
 void            fs1_iupdate(struct inode*);
 int             fs1_namecmp(const char*, const char*);
 int             fs1_readi(struct inode*, char*, uint, uint);
