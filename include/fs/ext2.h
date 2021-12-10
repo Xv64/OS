@@ -115,6 +115,4 @@ void          ext2_iunlock(struct inode *ip);
 void          ext2_iunlockput(struct inode *ip);
 void          ext2_iupdate(struct inode *ip);
 int           ext2_namecmp(const char *s, const char *t);
-struct inode *ext2_namei(char *path);
-struct inode *ext2_nameiparent(char *path, char *name);
 void          ext2_stati(struct inode *ip, struct stat *st);

@@ -14,12 +14,30 @@
 #include "defs.h"
 #include "param.h"
 #include "kernel/string.h"
+#include "mmu.h"
+#include "proc.h"
 
 struct fsmap_t {
 	fstype type;
 	uint64 dev;
 	uint8 used;
 };
+
+struct icache_node {
+    uint8 used;
+    struct inode inode;
+    struct icache_node *next;
+};
+
+struct {
+	struct spinlock lock;
+    uint16 unused_nodes;
+    struct icache_node *head;
+} icache;
+
+void growicache();
+static inline struct inode* iget(uint64 dev, uint32 inum);
+static char* skipelem(char* path, char* name);
 
 extern uint64 ROOT_DEV;
 struct fsmap_t fsmap[FS_MAX_INIT_DEV];
@@ -115,6 +133,7 @@ void vfsinit() {
 	fs1_iinit(); // fs1 needs an explicit init before we can invoke any methods
 
 	initlock(&lock, "vfs");
+	growicache();
 
 	// for now, let's just run with the ROOT_DEVd
 	// later we will want to enumerate all devices
@@ -192,25 +211,84 @@ int namecmp(const char *s, const char *t) {
 	return strncmp(s, t, DIRSIZ);
 }
 
-struct inode *namei(char *path) {
-	fstype t = getfstype(ROOT_DEV); // TODO: look up device
-	if(t == FS_TYPE_EXT2) {
-		return ext2_namei(path);
-	} else if(t == FS_TYPE_FS1) {
-		return fs1_namei(path);
-	} else {
-		panic("Unknown fs type");
+// Copy the next path element from path into name.
+// Return a pointer to the element following the copied one.
+// The returned path has no leading slashes,
+// so the caller can check *path=='\0' to see if the name is the last one.
+// If no name to remove, return 0.
+//
+// Examples:
+//   skipelem("a/bb/c", name) = "bb/c", setting name = "a"
+//   skipelem("///a//bb", name) = "bb", setting name = "a"
+//   skipelem("a", name) = "", setting name = "a"
+//   skipelem("", name) = skipelem("////", name) = 0
+//
+static char* skipelem(char* path, char* name){
+	char* s;
+	int len;
+
+	while (*path == '/')
+		path++;
+	if (*path == 0)
+		return 0;
+	s = path;
+	while (*path != '/' && *path != 0)
+		path++;
+	len = path - s;
+	if (len >= DIRSIZ)
+		memmove(name, s, DIRSIZ);
+	else {
+		memmove(name, s, len);
+		name[len] = 0;
 	}
+	while (*path == '/')
+		path++;
+	return path;
+}
+
+// Look up and return the inode for a path name.
+// If parent != 0, return the inode for the parent and copy the final
+// path element into name, which must have room for DIRSIZ bytes.
+// Must be called inside a transaction since it calls iput().
+static struct inode* namex(char* path, int nameiparent, char* name){
+	struct inode* ip, * next;
+
+	if (*path == '/')
+		ip = iget(ROOT_DEV, ROOTINO);
+	else
+		ip = idup(proc->cwd);
+
+	while ((path = skipelem(path, name)) != 0) {
+		ilock(ip);
+		if (ip->type != T_DIR) {
+			iunlockput(ip);
+			return 0;
+		}
+		if (nameiparent && *path == '\0') {
+			// Stop one level early.
+			iunlock(ip);
+			return ip;
+		}
+		if ((next = dirlookup(ip, name, 0)) == 0) {
+			iunlockput(ip);
+			return 0;
+		}
+		iunlockput(ip);
+		ip = next;
+	}
+	if (nameiparent) {
+		iput(ip);
+		return 0;
+	}
+	return ip;
+}
+
+struct inode *namei(char *path) {
+	char name[DIRSIZ];
+	return namex(path, 0, name);
 }
 struct inode *nameiparent(char *path, char *name) {
-	fstype t = getfstype(ROOT_DEV); // TODO: look up device
-	if(t == FS_TYPE_EXT2) {
-		return ext2_nameiparent(path, name);
-	} else if(t == FS_TYPE_FS1) {
-		return fs1_nameiparent(path, name);
-	} else {
-		panic("Unknown fs type");
-	}
+	return namex(path, 1, name);
 }
 
 int readi(struct inode *ip, char *dst, uint off, uint n) {
@@ -257,4 +335,63 @@ int writei(struct inode *ip, char *src, uint off, uint n) {
 	} else {
 		panic("Unknown fs type");
 	}
+}
+
+static inline struct inode* iget(uint64 dev, uint32 inum){
+	struct inode* ip, * empty;
+
+	acquire(&lock);
+
+	// Is the inode already cached?
+	empty = 0;
+    for (struct icache_node *node = icache.head; node->next != 0; node = node->next) {
+        ip = &(node->inode);
+		if (ip->ref > 0 && ip->dev == dev && ip->inum == inum) {
+			ip->ref++;
+			release(&lock);
+			return ip;
+		}
+		if (empty == 0 && ip->ref == 0) // Remember empty slot.
+			empty = ip;
+	}
+
+	// Recycle an inode cache entry.
+	if (empty == 0) {
+        growicache();
+        release(&lock);
+		return iget(dev, inum);
+    }
+
+	ip = empty;
+	ip->dev = dev;
+	ip->inum = inum;
+	ip->ref = 1;
+	ip->flags = 0;
+	release(&lock);
+
+	return ip;
+}
+
+// only call this function if you hold a lock on the cache!
+void growicache() {
+    void *ptr = (void *)kalloc();
+    memset(ptr, 0, 4096);
+    uint16 allot = 4096 / sizeof(struct icache_node);
+    uint16 offset = 0;
+    struct icache_node *last;
+    if (icache.head == 0) {
+        icache.head = (struct icache_node *)ptr;
+        offset++;
+        last = icache.head;
+    } else {
+        last = icache.head;
+        while(last->next != 0) {
+            last = last->next;
+        }
+    }
+    while(allot > offset) {
+        last->next = ((struct icache_node *)ptr) + offset++;
+        last = last->next;
+    }
+    icache.unused_nodes += allot;
 }

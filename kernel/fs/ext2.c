@@ -20,22 +20,8 @@
 struct ext2_superblock sb;
 #define DISK_SECTOR_SIZE 512
 
-struct ext2_icache_node {
-    uint8 used;
-    struct inode inode;
-    struct ext2_icache_node *next;
-};
-
-struct {
-	struct spinlock lock;
-    uint16 unused_nodes;
-    struct ext2_icache_node *head;
-} ext2_icache;
-
 extern uint64 ROOT_DEV;
 
-void growicache();
-static inline struct inode* ext2_iget(uint64 dev, uint32 inum);
 static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n);
 
 uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
@@ -48,10 +34,6 @@ uint8 ext2_init_dev(uint16 devt, uint32 devnum) {
         cprintf("unsupported block size (%d bytes) - unmountable\n", blocksize);
         return 0;
     }
-    initlock(&ext2_icache.lock, "ext2_icache");
-    ext2_icache.head = 0;
-    ext2_icache.unused_nodes = 0;
-    growicache();
     return 1;
 }
 
@@ -126,85 +108,8 @@ int ext2_namecmp(const char *s, const char *t) {
     panic("ext2_namecmp not implemented yet");
 }
 
-struct inode *ext2_namei(char *path) {
-    cprintf("Looking for path: %s\n", path);
-    if (strncmp("/", path, 2) == 0) {
-        struct inode* ip = ext2_iget(ROOT_DEV, 2);
-        struct ext2_inode inode;
-        memset(&inode, 0, sizeof(struct ext2_inode));
-        ext2_readi(ip, (void *)&inode, 0 /* ??? */, 1);
-        cprintf("inode.user_id=%d\n", inode.user_id);
-        panic("root dir not implemented\n");
-        return ip;
-    }
-    panic("ext2_namei not implemented yet");
-}
-
-struct inode *ext2_nameiparent(char *path, char *name) {
-    panic("ext2_nameiparent not implemented yet");
-}
-
 void ext2_stati(struct inode *ip, struct stat *st) {
     panic("ext2_stati not implemented yet");
-}
-
-// only call this function if you hold a lock on the cache!
-void growicache() {
-    void *ptr = (void *)kalloc();
-    memset(ptr, 0, 4096);
-    uint16 allot = 4096 / sizeof(struct ext2_icache_node);
-    uint16 offset = 0;
-    struct ext2_icache_node *last;
-    if (ext2_icache.head == 0) {
-        ext2_icache.head = (struct ext2_icache_node *)ptr;
-        offset++;
-        last = ext2_icache.head;
-    } else {
-        last = ext2_icache.head;
-        while(last->next != 0) {
-            last = last->next;
-        }
-    }
-    while(allot > offset) {
-        last->next = ((struct ext2_icache_node *)ptr) + offset++;
-        last = last->next;
-    }
-    ext2_icache.unused_nodes += allot;
-}
-
-static inline struct inode* ext2_iget(uint64 dev, uint32 inum){
-	struct inode* ip, * empty;
-
-	acquire(&ext2_icache.lock);
-
-	// Is the inode already cached?
-	empty = 0;
-    for (struct ext2_icache_node *node = ext2_icache.head; node->next != 0; node = node->next) {
-        ip = &(node->inode);
-		if (ip->ref > 0 && ip->dev == dev && ip->inum == inum) {
-			ip->ref++;
-			release(&ext2_icache.lock);
-			return ip;
-		}
-		if (empty == 0 && ip->ref == 0) // Remember empty slot.
-			empty = ip;
-	}
-
-	// Recycle an inode cache entry.
-	if (empty == 0) {
-        growicache();
-        release(&ext2_icache.lock);
-		return ext2_iget(dev, inum);
-    }
-
-	ip = empty;
-	ip->dev = dev;
-	ip->inum = inum;
-	ip->ref = 1;
-	ip->flags = 0;
-	release(&ext2_icache.lock);
-
-	return ip;
 }
 
 static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n) {
