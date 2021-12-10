@@ -203,15 +203,10 @@ void iunlock(struct inode *ip) {
 	}
 }
 
+// Common idiom: unlock, then put.
 void iunlockput(struct inode *ip) {
-	fstype t = getfstype(ip->dev);
-	if(t == FS_TYPE_EXT2) {
-		ext2_iunlockput(ip);
-	} else if(t == FS_TYPE_FS1) {
-		fs1_iunlockput(ip);
-	} else {
-		panic("Unknown fs type");
-	}
+		iunlock(ip);
+		iput(ip);
 }
 
 void iupdate(struct inode *ip) {

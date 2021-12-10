@@ -288,12 +288,6 @@ void fs1_iput(struct inode* ip){
 	release(&fs1_icache.lock);
 }
 
-// Common idiom: unlock, then put.
-void fs1_iunlockput(struct inode* ip){
-	iunlock(ip);
-	iput(ip);
-}
-
 
 // Inode content
 //
@@ -483,7 +477,7 @@ int fs1_dirlink(struct inode* dp, char* name, uint inum){
 void fs1_readinode(struct inode *ip) {
 	struct buf* bp;
 	struct dinode* dip;
-	
+
 	uint32 sector = IBLOCK(ip->inum);
 	bp = bread(ip->dev, sector);
 	dip = (struct dinode*)bp->data;
