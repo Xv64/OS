@@ -40,12 +40,12 @@ int main(void){
 	lapicinit();
 	seginit(); // set up segments
 	cprintf("\ncpu%d: starting Xv64\n\n", cpu->id);
-	cprintf("%s CPU detected (%s - %d)\n", CPU_NAME, CPU_VENDOR, CPU_MODEL);
 	credits();
 	picinit(); // interrupt controller
 	ioapicinit(); // another interrupt controller
 	consoleinit(); // I/O devices & their interrupts
 	uartinit(); // serial port
+	cprintf("%s CPU detected (%s - %d)\n", CPU_NAME, CPU_VENDOR, CPU_MODEL);
 	pinit();   // process table
 	procloopinit();// setup proc loop device
 	tvinit();  // trap vectors
