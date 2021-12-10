@@ -152,14 +152,32 @@ void vfsinit() {
 	}
 }
 
-void ilock(struct inode *ip) {
-	fstype t = getfstype(ip->dev);
-	if(t == FS_TYPE_EXT2) {
-		ext2_ilock(ip);
-	} else if(t == FS_TYPE_FS1) {
-		fs1_ilock(ip);
-	} else {
-		panic("Unknown fs type");
+// Lock the given inode.
+// Reads the inode from disk if necessary.
+void ilock(struct inode* ip){
+	if (ip == 0 || ip->ref < 1)
+		panic("ilock");
+
+	acquire(&lock);
+	while (ip->flags & I_BUSY)
+		sleep(ip, &lock);
+	ip->flags |= I_BUSY;
+	release(&lock);
+
+	if (!(ip->flags & I_VALID)) {
+		fstype t = getfstype(ip->dev);
+		if(t == FS_TYPE_EXT2) {
+			ext2_readinode(ip);
+		} else if(t == FS_TYPE_FS1) {
+			fs1_readinode(ip);
+		} else {
+			panic("Unknown fs type");
+		}
+		ip->flags |= I_VALID;
+		if (ip->type == 0) {
+			cprintf("Error reading inode %d from disk\n", ip->inum);
+			panic("ilock: no type");
+		}
 	}
 }
 

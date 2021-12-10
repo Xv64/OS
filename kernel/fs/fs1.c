@@ -251,42 +251,6 @@ struct inode* fs1_idup(struct inode* ip){
 	return ip;
 }
 
-// Lock the given inode.
-// Reads the inode from disk if necessary.
-void fs1_ilock(struct inode* ip){
-	struct buf* bp;
-	struct dinode* dip;
-	// cprintf("Locking inode %d\n", ip->inum);
-
-	if (ip == 0 || ip->ref < 1)
-		panic("ilock");
-
-	acquire(&fs1_icache.lock);
-	while (ip->flags & I_BUSY)
-		sleep(ip, &fs1_icache.lock);
-	ip->flags |= I_BUSY;
-	release(&fs1_icache.lock);
-
-	if (!(ip->flags & I_VALID)) {
-		uint32 sector = IBLOCK(ip->inum);
-		bp = bread(ip->dev, sector);
-		dip = (struct dinode*)bp->data;
-		dip += ip->inum % IPB; // increment dip to the correct inode in the sector
-		ip->type = dip->type;
-		ip->major = dip->major;
-		ip->minor = dip->minor;
-		ip->nlink = dip->nlink;
-		ip->size = dip->size;
-		memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
-		brelse(bp);
-		ip->flags |= I_VALID;
-		if (ip->type == 0) {
-			cprintf("Error reading inode %d from sector %d\n", ip->inum, sector);
-			panic("ilock: no type");
-		}
-	}
-}
-
 // Unlock the given inode.
 void fs1_iunlock(struct inode* ip){
 	if (ip == 0 || !(ip->flags & I_BUSY) || ip->ref < 1)
@@ -514,4 +478,21 @@ int fs1_dirlink(struct inode* dp, char* name, uint inum){
 		panic("dirlink");
 
 	return 0;
+}
+
+void fs1_readinode(struct inode *ip) {
+	struct buf* bp;
+	struct dinode* dip;
+	
+	uint32 sector = IBLOCK(ip->inum);
+	bp = bread(ip->dev, sector);
+	dip = (struct dinode*)bp->data;
+	dip += ip->inum % IPB; // increment dip to the correct inode in the sector
+	ip->type = dip->type;
+	ip->major = dip->major;
+	ip->minor = dip->minor;
+	ip->nlink = dip->nlink;
+	ip->size = dip->size;
+	memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
+	brelse(bp);
 }

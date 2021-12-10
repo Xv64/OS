@@ -105,6 +105,7 @@ uint8         ext2_init_dev(uint16 devt, uint32 devnum);
 void          ext2_readsb(uint16 devt, uint32 devnum, struct ext2_superblock* sb2);
 void          ext2_ilock(struct inode *ip);
 int           ext2_readi(struct inode *ip, char *dst, uint off, uint n);
+void          ext2_readinode(struct inode *ip);
 int           ext2_writei(struct inode *ip, char *src, uint off, uint n);
 int           ext2_dirlink(struct inode *dp, char *name, uint inum);
 struct inode *ext2_dirlookup(struct inode *dp, char *name, uint *poff);

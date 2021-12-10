@@ -24,7 +24,7 @@ struct inode*   fs1_dirlookup(struct inode*, char*, uint*);
 struct inode*   fs1_ialloc(uint, short);
 struct inode*   fs1_idup(struct inode*);
 void            fs1_iinit(void);
-void            fs1_ilock(struct inode*);
+void            fs1_readinode(struct inode *);
 void            fs1_iput(struct inode*);
 void            fs1_iunlock(struct inode*);
 void            fs1_iunlockput(struct inode*);

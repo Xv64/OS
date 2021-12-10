@@ -112,6 +112,10 @@ void ext2_stati(struct inode *ip, struct stat *st) {
     panic("ext2_stati not implemented yet");
 }
 
+void ext2_readinode(struct inode *ip) {
+    panic("ext2_readinode not implemented yet");
+}
+
 static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n) {
     uint32 spb = blocksize / DISK_SECTOR_SIZE; // 2
     uint64 start = blocknum * spb;
