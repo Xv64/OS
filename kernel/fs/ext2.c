@@ -113,7 +113,21 @@ void ext2_stati(struct inode *ip, struct stat *st) {
 }
 
 void ext2_readinode(struct inode *ip) {
-    panic("ext2_readinode not implemented yet");
+    struct buf *bp;
+	struct ext2_inode *ext2i;
+
+    int blocksize = (1024 << sb.block_size);
+    int index = (ip->inum - 1) % sb.inodes_in_group;
+    int inodesize = sb.major_ver >= 1 ? sb.inode_size : FS_EXT2_OLD_INODE_SIZE;
+    int block = (index * inodesize) / blocksize;
+
+    bp = bread(ip->dev, block);
+    ext2i = (struct ext2_inode*)bp->data + index;
+    ip->type = T_FILE; //HACK: use ext2i->type instead
+    ip->nlink = ext2i->hard_link_count;
+    ip->size = ext2i->lower_size;
+    memmove(ip->addrs, ext2i->block_pointers, sizeof(ext2i->block_pointers));
+    brelse(bp);
 }
 
 static inline void readblock(uint16 devt, uint32 devnum, uint64 blocknum, uint32 blocksize, void *buf, int n) {
