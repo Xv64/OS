@@ -5,6 +5,7 @@
   references:
     * https://engineering.purdue.edu/~ee469/lectures/469_lec22_part3.pdf
     * https://web.archive.org/web/20211027105440/https://wiki.osdev.org/Ext2
+    * http://www.science.smith.edu/~nhowe/Teaching/csc262/oldlabs/ext2.html
 */
 
 #include "types.h"
@@ -115,7 +116,13 @@ void ext2_readinode(struct inode *ip) {
 
     bp = bread(ip->dev, block);
     ext2i = (struct ext2_inode*)bp->data + index;
-    ip->type = T_FILE; //HACK: use ext2i->type instead
+    if (EXT2_TYPE_ISREG(ext2i->type)) {
+        ip->type = T_FILE;
+    } else if (EXT2_TYPE_ISDIR(ext2i->type)) {
+        ip->type = T_DIR;
+    } else {
+        ip->type = 0; // unknown!
+    }
     ip->nlink = ext2i->hard_link_count;
     ip->size = ext2i->lower_size;
     memmove(ip->addrs, ext2i->block_pointers, sizeof(ext2i->block_pointers));

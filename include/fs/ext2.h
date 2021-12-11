@@ -80,6 +80,13 @@ struct ext2_inode {
     uint32 os_value2[3];           // Operating System Specific Value #2 (see https://web.archive.org/web/20211027105440/https://wiki.osdev.org/Ext2#OS_Specific_Value_2)
 }; // 128 bytes
 
+#define EXT2_IFMT  00170000
+#define EXT2_IFREG  0100000
+#define EXT2_IFDIR  0040000
+
+#define EXT2_TYPE_ISREG(m)	(((m) & EXT2_IFMT) == EXT2_IFREG)
+#define EXT2_TYPE_ISDIR(m)	(((m) & EXT2_IFMT) == EXT2_IFDIR)
+
 #define FS_EXT2_SIGNATURE 0xEF53
 #define FS_EXT2_SB_SIZE 1024
 #define FS_EXT2_OLD_INODE_SIZE 128
