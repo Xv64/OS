@@ -1,5 +1,6 @@
 /******************************************************************************
  * LISP language interpreter
+ * Copyright (c) 2020-2021 Jason Whitehorn
  * Copyright (c) 2018 Kristoffer Grönlund <krig@koru.se>
  * MIT License
  * Original Source: https://github.com/krig/LISP
@@ -382,15 +383,6 @@ object *builtin_read(object *args) {
 	return lisp_read(stdin);
 }
 
-object *builtin_memread(object *args) {
-	unsigned long addr = atol(TEXT(args->car));
-	unsigned long *mem = (unsigned long *)addr;
-
-	char ch[TOKEN_MAX];
-	snprintf(ch, TOKEN_MAX, "%p", *mem);
-	return new_atom(intern_string(ch));
-}
-
 object *builtin_exit(object *args){
 	exit(0);
 	return NULL;
@@ -503,10 +495,12 @@ int main(int argc, char* argv[]) {
 	defun(env, "display", &builtin_display);
 	defun(env, "newline", &builtin_newline);
 	defun(env, "read", &builtin_read);
-	defun(env, "memread", &builtin_memread);
 	defun(env, "exit", &builtin_exit);
 	FILE *in = (argc > 1) ? fopen(argv[1], "r") : stdin;
+	fprintf(stdout, "Lisp 1.5 interpreter\nversion 1.0\n");
+	fprintf(stdout, "type (exit) to exit\n\n");
 	for (;;) {
+		fprintf(stdout, "] ");
 		obj = lisp_read(in);
 		obj = lisp_eval(obj, env);
 		if (in == stdin) {
