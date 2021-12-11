@@ -181,15 +181,37 @@ void ilock(struct inode* ip){
 	}
 }
 
+// Drop a reference to an in-memory inode.
+// If that was the last reference, the inode cache entry can
+// be recycled.
+// If that was the last reference and the inode has no links
+// to it, free the inode (and its content) on disk.
+// All calls to iput() must be inside a transaction in
+// case it has to free the inode.
 void iput(struct inode *ip) {
-	fstype t = getfstype(ip->dev);
-	if(t == FS_TYPE_EXT2) {
-		ext2_iput(ip);
-	} else if(t == FS_TYPE_FS1) {
-		fs1_iput(ip);
-	} else {
-		panic("Unknown fs type");
+	acquire(&lock);
+	if (ip->ref == 1 && (ip->flags & I_VALID) && ip->nlink == 0) {
+		// inode has no links and no other references: truncate and free.
+		if (ip->flags & I_BUSY)
+			panic("iput busy");
+		ip->flags |= I_BUSY;
+		release(&lock);
+		fstype t = getfstype(ip->dev);
+		if(t == FS_TYPE_EXT2) {
+			ext2_itrunc(ip);
+		} else if(t == FS_TYPE_FS1) {
+			fs1_itrunc(ip);
+		} else {
+			panic("Unknown fs type");
+		}
+		ip->type = 0;
+		iupdate(ip);
+		acquire(&lock);
+		ip->flags = 0;
+		wakeup(ip);
 	}
+	ip->ref--;
+	release(&lock);
 }
 
 // Unlock the given inode.

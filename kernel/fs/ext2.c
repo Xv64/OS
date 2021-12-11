@@ -88,10 +88,6 @@ struct inode *ext2_idup(struct inode *ip) {
     panic("ext2_idup not implemented yet");
 }
 
-void ext2_iput(struct inode *ip) {
-    panic("ext2_iput not implemented yet");
-}
-
 void ext2_iupdate(struct inode *ip) {
     panic("ext2_iupdate not implemented yet");
 }
@@ -102,6 +98,10 @@ int ext2_namecmp(const char *s, const char *t) {
 
 void ext2_stati(struct inode *ip, struct stat *st) {
     panic("ext2_stati not implemented yet");
+}
+
+void ext2_itrunc(struct inode* ip) {
+    panic("ext2_itrunc not implemented yet");
 }
 
 void ext2_readinode(struct inode *ip) {

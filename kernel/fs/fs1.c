@@ -26,7 +26,6 @@
 #include "kernel/string.h"
 
 #define min(a, b) ((a) < (b) ? (a) : (b))
-static void fs1_itrunc(struct inode*);
 
 // Read the super block.
 void fs1_readsb(int dev, struct fs1_superblock* sb){
@@ -251,32 +250,6 @@ struct inode* fs1_idup(struct inode* ip){
 	return ip;
 }
 
-// Drop a reference to an in-memory inode.
-// If that was the last reference, the inode cache entry can
-// be recycled.
-// If that was the last reference and the inode has no links
-// to it, free the inode (and its content) on disk.
-// All calls to iput() must be inside a transaction in
-// case it has to free the inode.
-void fs1_iput(struct inode* ip){
-	acquire(&fs1_icache.lock);
-	if (ip->ref == 1 && (ip->flags & I_VALID) && ip->nlink == 0) {
-		// inode has no links and no other references: truncate and free.
-		if (ip->flags & I_BUSY)
-			panic("iput busy");
-		ip->flags |= I_BUSY;
-		release(&fs1_icache.lock);
-		fs1_itrunc(ip);
-		ip->type = 0;
-		iupdate(ip);
-		acquire(&fs1_icache.lock);
-		ip->flags = 0;
-		wakeup(ip);
-	}
-	ip->ref--;
-	release(&fs1_icache.lock);
-}
-
 
 // Inode content
 //
@@ -320,7 +293,7 @@ static uint fs1_bmap(struct inode* ip, uint bn){
 // to it (no directory entries referring to it)
 // and has no in-memory reference to it (is
 // not an open file or current directory).
-static void fs1_itrunc(struct inode* ip){
+void fs1_itrunc(struct inode* ip){
 	int i, j;
 	struct buf* bp;
 	uint* a;
