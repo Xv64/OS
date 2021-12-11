@@ -1,6 +1,6 @@
 # Xv64
 
-Xv64 is a 64-bit operating system targeting AMD64 compatible processors, featuring an SMP hybrid microkernel, POSIX UNIX/compatibility layer, AHCI/SATA support, & much more. The goal of Xv64 is to implement a clean, modern, 64-bit only OS that can both maintain a POSIX compatibility layer while also exploring unique OS design concepts.
+Xv64 is a 64-bit operating system targeting AMD64 compatible processors, featuring an SMP hybrid microkernel, POSIX/UNIX compatibility layer, AHCI/SATA support, & much more. The goal of Xv64 is to implement a clean, modern, 64-bit only OS that can both maintain a POSIX compatibility layer while also exploring unique OS design concepts.
 
 ![](docs/pics/Xv64-2020-03-24.gif)
 
