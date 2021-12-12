@@ -15,7 +15,7 @@ To get started hacking away on Xv64, you'll need a few requirements:
 
 Once you have those installed, execute:
 
-`env QEMU_OPTS=-nographic ./run.sh -r -l`
+`env QEMU_OPTS=-nographic ./run.sh -r`
 
 This will build the OS from source, and run it within qemu on your system.
 
