@@ -105,6 +105,16 @@ void ext2_itrunc(struct inode* ip) {
     panic("ext2_itrunc not implemented yet");
 }
 
+void dump_data(uint8 *ptr, int cnt) {
+    int j = 0;
+    while(j <= cnt) {
+        for(int i = 0; i != 60; i++) {
+            cprintf("%x ", ptr[j++]);
+        }
+        cprintf("\n");
+    }
+}
+
 void ext2_readinode(struct inode *ip) {
     struct buf *bp;
 	struct ext2_inode *ext2i;
@@ -113,14 +123,19 @@ void ext2_readinode(struct inode *ip) {
     int index = (ip->inum - 1) % sb.inodes_in_group;
     int inodesize = sb.major_ver >= 1 ? sb.inode_size : FS_EXT2_OLD_INODE_SIZE;
     int block = (index * inodesize) / blocksize;
+    cprintf("About to read block %d\n", block);
 
-    bp = bread(ip->dev, block);
-    ext2i = (struct ext2_inode*)bp->data + index;
+    bp = bread(ip->dev, block + 2);
+    dump_data(bp->data, 4096);
+    cprintf("Seeking to inode @ index %d\n", index);
+    ext2i = (struct ext2_inode*)bp->data + (index * sizeof(struct ext2_inode));
+    dump_data((uint8 *)ext2i, sizeof(struct ext2_inode));
     if (EXT2_TYPE_ISREG(ext2i->type)) {
         ip->type = T_FILE;
     } else if (EXT2_TYPE_ISDIR(ext2i->type)) {
         ip->type = T_DIR;
     } else {
+        cprintf("Uknown type %d\n", ext2i->type);
         ip->type = 0; // unknown!
     }
     ip->nlink = ext2i->hard_link_count;
