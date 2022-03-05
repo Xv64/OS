@@ -180,7 +180,18 @@ static inline unsigned int amd64_xchg(volatile unsigned int *addr, unsigned long
 	unsigned int result;
 
 	// The + in "+m" denotes a read-modify-write operand.
-	asm volatile ("lock; xchgl %0, %1" :
+	asm volatile ("lock xchgl %0, %1" :
+	              "+m" (*addr), "=a" (result) :
+	              "1" (newval) :
+	              "cc");
+	return result;
+}
+
+static inline unsigned int amd64_xadd(volatile unsigned int *addr, unsigned long newval) {
+	unsigned int result;
+
+	// The + in "+m" denotes a read-modify-write operand.
+	asm volatile ("lock xaddl %1, %0" :
 	              "+m" (*addr), "=a" (result) :
 	              "1" (newval) :
 	              "cc");
@@ -202,6 +213,31 @@ static inline void amd64_cpuid(unsigned int ax, unsigned int *p) {
 	              : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
 	              :  "0" (ax));
 }
+
+static inline uint64 amd64_rdmsr(uint msr) {
+    uint32 low, high;
+    asm volatile ("rdmsr"
+		  : "=a" (low), "=d" (high)
+		  : "c" (msr));
+    return (uint64)low | ((uint64)high << 32);
+}
+
+static inline void amd64_wrmsr(uint msr, uint64 newval) {
+    uint32 low = newval;
+    uint32 high = newval >> 32;
+    asm volatile ("wrmsr"
+		  :
+		  : "a" (low), "d" (high), "c" (msr));
+}
+
+static inline uint64 amd64_rdtsc()
+{
+    uint32 low, high;
+
+    asm volatile("rdtsc" : "=a" (low), "=d" (high));
+    return (uint64)low | ((uint64)high << 32);
+}
+
 
 // lie about some register names in 64bit mode to avoid
 // clunky ifdefs in proc.c and trap.c.

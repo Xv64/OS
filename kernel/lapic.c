@@ -10,14 +10,22 @@
 #include "proc.h"
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
-#define ID      (0x0020 / 4)   // ID
-#define VER     (0x0030 / 4)   // Version
-#define TPR     (0x0080 / 4)   // Task Priority
-#define EOI     (0x00B0 / 4)   // EOI
-#define SVR     (0x00F0 / 4)   // Spurious Interrupt Vector
+#define ID               0x02   // ID
+#define VER              0x03   // Version
+#define TPR              0x08   // Task Priority
+#define EOI              0x0B   // EOI
+#define LDR              0x0D   // Logical destination
+#define SVR              0x0F   // Spurious Interrupt Vector
 #define ENABLE     0x00000100   // Unit Enable
-#define ESR     (0x0280 / 4)   // Error Status
-#define ICRLO   (0x0300 / 4)   // Interrupt Command
+#define ISR0             0x10   // In-service bits 0:31
+#define ISR7             0x17   // In-service bits 224:255
+#define TMR0             0x18   // Trigger mode bits 0:31
+#define TMR7             0x1F   // Trigger mode bits 224:255
+#define IRR0             0x20   // Interrupt request bits 0:31
+#define IRR7             0x27   // Interrupt request bits 224:255
+#define ESR              0x28   // Error Status
+#define ICRLO            0x30   // Interrupt Command [31:0]
+#define ICRHI            0x31   // Interrupt Command [63:32]
 #define INIT       0x00000500   // INIT/RESET
 #define STARTUP    0x00000600   // Startup IPI
 #define DELIVS     0x00001000   // Delivery status
@@ -27,29 +35,86 @@
 #define BCAST      0x00080000   // Send to all APICs, including self.
 #define BUSY       0x00001000
 #define FIXED      0x00000000
-#define ICRHI   (0x0310 / 4)   // Interrupt Command [63:32]
-#define TIMER   (0x0320 / 4)   // Local Vector Table 0 (TIMER)
+#define TIMER            0x32   // Local Vector Table 0 (TIMER)
 #define X1         0x0000000B   // divide counts by 1
 #define PERIODIC   0x00020000   // Periodic
-#define PCINT   (0x0340 / 4)   // Performance Counter LVT
-#define LINT0   (0x0350 / 4)   // Local Vector Table 1 (LINT0)
-#define LINT1   (0x0360 / 4)   // Local Vector Table 2 (LINT1)
-#define ERROR   (0x0370 / 4)   // Local Vector Table 3 (ERROR)
+#define THERMAL          0x33   // Thermal Monitoring LVT
+#define PCINT            0x34   // Performance Counter LVT
+#define LINT0            0x35   // Local Vector Table 1 (LINT0)
+#define LINT1            0x36   // Local Vector Table 2 (LINT1)
+#define ERROR            0x37   // Local Vector Table 3 (ERROR)
 #define MASKED     0x00010000   // Interrupt masked
-#define TICR    (0x0380 / 4)   // Timer Initial Count
-#define TCCR    (0x0390 / 4)   // Timer Current Count
-#define TDCR    (0x03E0 / 4)   // Timer Divide Configuration
+#define TICR             0x38   // Timer Initial Count
+#define TCCR             0x39   // Timer Current Count
+#define TDCR             0x3E   // Timer Divide Configuration
 
 volatile uint* lapic;  // Initialized in mp.c
+const int wants_x2apic = 1;
+__thread volatile int using_x2apic = 0;
 
-static void lapicw(int index, int value){
-	lapic[index] = value;
-	lapic[ID]; // wait for write to finish, by reading
+static inline int has_x2apic() {
+	uint32 cpuid_1[4];
+	enum { eax, ebx, ecx, edx };
+	amd64_cpuid(1, cpuid_1);
+	return !!(cpuid_1[ecx] & CPUID_X2APIC);
+}
+
+static inline void lapicw(int index, int value) {
+	if (using_x2apic) {
+		amd64_wrmsr(0x800+index, value);
+	} else {
+		lapic[index*4] = value;
+		lapic[ID*4]; // wait for write to finish, by reading
+	}
+}
+
+static inline uint64 lapicr(int index) {
+	if (using_x2apic) {
+		return amd64_rdmsr(0x800+index);
+	} else {
+		return lapic[index*4];
+	}
+}
+
+static inline void lapic_wicr(uint32 id, uint32 value)
+{
+	if (using_x2apic) {
+		amd64_wrmsr(0x800+ICRLO, ((uint64)id << 32) | (uint64)value);
+	} else {
+		lapicw(ICRHI, (int32)id);
+		lapicw(ICRLO, (int32)value);
+	}
+}
+
+static inline uint64 lapic_ricr()
+{
+	if (using_x2apic) {
+		return amd64_rdmsr(0x800+ICRLO);
+	} else {
+		return ((uint64)lapicr(ICRHI) << 32) | (uint64)lapicr(ICRLO);
+	}
 }
 
 void lapicinit(void){
 	if (!lapic)
 		return;
+
+	// Enable x2apic mode if available
+	lapicx2enable(wants_x2apic);
+
+	// Read and report APIC base, id, and version fields
+	uint64 apicbase = amd64_rdmsr(MSR_IA32_APIC_BASE);
+	uint64 apicaddr = apicbase & ~((1ul << 12) - 1);
+	uint xapic = !!(apicbase & (1ul << 11));
+	uint x2apic = !!(apicbase & (1ul << 10));
+	uint bsp = !!(apicbase & (1ul << 8));
+	uint apicid = lapicr(ID) >> (using_x2apic ? 0 : 24);
+	uint apicver = lapicr(VER);
+	uint version = apicver & 0xff;
+	uint maxlvt = (apicver >> 16) & 0xFF;
+
+	cprintf("cpu-%d: lapicinit: lapic#%x @%x, version=0x%x, maxlvt=%d, xapic=%d, x2apic=%d, bsp=%d\n",
+		cpu->id, apicid, apicaddr, version, maxlvt, xapic, x2apic, bsp);
 
 	// Enable local APIC; set spurious interrupt vector.
 	lapicw(SVR, ENABLE | (T_IRQ0 + IRQ_SPURIOUS));
@@ -66,10 +131,12 @@ void lapicinit(void){
 	lapicw(LINT0, MASKED);
 	lapicw(LINT1, MASKED);
 
-	// Disable performance counter overflow interrupts
-	// on machines that provide that interrupt entry.
-	if (((lapic[VER] >> 16) & 0xFF) >= 4)
+	// Disable performance counter and thermal interrupts
+	// on machines that provide those LVT entries.
+	if (maxlvt >= 5) {
 		lapicw(PCINT, MASKED);
+		lapicw(THERMAL, MASKED);
+	}
 
 	// Map error interrupt to IRQ_ERROR.
 	lapicw(ERROR, T_IRQ0 + IRQ_ERROR);
@@ -79,12 +146,23 @@ void lapicinit(void){
 	lapicw(ESR, 0);
 
 	// Ack any outstanding interrupts.
-	lapicw(EOI, 0);
+	if (using_x2apic) {
+		for (uint isr_reg = ISR7; isr_reg >= ISR0; isr_reg--) {
+			for (uint i = 0U; i < 32U; i++) {
+				if (lapicr(isr_reg) != 0U) {
+					lapicw(EOI, 0U);
+				} else {
+					break;
+				}
+			}
+		}
+	} else {
+		lapicw(EOI, 0);
+	}
 
 	// Send an Init Level De-Assert to synchronise arbitration ID's.
-	lapicw(ICRHI, 0);
-	lapicw(ICRLO, BCAST | INIT | LEVEL);
-	while (lapic[ICRLO] & DELIVS)
+	lapic_wicr(0, BCAST | INIT | LEVEL);
+	while (lapic_ricr() & DELIVS)
 		;
 
 	// Enable interrupts on the APIC (but not on the processor).
@@ -111,7 +189,7 @@ int cpunum(void){
 	if (!lapic)
 		return 0;
 
-	id = lapic[ID] >> 24;
+	id = lapicr(ID) >> (using_x2apic ? 0 : 24);
 	for (n = 0; n < ncpu; n++)
 		if (id == cpus[n].apicid)
 			return n;
@@ -125,9 +203,13 @@ void lapiceoi(void){
 		lapicw(EOI, 0);
 }
 
-// Spin for a given number of microseconds.
-// On real hardware would want to tune this dynamically.
+extern uint32 tscfreq;
+
+// Spin for a given number of microseconds using the tsc
 void microdelay(int us){
+	uint64 tc, ts = amd64_rdtsc(), tf = ts + (uint64)tscfreq * (uint64)us;
+	while ((tc = amd64_rdtsc()) < tf)
+		;
 }
 
 #define IO_RTC  0x70
@@ -147,12 +229,13 @@ void lapicstartap(uchar apicid, uint addr){
 	wrv[0] = 0;
 	wrv[1] = addr >> 4;
 
+	uint destid = apicid << (using_x2apic ? 0 : 24);
+
 	// "Universal startup algorithm."
 	// Send INIT (level-triggered) interrupt to reset other CPU.
-	lapicw(ICRHI, apicid << 24);
-	lapicw(ICRLO, INIT | LEVEL | ASSERT);
+	lapic_wicr(destid, INIT | LEVEL | ASSERT);
 	microdelay(200);
-	lapicw(ICRLO, INIT | LEVEL);
+	lapic_wicr(destid, INIT | LEVEL);
 	microdelay(100); // should be 10ms, but too slow in Bochs!
 
 	// Send startup IPI (twice!) to enter code.
@@ -161,8 +244,30 @@ void lapicstartap(uchar apicid, uint addr){
 	// should be ignored, but it is part of the official Intel algorithm.
 	// Bochs complains about the second one.  Too bad for Bochs.
 	for (i = 0; i < 2; i++) {
-		lapicw(ICRHI, apicid << 24);
-		lapicw(ICRLO, STARTUP | (addr >> 12));
+		lapic_wicr(destid, STARTUP | (addr >> 12));
 		microdelay(200);
 	}
+}
+
+// enable x2apic mode
+void lapicx2enable(uint enable)
+{
+	enum { X2APIC_ENABLE = (1ul << 10) };
+
+	uint64 apicbase = amd64_rdmsr(MSR_IA32_APIC_BASE);
+
+	if (!has_x2apic()) return;
+
+	if (enable && (apicbase & X2APIC_ENABLE) == 0) {
+		amd64_wrmsr(MSR_IA32_APIC_BASE, (apicbase |= X2APIC_ENABLE));
+	} else if (!enable && (apicbase & X2APIC_ENABLE) == X2APIC_ENABLE) {
+		amd64_wrmsr(MSR_IA32_APIC_BASE, (apicbase &= ~X2APIC_ENABLE));
+	}
+	using_x2apic = !!enable;
+}
+
+// send ipi to another processor
+void lapicsendipi(uint irq, uint cpunum)
+{
+	lapic_wicr(using_x2apic ? cpunum : cpunum << 24, irq);
 }
