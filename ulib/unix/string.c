@@ -1,6 +1,7 @@
 #include "unix/string.h"
 #include "unix/stddef.h"
 #include "syscalls.h"
+#include "types.h"
 #include "x86.h"
 #include "fcntl.h"
 
