@@ -23,4 +23,4 @@ all: $(PROGS)
 
 %: %.c
 	$(CC) $(CFLAGS) -c -o $@.o $@.c
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $(FSPATH)/kexts/$@ $@.o $(ULIB)
+	$(LD) $(LDFLAGS) --gc-sections -N -e main -Ttext 0 -o $(FSPATH)/kexts/$@ $@.o $(ULIB)
