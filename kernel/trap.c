@@ -121,20 +121,20 @@ void trap(struct trapframe* tf){
 }
 
 uint8 irq_register_handler(uint16 irq, irqhandler handler) {
-	if(irq >= MAX_IRQS) {
+	if(irq - T_IRQ0 >= MAX_IRQS) {
 		return 0; //sorry
 	}
 	acquire(&irqHandlersLock);
-	irqHandlers[irq] = handler;
+	irqHandlers[irq - T_IRQ0] = handler;
 	release(&irqHandlersLock);
 	return 1;
 }
 
 irqhandler get_registered_handler(uint16 irq) {
 	irqhandler result = 0;
-	if(irq < MAX_IRQS) {
+	if(irq - T_IRQ0 < MAX_IRQS) {
 		acquire(&irqHandlersLock);
-		result = irqHandlers[irq];
+		result = irqHandlers[irq - T_IRQ0];
 		release(&irqHandlersLock);
 	}
 	return result;

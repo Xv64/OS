@@ -18,6 +18,10 @@ struct cpu {
   // Cpu-local storage variables; see below
   void *local;
   struct proc *proc;
+
+  char name[50];               // cpuid name
+  char vendor[13];             // cpuid vendor
+  uint32 model;                // cpuid model
 };
 
 extern struct cpu cpus[NCPU];

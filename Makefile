@@ -69,7 +69,7 @@ AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
-CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -g -ggdb -fno-omit-frame-pointer
+CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -MD -g -ggdb -fno-omit-frame-pointer -ffunction-sections
 CFLAGS += -ffreestanding -fno-common -nostdlib -Iinclude -gdwarf-2 $(XFLAGS) $(OPT)
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASFLAGS = -fno-pic -gdwarf-2 -Wa,-divide -Iinclude $(XFLAGS)
@@ -167,13 +167,13 @@ ULIB = uobj/ulib.o uobj/usys.o uobj/printf.o uobj/umalloc.o uobj/string.o
 
 fs/bin/%: uobj/%.o $(ULIB)
 	@mkdir -p fs out fs/bin
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(LD) $(LDFLAGS) --gc-sections -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > out/$*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > bin/$*.sym
 
 fs/%: uobj/%.o $(ULIB)
 	@mkdir -p fs out fs/bin
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(LD) $(LDFLAGS) --gc-sections -N -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > out/$*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > bin/$*.sym
 
@@ -181,7 +181,7 @@ fs/forktest: uobj/forktest.o $(ULIB)
 	@mkdir -p fs
 	# forktest has less library code linked in - needs to be small
 	# in order to be able to max out the proc table.
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o fs/forktest uobj/forktest.o uobj/ulib.o uobj/usys.o
+	$(LD) $(LDFLAGS) --gc-sections -N -e main -Ttext 0 -o fs/forktest uobj/forktest.o uobj/ulib.o uobj/usys.o
 	$(OBJDUMP) -S fs/forktest > out/forktest.asm
 
 out/mkfs: tools/mkfs.c include/vfs.h
@@ -236,12 +236,10 @@ fs.img: out/mkfs fs/LICENSE $(UPROGS) $(SUBPROGS)
 
 	dd if=/dev/zero of=bin/fs-ext2.img bs=1k count=2000
 	mkfs -t ext2 -i 1024 -b 1024 -F bin/fs-ext2.img
-	mkdir /tmp/loop
-	mount -o loop bin/fs-ext2.img /tmp/loop
-	cp -r ./fs/ /tmp/loop/
-	umount /tmp/loop
-
-
+	mkdir -p /tmp/loop
+	sudo mount -o loop bin/fs-ext2.img /tmp/loop
+	sudo cp -r ./fs/ /tmp/loop/
+	sudo umount /tmp/loop
 -include */*.d
 
 clean:
@@ -259,7 +257,7 @@ binaries : fs.img boot.img
 	cp -r fs ./bin/
 	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
 	qemu-img convert boot.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
-	mkdir bin/artifacts
+	mkdir -p bin/artifacts
 	cp -r uobj bin/artifacts/
 	cp -r kobj bin/artifacts/
 	cp -r out bin/artifacts/

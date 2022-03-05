@@ -8,6 +8,7 @@
 #include "acpi.h"
 #include "pci.h"
 #include "buf.h"
+#include "irq.h"
 #include "kernel/string.h"
 
 static void identcpu();
@@ -17,17 +18,12 @@ static void mpmain(void)  __attribute__((noreturn));
 extern pde_t* kpgdir;
 uint64 ROOT_DEV = 1;
 
-char CPU_NAME[50];
-char CPU_VENDOR[13];
-uint32 CPU_MODEL;
-
 extern char end[]; // first address after kernel loaded from ELF file
 
 // Bootstrap processor starts running C code here.
 // Allocate a real stack and switch to it, first
 // doing some setup required for memory allocator to work.
 int main(void){
-	identcpu();
 	uartearlyinit();
 	kinit1(P2V(KALLOC_START), P2V(KALLOC_START + 4 * 1024 * 1024)); // phys page allocator
 	kvmalloc(); // kernel page table
@@ -37,18 +33,26 @@ int main(void){
 	if (!ismp)
 		panic("too few processors"); //really, it's the year 2021.
 
-	lapicinit();
 	seginit(); // set up segments
-	cprintf("\ncpu%d: starting Xv64\n\n", cpu->id);
-	credits();
+	tvinit();  // trap vectors
 	picinit(); // interrupt controller
 	ioapicinit(); // another interrupt controller
-	consoleinit(); // I/O devices & their interrupts
 	uartinit(); // serial port
-	cprintf("%s CPU detected (%s - %d)\n", CPU_NAME, CPU_VENDOR, CPU_MODEL);
 	pinit();   // process table
+	identcpu();
+	lapicinit();
+	startothers(); // start other processors
+
+	// Finish setting up this processor in mpmain.
+	mpmain();
+}
+
+void postinit()
+{
+	consoleinit(); // I/O devices & their interrupts
+	cprintf("\ncpu%d: starting Xv64\n\n", cpu->id);
+	credits();
 	procloopinit();// setup proc loop device
-	tvinit();  // trap vectors
 	pciinit(); // initialize PCI bus (AHCI also)
 	binit();   // buffer cache
 	fileinit(); // file table
@@ -58,12 +62,7 @@ int main(void){
 	vfsinit();   // bootstrap fs init
 	             // (must happen after all disk types are initialized)
 
-	startothers(); // start other processors
-	kinit2(P2V(KALLOC_START + 4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 	userinit(); // first user process
-
-	// Finish setting up this processor in mpmain.
-	mpmain();
 }
 
 void credits(){
@@ -74,6 +73,7 @@ void credits(){
 void mpenter(void){
 	switchkvm();
 	seginit();
+	identcpu();
 	lapicinit();
 	mpmain();
 }
@@ -82,12 +82,13 @@ void mpenter(void){
 static void mpmain(void){
 	idtinit(); // load idt register
 	if(cpu->id == 0) {
+		kinit2(P2V(KALLOC_START + 4 * 1024 * 1024), P2V(PHYSTOP)); // must come after startothers()
 		cpu->capabilities = CPU_RESERVED_BLESS;
+		cprintf("%d-way SMP kernel online.\n", ncpu);
+		postinit();
+		cprintf("starting scheduler\n");
 	}
 	amd64_xchg(&cpu->started, 1); // tell startothers() we're up
-	if(cpu->id == 0){
-		cprintf("%d-way SMP kernel fully online.\nentering user space...\n", ncpu);
-	}
 	scheduler(); // start running processes
 }
 
@@ -126,22 +127,45 @@ static void startothers(void){
 	}
 }
 
+uint32 tscfreq;
+
+enum { eax, ebx, ecx, edx };
+
 void identcpu() {
-		uint32 vendor[4];
-		uint32 regs[4];
+	uint32 cpuid_0[4];
+	uint32 cpuid_8_2[4];
+	uint32 cpuid_8_3[4];
+	uint32 cpuid_8_4[4];
+	uint32 cpuid_16[4];
+	uint32 cpuid_vmw[4];
 
-		amd64_cpuid(0, regs);
-		vendor[0] = regs[1];
-		vendor[1] = regs[3];
-		vendor[2] = regs[2];
-		vendor[4] = (uint32)'\0';
-		memmove(&CPU_VENDOR, (char *)vendor, sizeof(CPU_VENDOR));
-		CPU_MODEL = regs[0];
+	amd64_cpuid(0, cpuid_0);
+	amd64_cpuid(0x80000002, cpuid_8_2);
+	amd64_cpuid(0x80000003, cpuid_8_3);
+	amd64_cpuid(0x80000004, cpuid_8_4);
 
-		memset(&CPU_NAME, 0, sizeof(CPU_NAME));
-		amd64_cpuid(0x80000002, (void *)&CPU_NAME);
-		amd64_cpuid(0x80000003, ((void *)&CPU_NAME) + 0x10);
-		amd64_cpuid(0x80000004, ((void *)&CPU_NAME) + 0x20);
+	memset(cpu->vendor, 0, sizeof(cpu->vendor));
+	memmove(cpu->vendor + 0, &cpuid_0[1], 4);
+	memmove(cpu->vendor + 4, &cpuid_0[3], 4);
+	memmove(cpu->vendor + 8, &cpuid_0[2], 4);
+	cpu->model = cpuid_0[0];
+
+	memset(cpu->name, 0, sizeof(cpu->name));
+	memmove(cpu->name + 0x00, cpuid_8_2, 0x10);
+	memmove(cpu->name + 0x10, cpuid_8_3, 0x10);
+	memmove(cpu->name + 0x20, cpuid_8_4, 0x10);
+
+	amd64_cpuid(0x40000010, cpuid_vmw);
+	amd64_cpuid(0x16, cpuid_16);
+
+	if (cpuid_16[eax]) {
+		tscfreq = cpuid_16[eax] & 0xffff;
+	} else if (cpuid_vmw[eax] > 100000) {
+		tscfreq = cpuid_vmw[eax] / 1000;
+	}
+
+	cprintf("cpu-%d: name: %s vendor: %s model: %d tscfreq: %d\n",
+		cpu->id, cpu->name, cpu->vendor, cpu->model, tscfreq);
 }
 
 void sys_reboot(){

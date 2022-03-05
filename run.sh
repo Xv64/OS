@@ -1,8 +1,8 @@
 #!/bin/bash
 
-unset REBUILD IDE_MODE DEBUG EXT2 BIG
+unset REBUILD IDE_MODE DEBUG EXT2 BIG ACCEL
 
-while getopts 'rldeb' c
+while getopts 'rldebx' c
 do
   case $c in
     r) REBUILD=TRUE ;;
@@ -10,6 +10,7 @@ do
     d) DEBUG=TRUE ;;
     e) EXT2=TRUE ;;
     b) BIG=TRUE ;;
+    x) ACCEL=TRUE ;;
   esac
 done
 
@@ -36,7 +37,9 @@ if [ -n "$IDE_MODE" ]; then
     ROOT_DISK="-hdd ./bin/$ROOT_IMG"
 fi
 CPU="-cpu phenom-v1 -smp sockets=1 -smp cores=4 -smp threads=1"
-if [ -n "$BIG" ]; then
+if [ -n "$ACCEL" ]; then
+    CPU="-machine pc,accel=kvm,kernel-irqchip=on -cpu host,vmware-cpuid-freq=on,tsc-frequency=2600000000 -smp sockets=1 -smp cores=4 -smp threads=1"
+elif [ -n "$BIG" ]; then
     CPU="-cpu IvyBridge-v2 -smp sockets=2 -smp cores=12 -smp threads=2"
 fi
 
