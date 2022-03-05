@@ -236,12 +236,10 @@ fs.img: out/mkfs fs/LICENSE $(UPROGS) $(SUBPROGS)
 
 	dd if=/dev/zero of=bin/fs-ext2.img bs=1k count=2000
 	mkfs -t ext2 -i 1024 -b 1024 -F bin/fs-ext2.img
-	mkdir /tmp/loop
-	mount -o loop bin/fs-ext2.img /tmp/loop
-	cp -r ./fs/ /tmp/loop/
-	umount /tmp/loop
-
-
+	mkdir -p /tmp/loop
+	sudo mount -o loop bin/fs-ext2.img /tmp/loop
+	sudo cp -r ./fs/ /tmp/loop/
+	sudo umount /tmp/loop
 -include */*.d
 
 clean:
@@ -259,7 +257,7 @@ binaries : fs.img boot.img
 	cp -r fs ./bin/
 	cd ./bin/ && tar -xvzf Xv64.vmwarevm.tar.gz && rm Xv64.vmwarevm.tar.gz && cd ..
 	qemu-img convert boot.img -O vmdk bin/Xv64.vmwarevm/boot.vmdk
-	mkdir bin/artifacts
+	mkdir -p bin/artifacts
 	cp -r uobj bin/artifacts/
 	cp -r kobj bin/artifacts/
 	cp -r out bin/artifacts/
